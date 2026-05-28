@@ -1,0 +1,10 @@
+from django.contrib import admin
+from .models import AuditLog
+
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ("action", "entity", "entity_id", "user", "ip_address", "created_at")
+    list_filter = ("action", "entity", "created_at")
+    search_fields = ("entity", "entity_id", "user__username", "metadata")
+    readonly_fields = ("id", "user", "action", "entity", "entity_id", "ip_address", "user_agent", "metadata", "created_at", "updated_at")
