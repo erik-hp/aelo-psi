@@ -55,12 +55,16 @@ class PatientAccess(TimestampedModel):
             raise ValidationError("Patient access must stay inside one active clinic.")
 
         from apps.users.models import UserRole
-        grantor_is_clinician = granter.role == UserRole.PSYCHOLOGIST and (
-            patient.created_by_id == granter.pk
-            or PatientAccess.objects.filter(
-                patient_id=patient.pk, user_id=granter.pk, can_edit=True,
-            ).exclude(pk=self.pk).exists()
+        active_editor = PatientAccess.objects.filter(
+            patient_id=patient.pk, user_id=granter.pk, can_edit=True,
+        ).exclude(pk=self.pk).exists()
+        bootstrap_self = (
+            granter.role == UserRole.PSYCHOLOGIST
+            and granter.pk == beneficiary.pk == patient.created_by_id
+            and self.can_edit
+            and not PatientAccess.objects.filter(patient_id=patient.pk).exclude(pk=self.pk).exists()
         )
+        grantor_is_clinician = granter.role == UserRole.PSYCHOLOGIST and (active_editor or bootstrap_self)
         initial_admin_assignment = (
             granter.is_admin_role
             and patient.created_by_id == granter.pk
