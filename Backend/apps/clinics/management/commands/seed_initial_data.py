@@ -36,11 +36,7 @@ class Command(BaseCommand):
                 "created_by": admin,
             },
         )
-        PatientAccess.objects.get_or_create(
-            patient=patient,
-            user=admin,
-            defaults={"can_edit": True, "granted_by": admin},
-        )
+        # Operational administrators never receive automatic clinical access.
         TherapySession.objects.get_or_create(
             patient=patient,
             professional=admin,
