@@ -70,10 +70,29 @@ async def ollama_analysis(payload: AnalysisRequest) -> AnalysisResult:
         response.raise_for_status()
         raw = response.json()
     output = AnalysisResult.model_validate_json(raw.get("response", "{}"))
-    note_ids = {item.note_id for item in payload.context}
+    # An ID by itself does not prove provenance. Verify session and excerpt
+    # against the exact authorized text, never against an LLM-authored citation.
+    notes = {item.note_id: item for item in payload.context}
     for source in output.sources:
-        if source.note_id not in note_ids:
+        original = notes.get(source.note_id)
+        if original is None:
             raise ValueError("AI cited a note outside the supplied patient context.")
+        if source.session_id != original.session_id:
+            raise ValueError("AI cited an inconsistent clinical session.")
+        excerpt = source.excerpt.strip()
+        if not excerpt or excerpt not in original.text:
+            raise ValueError("AI citation excerpt does not match its source.")
+    # Narrative claims without a verifiable source must not be presented.
+    narrative = any((
+        output.patterns,
+        output.longitudinal_evolution.strip(),
+        output.attention_points,
+        output.behavioral_changes,
+        output.longitudinal_coherence.strip(),
+        output.possible_inconsistencies,
+    ))
+    if narrative and not output.sources:
+        raise ValueError("AI narrative contains no traceable evidence.")
     # Scores remain model-generated claims, not evaluated clinical measurements.
     return output
 
