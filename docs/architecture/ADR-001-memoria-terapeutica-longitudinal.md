@@ -140,7 +140,7 @@ Todas requerem autenticação e autorização objeto-a-objeto no back-end, sem d
 * Não chamar notas sanitizadas de anônimas por padrão: relações narrativas e embeddings podem permitir reidentificação.
 * Criptografia de campos sensíveis, chaves fora do código, segregação por clínica e restrição às notas do paciente autorizado; tráfego local protegido, segurança de backups.
 * Registro de auditoria de processamento, leitura, revisões, assinatura, exportações e falhas, sem conteúdo de prontuário/prompt bruto nos logs.
-* Possibilitar reprovação do índice e destruição controlada de derivados segundo políticas de retenção e direitos legais, sem apagar ilegalmente registros profissionais obrigatórios.
+* Possibilitar reprocessamento, revogação de índices e destruição controlada de derivados segundo políticas de retenção e direitos legais, sem apagar ilegalmente registros profissionais obrigatórios.
 * Aplicar revisão humana exigida pela finalidade clínica. A orientação do CFP de julho/2025 destaca supervisão crítica, sigilo e responsabilidade profissional.
 * Implementar mapeamento FHIR documentado: `Patient`, `Encounter`, `DocumentReference`, `Provenance`; `Observation` somente para métricas bem definidas, com interpretação e método descritos. Não alegar certificação FHIR sem validação de perfis.
 * Registro obrigatório e critérios de guarda devem ser conferidos à luz das normas profissionais e legislação vigentes.
@@ -166,11 +166,13 @@ Esses critérios são metas de aceite, não resultados já comprovados.
 
 ## 10. Entregas incrementais
 
-1. **Fase 0 — Segurança e verdade:** corrigir autorização clínica por paciente/tenant, nota assinada, fallback fictício de IA, scores simulados, tratamento de segredos.
-2. **Fase 1 — Memória indexada:** pgvector, chunks ancorados por nota/versão, pesquisa híbrida e resultados com citações.
-3. **Fase 2 — Relações e tempo:** eventos, temas, relações e snapshots por paciente, sempre com evidência.
-4. **Fase 3 — Revisão clínica:** aceite/rejeição, versionamento derivado, linha temporal e mapa temático.
-5. **Fase 4 — Validação:** benchmarks de RAG e sessões SUS/UMUX-Lite com dados sintéticos, análises de usabilidade e limitações.
+As cinco etapas abaixo descrevem **marcos conceituais da MTLI**, não substituem nem renumeram as fases vinculantes **F0–F7** do [Plano Mestre](../PLANO_MESTRE_IMPLEMENTACAO.md). Segurança e registro confiável precedem a indexação; veja F0/F1 do plano mestre.
+
+1. **Marco MTLI-A — Segurança e verdade:** corrigir autorização clínica por paciente/tenant, nota assinada, fallback fictício de IA, scores simulados, tratamento de segredos.
+2. **Marco MTLI-B — Memória indexada:** pgvector, chunks ancorados por nota/versão, pesquisa híbrida e resultados com citações.
+3. **Marco MTLI-C — Relações e tempo:** eventos, temas, relações e snapshots por paciente, sempre com evidência.
+4. **Marco MTLI-D — Revisão clínica:** aceite/rejeição, versionamento derivado, linha temporal e mapa temático.
+5. **Marco MTLI-E — Validação:** benchmarks de RAG e sessões SUS/UMUX-Lite com dados sintéticos, análises de usabilidade e limitações.
 
 ## 11. Fontes de referência e limites
 
@@ -179,7 +181,7 @@ Esses critérios são metas de aceite, não resultados já comprovados.
 - pgvector: [busca por similaridade e híbrida](https://github.com/pgvector/pgvector).
 - HL7: [DocumentReference](https://hl7.org/fhir/documentreference.html), [Provenance](https://fhir.hl7.org/fhir/provenance.html), [Observation](https://fhir.hl7.org/fhir/observation.html).
 - CFP: [posicionamento sobre IA, julho de 2025](https://site.cfp.org.br/cfp-divulga-posicionamento-sobre-inteligencia-artificial-no-contexto-da-pratica-psicologica/).
-- ANPD: [RIPD](https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/relatorio-de-impacto-a-proteco-de-dados-pessoais-ripd) e [conceitos de pseudonimização](https://www.gov.br/anpd/pt-br/documentos-e-publicacoes/glossario-anpd).
+- ANPD: [RIPD](https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/relatorio-de-impacto-a-protecao-de-dados-pessoais-ripd) e [conceitos de pseudonimização](https://www.gov.br/anpd/pt-br/documentos-e-publicacoes/glossario-anpd).
 - TCC2 de referência: projeto acadêmico fornecido pelo autor, com DSR, IA assistiva, LGPD, FHIR, SUS e UMUX-Lite.
 
 **Nota regulatória:** Resolução CFP 09/2024 trata do exercício profissional mediado por TDICs, e não é uma proibição legal específica de diagnósticos de IA. Esta ADR adota voluntariamente um escopo mais restrito de IA apenas assistiva.
