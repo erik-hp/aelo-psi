@@ -25,6 +25,21 @@ class PatientAccessTests(TestCase):
         cls.patient_b = Patient.objects.create(clinic=cls.b, internal_code="B-1", display_name="Pessoa fictícia B", created_by=cls.admin_b)
         PatientAccess.objects.create(patient=cls.patient_a, user=cls.psych_a, can_edit=True, granted_by=cls.psych_a)
 
+    def test_intern_cannot_edit_even_with_legacy_write_grant(self):
+        User = get_user_model()
+        intern = User.objects.create_user(username='readonly_intern', password='test-only', role='INTERN', clinic=self.a)
+        PatientAccess.objects.bulk_create([PatientAccess(patient=self.patient_a, user=intern, granted_by=self.psych_a, can_edit=True)])
+        self.assertTrue(accessible_patients(intern, clinical=True).filter(pk=self.patient_a.pk).exists())
+        self.assertFalse(accessible_patients(intern, clinical=True, write=True).filter(pk=self.patient_a.pk).exists())
+
+    def test_intern_cannot_register_patient(self):
+        User = get_user_model()
+        intern = User.objects.create_user(username='new_patient_intern', password='test-only', role='INTERN', clinic=self.a)
+        client = APIClient()
+        client.force_authenticate(user=intern)
+        response = client.post('/api/patients/', {'internal_code': 'DENIED', 'display_name': 'Synthetic'}, format='json')
+        self.assertEqual(response.status_code, 403)
+
     def test_admin_is_confined_to_their_clinic(self):
         self.assertTrue(accessible_patients(self.admin_a).filter(pk=self.patient_a.pk).exists())
         self.assertFalse(accessible_patients(self.admin_a).filter(pk=self.patient_b.pk).exists())
