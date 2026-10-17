@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from apps.audit_logs.services import audit
 from apps.patients.access import accessible_patients
@@ -14,6 +15,11 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
         return ClinicalNote.objects.filter(deleted_at__isnull=True, patient__in=accessible_patients(self.request.user, clinical=True, write=write))
+
+    def retrieve(self, request, *args, **kwargs):
+        note = self.get_object()
+        audit(request, 'READ', note, {'module': 'clinical_notes', 'method': 'GET'})
+        return Response(self.get_serializer(note).data)
 
     def perform_create(self, serializer):
         patient = serializer.validated_data["patient"]
