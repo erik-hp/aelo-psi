@@ -6,7 +6,7 @@
 
 - Django 5.2.18 (ramo LTS), DRF 3.17.2, SimpleJWT 5.5.1, Gunicorn 26.2.0.
 - django-cors-headers e django-filter atualizados em faixas compatíveis.
-- FastAPI, Uvicorn e HTTPX com faixas mais recentes; o artefato de IA ainda precisa de maior atualização/triagem do Starlette transitivo.
+- FastAPI 0.143.3, Uvicorn e HTTPX em faixas mais recentes, permitindo resolução transitiva de Starlette sem os avisos registrados neste ciclo.
 
 ## Evidência do primeiro ciclo
 
@@ -17,9 +17,17 @@ Commit `35f81657964ed363e29180a11ea27c8575462e1b`:
 - O workflow de inventário é **não bloqueante**, então sua conclusão visual como sucesso não significa remediação total.
 - Os números são alertas do scanner, não CVEs únicas ou riscos clinicamente avaliados. A classificação específica está pendente de leitura do JSON e revisão das versões realmente instaladas.
 
+## Segundo ciclo — atualização FastAPI
+
+- **Commit:** `3425fd6ac6b52330fb2856b5ee47ecf7910180bb`.
+- [CI #39050714933](https://github.com/erik-hp/aelo-psi/actions/runs/39050714933): Django, Frontend e FastAPI **SUCESSO**.
+- [Auditoria #39050714961](https://github.com/erik-hp/aelo-psi/actions/runs/39050714961): `pip-audit` Django e FastAPI reportaram **No known vulnerabilities found** nos pacotes resolvidos nesta execução. `npm audit` ainda retornou falha e deve ser tratado separadamente.
+- **Critério atendido nesta PR:** remover os avisos conhecidos do inventário inicial da camada Python sem falha dos testes automatizados. A resolução Python ainda não está completamente fixada por lockfile/hashes, portanto novas resoluções podem alterar esses resultados.
+- **Não atendido:** vulnerabilidades no frontend, varredura de segredos, testes de implantação e demais critérios G0.
+
 ## Decisões e próximas ações
 
-1. Identificar a versão transitiva `starlette` resolvida pelo FastAPI e cada advisory restante. Não forçar uma versão incompatível: atualizar FastAPI/Starlette conjuntamente em PR testada, ou registrar riscos residuais.
+1. Documentar/fixar a resolução transitiva FastAPI/Starlette para reprodutibilidade e revalidar periodicamente o inventário, mesmo após os alertas atuais terem desaparecido.
 2. Atualizar dependências npm/lockfile do front-end em PR própria com testes de rotas, autenticação e build.
 3. Fixar resolução Python via lock/hashes para resultados reproduzíveis, avaliando políticas de atualização.
 4. Introduzir secret scanning e transformar auditoria de vulnerabilidades em gate bloqueante após triagem.
