@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from apps.audit_logs.services import audit
@@ -12,6 +12,13 @@ from .models import AIAnalysis, AnalysisStatus, HumanValidation
 from .permissions import CanRequestAI, CanReviewAI
 from .serializers import AIAnalysisSerializer, AnalysisRequestSerializer, ReviewSerializer
 from .services import request_ai_analysis
+from services.ai.client import AIServiceError
+
+
+class AIUnavailable(APIException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    default_detail = 'Análise assistiva indisponível. Nenhum resultado clínico foi gerado.'
+    default_code = 'ai_unavailable'
 
 
 class AIThrottle(UserRateThrottle):
@@ -34,12 +41,15 @@ def request_analysis(request):
     note = None
     if serializer.validated_data.get("note"):
         note = get_object_or_404(ClinicalNote, id=serializer.validated_data["note"], patient=patient, deleted_at__isnull=True)
-    analysis = request_ai_analysis(
-        patient=patient,
-        note=note,
-        user=request.user,
-        context_limit=serializer.validated_data["context_limit"],
-    )
+    try:
+        analysis = request_ai_analysis(
+            patient=patient,
+            note=note,
+            user=request.user,
+            context_limit=serializer.validated_data["context_limit"],
+        )
+    except AIServiceError:
+        raise AIUnavailable() from None
     audit(request, "AI_REQUEST", analysis, {"patient": str(patient.id)})
     return Response(AIAnalysisSerializer(analysis).data, status=status.HTTP_201_CREATED)
 
