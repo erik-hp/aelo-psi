@@ -1,5 +1,6 @@
 """Explicit synthetic demo fixtures, never a default administrative password."""
 import os
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
@@ -43,7 +44,7 @@ class Command(BaseCommand):
         TherapySession.objects.get_or_create(
             patient=patient,
             professional=admin,
-            scheduled_at=timezone.now().replace(microsecond=0),
+            scheduled_at=timezone.make_aware(datetime(2026, 1, 5, 14, 0)),
             defaults={
                 "status": SessionStatus.COMPLETED,
                 "summary": "Sessão sintética exclusivamente para validar integração.",
