@@ -55,6 +55,10 @@ class PatientAccess(TimestampedModel):
             raise ValidationError("Patient access must stay inside one active clinic.")
 
         from apps.users.models import UserRole
+        if beneficiary.role not in {UserRole.PSYCHOLOGIST, UserRole.INTERN} or beneficiary.is_superuser:
+            raise ValidationError('Clinical grants are restricted to eligible professionals.')
+        if beneficiary.role == UserRole.INTERN and self.can_edit:
+            raise ValidationError('Intern clinical editing requires a supervised workflow.')
         active_editor = PatientAccess.objects.filter(
             patient_id=patient.pk, user_id=granter.pk, can_edit=True,
         ).exclude(pk=self.pk).exists()
