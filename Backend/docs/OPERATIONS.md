@@ -20,6 +20,10 @@ Replace `YOUR_SUPERUSER` with the username you created. The username is not a pa
 The Django API runs on `http://localhost:8000`.
 The AI service runs on `http://localhost:8001`.
 
+## Internal AI service authentication
+
+Configure `AI_SERVICE_TOKEN` as a separate high-entropy secret in `Backend/.env` shared only by the Django API and FastAPI service. The FastAPI `/analysis` endpoint rejects missing/invalid tokens; `/health` only signals process availability. Do not expose FastAPI/Ollama outside the isolated network. The Django `/admin/` route is disabled by default and only enabled locally when `DJANGO_DEBUG=True` and `AELO_ENABLE_DJANGO_ADMIN=True`; do not enable it with real patient information because its model administration does not enforce per-patient DRF permissions.
+
 ## Migration strategy
 
 Create migrations per app with small, reviewable schema changes. Avoid mixing data migrations with broad model rewrites. For production, commit generated migrations and run them in a deployment step before shifting traffic to new containers. The compose command uses `--run-syncdb` only to make the first local MVP boot forgiving before migrations are generated.
