@@ -95,7 +95,7 @@ function mapPatient(patient: ApiPatient): Patient {
     sessionFrequency: "Semanal",
     lastSession: "-",
     nextSession: "-",
-    riskLevel: "baixo",
+    riskLevel: "não avaliado",
     therapist: "Equipe clínica",
     tags: [patient.internal_code],
   };
