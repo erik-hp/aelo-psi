@@ -52,6 +52,11 @@ class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
         qs = AIAnalysis.objects.select_related("patient", "requested_by", "note").prefetch_related("sources", "sentiment_metrics")
         return qs.filter(patient__in=accessible_patients(self.request.user, clinical=True)).distinct()
 
+    def retrieve(self, request, *args, **kwargs):
+        analysis = self.get_object()
+        audit(request, 'READ', analysis, {'module': 'ai_analysis', 'method': 'GET'})
+        return Response(self.get_serializer(analysis).data)
+
     @action(detail=True, methods=["post"], permission_classes=[CanReviewAI])
     def validate(self, request, pk=None):
         return self._review(request, AnalysisStatus.VALIDATED)
@@ -76,5 +81,5 @@ class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
                 "comment": serializer.validated_data.get("comment", ""),
             },
         )
-        audit(request, f"AI_{decision}", analysis, {"comment": serializer.validated_data.get("comment", "")})
+        audit(request, f"AI_{decision}", analysis, {"module": "ai_analysis"})
         return Response(self.get_serializer(analysis).data)
