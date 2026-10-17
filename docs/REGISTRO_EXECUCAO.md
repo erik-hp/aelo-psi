@@ -7,7 +7,7 @@
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
 - **Próxima tarefa:** **F0-01** — estabelecer baseline de build, testes, ambientes e endpoints; F0-02/F0-03 após inventário.
-- **Branch de documentação:** `feat/tcc2-foundation-security-docs`; alterações documentais em review até merge. `main` não deve ser considerada atualizada.
+- **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
 ## Evidências já obtidas
@@ -29,7 +29,7 @@
 | --- | --- | --- | --- | --- |
 | 2026-10-17 | DOC-01 | Inventário estático do repositório e base do TCC | Leitura de código e documentos vinculados | CONCLUÍDO (somente documentação) |
 | 2026-10-17 | DOC-02 | Redação ADR-001 MTLI | Arquivo em branch `feat/tcc2-foundation-security-docs` | EM REVISÃO |
-| 2026-10-17 | DOC-03 | Plano mestre, matriz, README e instruções permanentes | Arquivos na mesma branch | EM REVISÃO |
+| 2026-10-17 | DOC-03 | Plano mestre, matriz, README e instruções permanentes | [PR #1](https://github.com/erik-hp/aelo-psi/pull/1); resultado do merge verificável no GitHub | EM REVISÃO na data de abertura |
 | 2026-10-17 | F0-01 | Rodar ambiente/build/testes e relatar baseline | **Sem execuções de runtime neste registro** | NÃO INICIADO |
 
 ## Modelos de entrada para trabalhos futuros
