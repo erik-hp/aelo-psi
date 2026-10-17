@@ -172,7 +172,7 @@ npm run build
 
 ### 6.4. Segurança de demonstração
 
-O comando de seed legado `Backend/apps/clinics/management/commands/seed_initial_data.py` ainda existe e utiliza credencial fixa: **não execute o seed** em ambientes compartilhados ou com dados clínicos. O Compose deixou de executá-lo automaticamente. Após iniciar, crie o administrador de desenvolvimento explicitamente com `docker compose exec api python manage.py createsuperuser`. Use somente dados sintéticos em um ambiente isolado. Nenhum dado de paciente real deve entrar no ambiente de demonstração atual.
+O comando de seed foi alterado para **não criar contas nem senhas** e somente aceitar dados sintéticos mediante opt-in explícito. O Compose não o executa automaticamente. Após iniciar, crie o administrador de desenvolvimento com `docker compose exec api python manage.py createsuperuser`; associe o usuário a uma clínica antes de cadastrar pacientes. Use somente dados sintéticos em um ambiente isolado. Nenhum dado de paciente real deve entrar no ambiente de demonstração atual.
 
 ## 7. Organização do repositório
 
