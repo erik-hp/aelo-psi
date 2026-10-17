@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import AsyncMock, patch
 
 from fastapi import HTTPException
-from ai_service.main import AnalysisRequest, ContextItem, analysis, AnalysisResult
+from ai_service.main import AnalysisRequest, ContextItem, analysis, AnalysisResult, require_service_token
 
 
 def fake_payload():
@@ -30,3 +30,20 @@ class AnalysisFailureTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             AnalysisResult(patterns=[], longitudinal_evolution="", attention_points=[],
                            sources=[], relevance_score=12)
+
+
+class ServiceAuthenticationTests(unittest.TestCase):
+    def test_missing_token_rejected(self):
+        with patch.dict("os.environ", {"AI_SERVICE_TOKEN": "local-test-only-strong-service-secret"}):
+            with self.assertRaises(HTTPException) as ctx:
+                require_service_token(None)
+        self.assertEqual(ctx.exception.status_code, 403)
+
+    def test_valid_service_token_accepted(self):
+        with patch.dict("os.environ", {"AI_SERVICE_TOKEN": "local-test-only-strong-service-secret"}):
+            self.assertIsNone(require_service_token("local-test-only-strong-service-secret"))
+
+    def test_unconfigured_service_token_is_rejected(self):
+        with patch.dict("os.environ", {"AI_SERVICE_TOKEN": ""}):
+            with self.assertRaises(HTTPException):
+                require_service_token("something")
