@@ -87,6 +87,13 @@
 - **Criptografia:** [ADR-002](architecture/ADR-002-criptografia-prontuarios.md) propõe envelope encryption, migração incremental sem perda de registros e testes obrigatórios. **Nenhuma nota foi criptografada por esta entrega**.
 - **Gate:** G0 permanece bloqueado; checar resultados do CI do commit mais recente do PR #2 e auditoria dos controles ainda faltantes antes de avançar F1.
 
+## F0-03 — Verificação adicional de fontes de IA
+
+- Citações automáticas agora exigem que `note_id`, `session_id` e o trecho coincidam com notas autorizadas fornecidas ao modelo; resposta narrativa sem fonte é rejeitada. **Verificação de trecho não equivale à validação semântica da afirmação**: esta depende de avaliação posterior (F2).
+- Falha na chamada interna de IA é traduzida para HTTP 503 sem devolver payload clínico.
+- Testes unitários para trechos inventados e análises narrativas sem fontes foram adicionados.
+- Aguardando o CI do último commit do PR #2; G0 permanece bloqueado e não houve merge.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
