@@ -37,6 +37,22 @@ A verificação é **não bloqueante por enquanto**, pois esta primeira rodada e
 
 **Situação:** `BLOQUEADO PARA FECHAMENTO G0` até triagem e correção/aceite fundamentado das vulnerabilidades. Nunca confundir relatório verde de inventário com ausência de falhas.
 
+
+### Pacotes identificados no artefato JSON da execução
+
+| Ecossistema | Pacote | Versão examinada | Quantidade de avisos reportados | Encaminhamento |
+| --- | --- | --- | --- | --- |
+| Django | `django` | 5.0.14 | 13 | Atualizar para ramo atualmente mantido após verificar compatibilidade |
+| Django | `djangorestframework` | 3.15.2 | 2 | Avaliar atualização para versão com correções (scanner cita 3.17.2) |
+| Django | `djangorestframework-simplejwt` | 5.3.1 | 2 | Avaliar atualização para versão corrigida (scanner cita 5.5.1) |
+| Django | `gunicorn` | 21.2.0 | 4 | Avaliar versão corrigida e smoke test de servidor |
+| FastAPI | `starlette` | 0.37.2 | 14 | Exige atualização compatível de FastAPI/Starlette e testes de integração |
+| Front-end | `axios`, `form-data`, `react-router`, `react-router-dom` | Ver `frontend-production.json` | 4 avisos no total (3 altos e 1 moderado) | Atualizar lockfile e testar rotas/autenticação |
+
+Essas contagens refletem entradas retornadas pelos scanners; alguns identificadores aparecem duplicados no JSON, portanto **não** representam necessariamente CVEs únicas. Não atribuir severidade aos alertas Python sem analisar cada advisory.
+
+**Próxima PR:** atualizações compatíveis em lotes pequenos, com testes de integração, validação de API, migrações e rerun dos mesmos três auditores. O projeto não deve ser implantado com dados reais.
+
 ## Referências internas
 
 - [Plano Mestre](../PLANO_MESTRE_IMPLEMENTACAO.md), item F0-05.
