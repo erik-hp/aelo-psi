@@ -120,6 +120,16 @@
 - **Evidência de testes:** [run #39037986080](https://github.com/erik-hp/aelo-psi/actions/runs/39037986080), commit `6e0cd338401bf5ce1f7c199ed4d3884abe32fff9`, três jobs concluídos com sucesso. Mudanças posteriores a esse commit exigem nova validação.
 - **Limites:** `full_clean` no modelo não protege SQL direto/`QuerySet.update`, e não há trilha de auditoria imutável ou governança de concessões histórica em tabelas próprias. Transferência formal de titularidade clínica, políticas de suspensão do paciente e segurança de scripts operacionais continuam pendentes de avaliação. G0 continua **BLOQUEADO** e PR #2 não está integrado.
 
+## Revisão pré-merge do PR #2 — 17/10/2026
+
+**Decisão:** integrar o PR como uma entrega incremental F0, **não** como liberação do gate G0. O escopo inclui autorização, auditoria, bootstrap de desenvolvimento, CI e documentação de criptografia; a aplicação permanece vedada a dados reais.
+
+Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico mesmo com concessões legadas `can_edit=True`; apenas administração e psicólogos cadastram pacientes; grants por ORM exigem beneficiário de papel autorizado e não superusuário; listagens de notas/análises passam a gerar eventos de auditoria de acesso. O cadastro por administrador deve atribuir o psicólogo inicial antes de qualquer acesso clínico.
+
+**Pendências conhecidas após o merge:** completar governança de permissões (transferência, histórico de concessões, revogação sob concorrência e DB constraints/controle de privilégios SQL); prontuário assinado com retificações formalizadas; criptografia de campo e chaves conforme ADR-002; revisão de auditoria e incidentes; validação de produção, RIPD e parecer jurídico/profissional. Checks GitHub Actions são necessários, porém não equivalem a homologação clínica. O registro de gates permanece `G0 BLOQUEADO`.
+
+**Verificação:** usar o último commit do PR no GitHub e confirmar os três jobs do workflow. Após o merge registrar commit de integração e manter estas pendências ativas.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
