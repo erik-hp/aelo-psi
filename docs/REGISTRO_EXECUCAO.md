@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** revisar/validar a PR F0-04/F0-06 (`fix/f0-runtime-secrets-privacy-inventory`) e continuar inventário de autorização, backup, chaves e proteção contra XSS. O PR #2 já foi integrado à `main` (`c2f2174c51e4ee408763cb4a4f3c33cf2bc9c0a4`); G0 continua bloqueado.
+- **Próxima tarefa:** validar testes de ciclo de vida JWT/clínica da branch `fix/f0-clinic-session-lifecycle`, revisar resultados da PR e continuar segurança/privacidade F0. Os PRs #3 e #4 foram integrados, sendo `03c589d4ccc96a29874dfac5149ec38f76ab5706` o commit-base desta rodada. G0 continua bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -144,6 +144,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Atualização de nota e histórico passa a ocorrer em transação com lock, evitando corrida de versionamento no fluxo da API. Não substitui assinatura formal nem constraints completas na camada SQL.
 - Testes sintéticos em `apps/clinical_notes/tests_integrity.py`: negar edição por outro profissional, negar troca de sessão, preservar versão anterior. Executar CI e registrar resultados antes de aprovar.
 - **G0 permanece BLOQUEADO** por governança de chaves, criptografia, revisão ampla de dados/segurança e demais requisitos do plano. Não usar dados reais.
+
+## F0-04 — Ciclo de vida de conta e clínica (proposta em revisão)
+
+- Autenticação JWT pela API passa a exigir conta ativa **e** vínculo a clínica ativa, não excluída, consultando estado atual do banco em cada request.
+- Em login e refresh, a mesma condição é verificada. Suspensão da clínica ou desativação da conta passa a impedir a renovação do token; dados embutidos no JWT não substituem a autorização atual.
+- Logout verifica que o token de atualização enviado pertence ao usuário autenticado antes de colocá-lo na lista de bloqueio.
+- Testes sintéticos de login, suspensão, refresh, logout próprio e tentativa de bloquear token alheio foram adicionados. **A execução CI deve ser confirmada após o commit final.**
+- Proteção de tokens contra XSS e encerramento de sessão em outros dispositivos permanecem pendentes. Não representa solução completa de gestão de identidade. Gate G0 bloqueado.
 
 ## Pendências de decisão
 
