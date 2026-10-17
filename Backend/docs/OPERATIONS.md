@@ -5,8 +5,10 @@
 1. Copy `.env.example` to `.env`.
 2. Run `docker compose up --build`.
 3. Run `docker compose exec api python manage.py makemigrations`.
-4. Run `docker compose exec api python manage.py migrate`.
-5. Run `docker compose exec api python manage.py seed_initial_data`.
+4. Run `docker compose exec api python manage.py migrate` (also executed on container startup).
+5. Create a development superuser explicitly using `docker compose exec api python manage.py createsuperuser`.
+
+**Security:** the former automatic `seed_initial_data` command has been removed from Compose. The legacy command remains in the repository with a known demo credential and must **not** be run in shared or production environments. PostgreSQL and API are bound to loopback; Ollama/FastAPI have no published host ports. Configure strong secrets in `.env` and do not use real clinical records in this environment.
 
 The Django API runs on `http://localhost:8000`.
 The AI service runs on `http://localhost:8001`.
