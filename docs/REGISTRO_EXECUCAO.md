@@ -162,7 +162,7 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 
 ## F0-05 — Inventário de dependências (em revisão)
 
-- Criado o workflow `dependency-audit.yml` para inspeção de dependências Django, FastAPI e React, publicando resultados JSON e resumo de cada execução.
+- Criado o workflow `dependency-audit.yml` para inspeção de dependências Django, FastAPI e React, publicando resultados JSON e resumo de cada execução. **Primeira run #39049549738:** `pip-audit` encontrou 21 vulnerabilidades em quatro pacotes Django e 14 em um pacote de IA. O job permaneceu verde pelo modo de inventário não bloqueante; detalhes e limitações em `docs/validation/F0_DEPENDENCY_AUDIT.md`.
 - As verificações são inicialmente não bloqueantes para permitir medir a dívida; uma falha deve gerar triagem, não ser interpretada como aprovação.
 - Criado o procedimento [F0_DEPENDENCY_AUDIT.md](validation/F0_DEPENDENCY_AUDIT.md). Ainda faltam lock de dependências Python e varredura formal do histórico por segredos, além de políticas de thresholds e atualização segura das bibliotecas.
 - **Não marcar F0-05 concluída** antes de analisar os resultados reais, classificar vulnerabilidades e revisar os riscos. Gate G0 BLOQUEADO.
