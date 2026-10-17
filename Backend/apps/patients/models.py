@@ -66,6 +66,7 @@ class PatientAccess(TimestampedModel):
             and patient.created_by_id == granter.pk
             and beneficiary.role == UserRole.PSYCHOLOGIST
             and self.can_edit
+            and not PatientAccess.objects.filter(patient_id=patient.pk).exclude(pk=self.pk).exists()
         )
         if not (grantor_is_clinician or initial_admin_assignment):
             raise ValidationError("Only an authorized psychologist may delegate clinical access; an administrator may assign an initial psychologist.")
