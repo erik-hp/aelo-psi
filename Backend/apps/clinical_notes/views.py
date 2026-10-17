@@ -1,7 +1,9 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from apps.audit_logs.services import audit
-from apps.patients.models import Patient
+from apps.patients.access import accessible_patients
 from services.security.anonymization import anonymize_text
 from .models import ClinicalNote, ClinicalNoteHistory
 from .serializers import ClinicalNoteSerializer
@@ -12,17 +14,22 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
     filterset_fields = ("patient", "session")
 
     def get_queryset(self):
-        qs = ClinicalNote.objects.filter(deleted_at__isnull=True)
-        if self.request.user.is_admin_role:
-            return qs
-        patient_ids = Patient.objects.filter(access_grants__user=self.request.user, deleted_at__isnull=True).values("id")
-        return qs.filter(patient_id__in=patient_ids).distinct()
+        write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
+        return ClinicalNote.objects.filter(deleted_at__isnull=True, patient__in=accessible_patients(self.request.user, clinical=True, write=write))
+
+    def list(self, request, *args, **kwargs):
+        result = super().list(request, *args, **kwargs)
+        audit(request, 'LIST', self, {'module': 'clinical_notes', 'method': 'GET'})
+        return result
+
+    def retrieve(self, request, *args, **kwargs):
+        note = self.get_object()
+        audit(request, 'READ', note, {'module': 'clinical_notes', 'method': 'GET'})
+        return Response(self.get_serializer(note).data)
 
     def perform_create(self, serializer):
         patient = serializer.validated_data["patient"]
-        allowed = Patient.objects.filter(id=patient.id, deleted_at__isnull=True)
-        if not self.request.user.is_admin_role:
-            allowed = allowed.filter(access_grants__user=self.request.user)
+        allowed = accessible_patients(self.request.user, clinical=True, write=True).filter(pk=patient.pk)
         if not allowed.exists():
             raise PermissionDenied("Patient is not accessible by this user.")
         note = serializer.save(author=self.request.user)
@@ -30,6 +37,8 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         note = self.get_object()
+        if note.locked_at is not None:
+            raise PermissionDenied('Nota assinada: utilize fluxo formal de retificação.')
         ClinicalNoteHistory.objects.create(
             note=note,
             edited_by=self.request.user,
@@ -48,5 +57,7 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
         audit(self.request, "UPDATE", updated, {"module": "clinical_notes", "version": updated.version})
 
     def perform_destroy(self, instance):
+        if instance.locked_at is not None:
+            raise PermissionDenied('Nota assinada não pode ser excluída.')
         instance.soft_delete()
         audit(self.request, "SOFT_DELETE", instance, {"module": "clinical_notes"})

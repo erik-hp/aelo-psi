@@ -1,17 +1,24 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from apps.audit_logs.services import audit
 from apps.clinical_notes.models import ClinicalNote
-from apps.patients.models import Patient
+from apps.patients.access import accessible_patients
 from apps.users.models import UserRole
 from .models import AIAnalysis, AnalysisStatus, HumanValidation
 from .permissions import CanRequestAI, CanReviewAI
 from .serializers import AIAnalysisSerializer, AnalysisRequestSerializer, ReviewSerializer
 from .services import request_ai_analysis
+from services.ai.client import AIServiceError
+
+
+class AIUnavailable(APIException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    default_detail = 'Análise assistiva indisponível. Nenhum resultado clínico foi gerado.'
+    default_code = 'ai_unavailable'
 
 
 class AIThrottle(UserRateThrottle):
@@ -19,9 +26,7 @@ class AIThrottle(UserRateThrottle):
 
 
 def accessible_patient_or_403(user, patient_id):
-    qs = Patient.objects.filter(deleted_at__isnull=True)
-    if not user.is_admin_role:
-        qs = qs.filter(access_grants__user=user)
+    qs = accessible_patients(user, clinical=True)
     patient = get_object_or_404(qs.distinct(), id=patient_id)
     return patient
 
@@ -36,25 +41,36 @@ def request_analysis(request):
     note = None
     if serializer.validated_data.get("note"):
         note = get_object_or_404(ClinicalNote, id=serializer.validated_data["note"], patient=patient, deleted_at__isnull=True)
-    analysis = request_ai_analysis(
-        patient=patient,
-        note=note,
-        user=request.user,
-        context_limit=serializer.validated_data["context_limit"],
-    )
+    try:
+        analysis = request_ai_analysis(
+            patient=patient,
+            note=note,
+            user=request.user,
+            context_limit=serializer.validated_data["context_limit"],
+        )
+    except AIServiceError:
+        raise AIUnavailable() from None
     audit(request, "AI_REQUEST", analysis, {"patient": str(patient.id)})
     return Response(AIAnalysisSerializer(analysis).data, status=status.HTTP_201_CREATED)
 
 
 class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
+    def list(self, request, *args, **kwargs):
+        result = super().list(request, *args, **kwargs)
+        audit(request, 'LIST', self, {'module': 'ai_analysis', 'method': 'GET'})
+        return result
+
     serializer_class = AIAnalysisSerializer
     filterset_fields = ("patient", "status")
 
     def get_queryset(self):
         qs = AIAnalysis.objects.select_related("patient", "requested_by", "note").prefetch_related("sources", "sentiment_metrics")
-        if self.request.user.is_admin_role:
-            return qs
-        return qs.filter(patient__access_grants__user=self.request.user).distinct()
+        return qs.filter(patient__in=accessible_patients(self.request.user, clinical=True)).distinct()
+
+    def retrieve(self, request, *args, **kwargs):
+        analysis = self.get_object()
+        audit(request, 'READ', analysis, {'module': 'ai_analysis', 'method': 'GET'})
+        return Response(self.get_serializer(analysis).data)
 
     @action(detail=True, methods=["post"], permission_classes=[CanReviewAI])
     def validate(self, request, pk=None):
@@ -66,7 +82,7 @@ class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
 
     def _review(self, request, decision):
         analysis = self.get_object()
-        if not (request.user.is_admin_role or request.user.role == UserRole.PSYCHOLOGIST):
+        if request.user.role != UserRole.PSYCHOLOGIST or not accessible_patients(request.user, clinical=True, write=True).filter(pk=analysis.patient_id).exists():
             raise PermissionDenied("Only psychologists can review AI analyses.")
         serializer = ReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -80,5 +96,5 @@ class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
                 "comment": serializer.validated_data.get("comment", ""),
             },
         )
-        audit(request, f"AI_{decision}", analysis, {"comment": serializer.validated_data.get("comment", "")})
+        audit(request, f"AI_{decision}", analysis, {"module": "ai_analysis"})
         return Response(self.get_serializer(analysis).data)

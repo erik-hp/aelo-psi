@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** **F0-01** — estabelecer baseline de build, testes, ambientes e endpoints; F0-02/F0-03 após inventário.
+- **Próxima tarefa:** validar a execução dos jobs CI de F0-01 e revisar as correções F0-02/F0-03 no Pull Request da branch `fix/f0-baseline-tenant-ai-integrity`. G0 ainda bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -30,7 +30,9 @@
 | 2026-10-17 | DOC-01 | Inventário estático do repositório e base do TCC | Leitura de código e documentos vinculados | CONCLUÍDO (somente documentação) |
 | 2026-10-17 | DOC-02 | Redação ADR-001 MTLI | Arquivo em branch `feat/tcc2-foundation-security-docs` | EM REVISÃO |
 | 2026-10-17 | DOC-03 | Plano mestre, matriz, README e instruções permanentes | [PR #1](https://github.com/erik-hp/aelo-psi/pull/1); resultado do merge verificável no GitHub | EM REVISÃO na data de abertura |
-| 2026-10-17 | F0-01 | Rodar ambiente/build/testes e relatar baseline | **Sem execuções de runtime neste registro** | NÃO INICIADO |
+| 2026-10-17 | F0-01 | Inventariar comandos e adicionar workflow CI | `docs/validation/F0_BASELINE.md` e `.github/workflows/ci.yml`; execução pendente | EM REVISÃO |
+| 2026-10-17 | F0-02 | Corrigir consultas com privilégios amplos | Política `apps/patients/access.py` e testes em branch; revisão e execução pendentes | EM REVISÃO |
+| 2026-10-17 | F0-03 | Bloquear fallback inventado de IA e gráficos fictícios em modo real | Código em branch; testes CI pendentes | EM REVISÃO |
 
 ## Modelos de entrada para trabalhos futuros
 
@@ -50,6 +52,83 @@
 - Riscos residuais:
 - Estado: NÃO INICIADO / EM ANDAMENTO / BLOQUEADO / EM REVISÃO / CONCLUÍDO:
 - Gate status e próximo ID:
+
+
+## Evidência de CI da primeira rodada F0
+
+- **Commit verificado:** `cdcd2dfd997488d64d358b567f77498c0eac5d9f`.
+- **GitHub Actions:** [execução #39031546521](https://github.com/erik-hp/aelo-psi/actions/runs/39031546521).
+- **Resultado:** `frontend` (lint e build) **SUCESSO**; `django` (check, migrações e testes dos apps) **SUCESSO**; `ai-service` (compile e testes) **SUCESSO**.
+- **Correção durante a verificação:** o primeiro job Django falhou porque a descoberta global tentou importar testes do FastAPI sem suas dependências; isolamos as suítes Django (`apps`) e FastAPI, ambas aprovadas depois.
+- **Ressalva:** testes automatizados disponíveis são limitados; ainda não houve verificação de implantação Docker nem revisão independente de autorização e LGPD. O **gate G0 permanece BLOQUEADO**, principalmente por F0-04 (credenciais de seed e endurecimento de ambiente), F0-05/F0-06.
+- **Após registrar esta evidência:** nova execução de CI poderá ser disparada pelo commit documental e deverá ser conferida no PR antes do merge.
+
+## Segunda evidência de CI — F0-04 parcial e novos testes
+
+- **Commit validado:** `757596e893a5bdc78618486f2f256c28b50486ee`.
+- **GitHub Actions:** [execução #39031839343](https://github.com/erik-hp/aelo-psi/actions/runs/39031839343).
+- **Resultado:** `frontend` (lint/build) **SUCESSO**; `django` (Compose config, check, migrations, testes) **SUCESSO**; `ai-service` (compilação/testes) **SUCESSO**.
+- **F0-04 parcialmente atendida:** Compose não executa automaticamente seed nem expõe serviço IA/Ollama no host; arquivos de exemplo exigem alteração de credenciais locais; comando sintético não cria senhas nem usuários. Não foi feito pentest nem testes de uso com dados reais.
+- **Atenção:** este registro foi atualizado após o commit indicado e dispara novo workflow; confirme os jobs no PR #2 antes de merge. **G0 continua BLOQUEADO** até revisar requisitos F0-02 a F0-06 e validar o ambiente em cenário real de deployment.
+
+## Continuação de revisão F0 — integração interna e admin
+
+- Rota `/admin/` desabilitada por padrão; só habilitada explicitamente com `DEBUG` e `AELO_ENABLE_DJANGO_ADMIN` no desenvolvimento.
+- `AI_SERVICE_TOKEN` exigido em chamadas Django → FastAPI, verificado com comparação resistente a diferenças de tempo; uso de token separado do segredo Django.
+- Proteção de segredo `DJANGO_SECRET_KEY` para execução fora de DEBUG.
+- Testes unitários de ausência, configuração e correção de token adicionados ao serviço de IA.
+- **Estas alterações são propostas no PR #2, não se declara liberação G0 nem conformidade jurídica.** Verificar checks do último commit do PR antes de merge.
+
+## F0 — Auditoria minimizada e criptografia planejada (17/10/2026)
+
+- **Auditoria (código em PR #2, ainda em revisão):** os eventos agora restringem metadados a campos explicitamente permitidos; comentários livres, textos de prontuário, caminhos de URL e cabeçalhos de IP encaminhados não confiáveis não são persistidos como metadados. Identificadores de registros, ação e ator continuam rastreáveis.
+- **Leituras individuais:** ações GET de detalhe de prontuário e análise passam a registrar eventos `READ` sem texto narrativo. Listagens e exportações ainda exigem política de auditoria por finalidade; a implementação não representa auditoria completa.
+- **Testes propostos:** `Backend/apps/audit_logs/tests.py` verifica minimização de metadados, confiança do IP, evento de leitura e isolamento de log entre clínicas.
+- **Criptografia:** [ADR-002](architecture/ADR-002-criptografia-prontuarios.md) propõe envelope encryption, migração incremental sem perda de registros e testes obrigatórios. **Nenhuma nota foi criptografada por esta entrega**.
+- **Gate:** G0 permanece bloqueado; checar resultados do CI do commit mais recente do PR #2 e auditoria dos controles ainda faltantes antes de avançar F1.
+
+## F0-03 — Verificação adicional de fontes de IA
+
+- Citações automáticas agora exigem que `note_id`, `session_id` e o trecho coincidam com notas autorizadas fornecidas ao modelo; resposta narrativa sem fonte é rejeitada. **Verificação de trecho não equivale à validação semântica da afirmação**: esta depende de avaliação posterior (F2).
+- Falha na chamada interna de IA é traduzida para HTTP 503 sem devolver payload clínico.
+- Testes unitários para trechos inventados e análises narrativas sem fontes foram adicionados.
+- Aguardando o CI do último commit do PR #2; G0 permanece bloqueado e não houve merge.
+
+## F0-02 — Revisão de privilégios e usuários (17/10/2026)
+
+- **Falha identificada:** a API de gerenciamento de usuários anteriormente aceitava atribuição de papel `ADMIN` e fornecia visibilidade/edição a identidades administrativas da mesma clínica. Correções aplicadas à branch do [PR #2](https://github.com/erik-hp/aelo-psi/pull/2).
+- **Correções:** o serializer deixa `clinic` somente leitura (associação sempre definida pelo servidor), proíbe criar/promover para `ADMIN`, exige validação de senhas e nega modificação de identidades administrativas/superusuário por essa API; a listagem de equipe exclui essas identidades.
+- **Testes sintéticos:** promoção indevida, criação de admin, transferência de clínica, alteração de administrador próprio ou de outra clínica.
+- **Evidência:** [CI #39035408010](https://github.com/erik-hp/aelo-psi/actions/runs/39035408010), commit `2e47a6568e80f893885a2690af9caacb8d50b94b`, três jobs aprovados (`django`, `frontend`, `ai-service`).
+- **Estado:** F0-02 em revisão; governança de criação de contas privilegiadas deve ser definida fora da API; faltam auditoria independente de grants, testes de negação por endpoint/role, assinatura e governança de chaves. **Gate G0 BLOQUEADO** e PR não integrado.
+
+## F0-02 — Concessões clínicas (17/10/2026)
+
+- A revisão identificou concessão automática de `can_edit` ao administrador que cadastrava pacientes, ainda que a política previsse distinção entre cadastro operacional e dados clínicos.
+- A criação de paciente agora concede acesso automático somente a criador com papel de psicólogo. A atribuição posterior a um psicólogo responsável segue regra explícita e é validada pelo modelo `PatientAccess` (clínica ativa, paciente não excluído, usuários ativos da mesma clínica, concedente autorizado).
+- O modelo valida concessões feitas diretamente pelo ORM com `full_clean` em `save`, além da camada HTTP. Isto ainda não protege escritas com `QuerySet.update` ou SQL direto: revisar constraints e serviço transacional na F1.
+- Testes de concessão entre clínicas, autoconcessão administrativa e ausência de concessão automática a administradores foram incluídos.
+- **Evidência:** [CI #39036905565](https://github.com/erik-hp/aelo-psi/actions/runs/39036905565), commit `ecca5854032a51c5a7e451fe5fd4fd8ba4ecb162`, 3 jobs aprovados.
+- **Pendente:** política completa de transferência de responsabilidade, revogação e auditoria de concessões; fluxo clínico de assinatura, criptografia e revisões LGPD; G0 permanece BLOQUEADO.
+
+## F0-02 — Concessão e revogação explícitas, com histórico preservado
+
+- **Mudança efetiva:** `accessible_patients` não concede mais acesso clínico por `created_by`; somente concessões explícitas ativas são usadas. Administradores mantêm acesso ao diretório administrativo, mas não ao conteúdo clínico.
+- **Migração:** `patients.0003_backfill_creator_grants` preserva em `PatientAccess` o acesso de psicólogos criadores elegíveis antes de remover o privilégio implícito. Não remove notas nem histórico; auditar especialmente bases com grants legados inconsistentes.
+- **APIs de paciente:** `GET /api/patients/{id}/access-grants/`, `POST /api/patients/{id}/grant-access/`, `POST /api/patients/{id}/revoke-access/`. Concessão inicial limitada a administrador que cadastrou o paciente designando psicólogo, ou delegação por psicólogo com concessão de edição; revogação somente por psicólogo com permissão de edição, sem deixar paciente sem psicólogo responsável.
+- **Validações:** clínica e usuários ativos, papéis adequados para atribuição, limitação de estagiários a leitura e bloqueio de autoconcessão administrativa; transações e locks por paciente para alterações concorrentes.
+- **Evidência de testes:** [run #39037986080](https://github.com/erik-hp/aelo-psi/actions/runs/39037986080), commit `6e0cd338401bf5ce1f7c199ed4d3884abe32fff9`, três jobs concluídos com sucesso. Mudanças posteriores a esse commit exigem nova validação.
+- **Limites:** `full_clean` no modelo não protege SQL direto/`QuerySet.update`, e não há trilha de auditoria imutável ou governança de concessões histórica em tabelas próprias. Transferência formal de titularidade clínica, políticas de suspensão do paciente e segurança de scripts operacionais continuam pendentes de avaliação. G0 continua **BLOQUEADO** e PR #2 não está integrado.
+
+## Revisão pré-merge do PR #2 — 17/10/2026
+
+**Decisão:** integrar o PR como uma entrega incremental F0, **não** como liberação do gate G0. O escopo inclui autorização, auditoria, bootstrap de desenvolvimento, CI e documentação de criptografia; a aplicação permanece vedada a dados reais.
+
+Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico mesmo com concessões legadas `can_edit=True`; apenas administração e psicólogos cadastram pacientes; grants por ORM exigem beneficiário de papel autorizado e não superusuário; listagens de notas/análises passam a gerar eventos de auditoria de acesso. O cadastro por administrador deve atribuir o psicólogo inicial antes de qualquer acesso clínico.
+
+**Pendências conhecidas após o merge:** completar governança de permissões (transferência, histórico de concessões, revogação sob concorrência e DB constraints/controle de privilégios SQL); prontuário assinado com retificações formalizadas; criptografia de campo e chaves conforme ADR-002; revisão de auditoria e incidentes; validação de produção, RIPD e parecer jurídico/profissional. Checks GitHub Actions são necessários, porém não equivalem a homologação clínica. O registro de gates permanece `G0 BLOQUEADO`.
+
+**Verificação:** usar o último commit do PR no GitHub e confirmar os três jobs do workflow. Após o merge registrar commit de integração e manter estas pendências ativas.
 
 ## Pendências de decisão
 

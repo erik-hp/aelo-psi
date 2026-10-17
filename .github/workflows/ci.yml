@@ -1,0 +1,85 @@
+name: AELO-PSI F0 baseline
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: Frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  django:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: aelo_ci
+          POSTGRES_USER: aelo_ci
+          POSTGRES_PASSWORD: test-only-not-for-production
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U aelo_ci -d aelo_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: Backend
+    env:
+      DJANGO_SECRET_KEY: ci-only-nonproduction-random-secret-not-for-real-usage
+      DJANGO_DEBUG: 'False'
+      AI_SERVICE_TOKEN: ci-only-separate-service-token-for-unit-tests
+      POSTGRES_DB: aelo_ci
+      POSTGRES_USER: aelo_ci
+      POSTGRES_PASSWORD: test-only-not-for-production
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: '5432'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: Backend/requirements/base.txt
+      - run: pip install -r requirements/base.txt
+      - name: Validate Docker Compose development configuration
+        run: cp .env.example .env && docker compose config --quiet
+      - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py test apps --noinput --verbosity 2
+
+  ai-service:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: Backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: Backend/requirements/ai.txt
+      - run: pip install -r requirements/ai.txt
+      - run: python -m compileall -q ai_service
+      - run: python -m unittest discover -s ai_service/tests -p 'test_*.py' -v

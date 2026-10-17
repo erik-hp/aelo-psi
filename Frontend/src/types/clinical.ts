@@ -11,7 +11,7 @@ export interface Patient {
   sessionFrequency: "Semanal" | "Quinzenal" | "Mensal";
   lastSession: string;
   nextSession: string;
-  riskLevel: "baixo" | "moderado" | "atenção";
+  riskLevel: "baixo" | "moderado" | "atenção" | "não avaliado";
   therapist: string;
   tags: string[];
 }

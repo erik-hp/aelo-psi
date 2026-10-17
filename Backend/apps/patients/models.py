@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from services.security.models import SoftDeleteModel, TimestampedModel
 
@@ -35,6 +36,53 @@ class PatientAccess(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="patient_access")
     can_edit = models.BooleanField(default=False)
     granted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="patient_access_granted")
+
+    def clean(self):
+        super().clean()
+        if not (self.patient_id and self.user_id and self.granted_by_id):
+            return
+        patient = self.patient
+        beneficiary = self.user
+        granter = self.granted_by
+        if (
+            not patient.clinic.is_active
+            or patient.deleted_at is not None
+            or not beneficiary.is_active
+            or not granter.is_active
+            or beneficiary.clinic_id != patient.clinic_id
+            or granter.clinic_id != patient.clinic_id
+        ):
+            raise ValidationError("Patient access must stay inside one active clinic.")
+
+        from apps.users.models import UserRole
+        if beneficiary.role not in {UserRole.PSYCHOLOGIST, UserRole.INTERN} or beneficiary.is_superuser:
+            raise ValidationError('Clinical grants are restricted to eligible professionals.')
+        if beneficiary.role == UserRole.INTERN and self.can_edit:
+            raise ValidationError('Intern clinical editing requires a supervised workflow.')
+        active_editor = PatientAccess.objects.filter(
+            patient_id=patient.pk, user_id=granter.pk, can_edit=True,
+        ).exclude(pk=self.pk).exists()
+        bootstrap_self = (
+            granter.role == UserRole.PSYCHOLOGIST
+            and granter.pk == beneficiary.pk == patient.created_by_id
+            and self.can_edit
+            and not PatientAccess.objects.filter(patient_id=patient.pk).exclude(pk=self.pk).exists()
+        )
+        grantor_is_clinician = granter.role == UserRole.PSYCHOLOGIST and (active_editor or bootstrap_self)
+        initial_admin_assignment = (
+            granter.is_admin_role
+            and patient.created_by_id == granter.pk
+            and beneficiary.role == UserRole.PSYCHOLOGIST
+            and self.can_edit
+            and not PatientAccess.objects.filter(patient_id=patient.pk).exclude(pk=self.pk).exists()
+        )
+        if not (grantor_is_clinician or initial_admin_assignment):
+            raise ValidationError("Only an authorized psychologist may delegate clinical access; an administrator may assign an initial psychologist.")
+
+    def save(self, *args, **kwargs):
+        # Validation must also apply to direct ORM writes, not only API forms.
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
     class Meta:
         constraints = [

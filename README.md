@@ -98,7 +98,7 @@ A arquitetura considera LGPD (Lei nº 13.709/2018), orientações da ANPD, regra
 
 **Pré-requisitos:** Git, Docker com plugin Compose e Node.js/npm compatíveis com o projeto; espaço para baixar o modelo do Ollama e recursos computacionais suficientes. Não há garantia de tempo de execução nem de aceleração GPU nesta versão.
 
-> Estes comandos explicam a estrutura **existente**. A inicialização atual contém **uma conta de demonstração com senha fixa** criada por seed automática; a correção está em F0-04. Use somente máquina/ambiente isolado de desenvolvimento, nunca rede pública ou prontuário real.
+> Estes comandos explicam a estrutura **existente**. A versão anterior inicializava uma conta de demonstração com senha fixa. A partir da F0-04, o Compose não executa mais esse seed automaticamente; contas são criadas de modo explícito no ambiente isolado. Use somente máquina/ambiente isolado de desenvolvimento, nunca rede pública ou prontuário real.
 
 ### 6.1. Obter o código
 
@@ -118,12 +118,12 @@ docker compose up --build -d
 docker compose ps
 ```
 
-No **Windows PowerShell**, substitua `cp` por `Copy-Item .env.example .env`, se necessário. **Edite o `.env` antes de uso**, definindo segredos locais não triviais; não publique o arquivo. O Compose existente sobe `db`, `api`, `ai-service` e `ollama`.
+No **Windows PowerShell**, substitua `cp` por `Copy-Item .env.example .env`, se necessário. **Edite o `.env` antes de uso**, definindo segredos locais não triviais; não publique o arquivo. O Compose sobe `db`, `api`, `ai-service` e `ollama`; apenas banco e API são publicados em portas de loopback, enquanto IA e Ollama ficam em rede interna. Defina as credenciais antes de iniciar.
 
 Endereços de desenvolvimento configurados no projeto:
 - Django API: `http://localhost:8000/api/`
-- FastAPI: `http://localhost:8001/health`
-- Ollama: `http://localhost:11434` (serviço, não interface web)
+- FastAPI: `http://ai-service:8001/health` (somente rede Docker)
+- Ollama: `http://ollama:11434` (somente rede Docker, sem exposição pública)
 
 Verificar registros/erros:
 
@@ -172,7 +172,7 @@ npm run build
 
 ### 6.4. Segurança de demonstração
 
-A versão inicial do código contém uma credencial de seed de desenvolvimento em `Backend/apps/clinics/management/commands/seed_initial_data.py`. **Não a utilize como credencial operacional** nem exponha esse serviço fora de um ambiente isolado. O plano prevê remover esse mecanismo automático antes do uso por terceiros. Nenhum dado de paciente real deve entrar no ambiente de demonstração atual.
+O comando de seed foi alterado para **não criar contas nem senhas** e somente aceitar dados sintéticos mediante opt-in explícito. O Compose não o executa automaticamente. Após iniciar, crie o administrador de desenvolvimento com `docker compose exec api python manage.py createsuperuser`; associe o usuário a uma clínica antes de cadastrar pacientes. Use somente dados sintéticos em um ambiente isolado. Nenhum dado de paciente real deve entrar no ambiente de demonstração atual.
 
 ## 7. Organização do repositório
 

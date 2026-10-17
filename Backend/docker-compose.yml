@@ -4,9 +4,9 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-aelo}
       POSTGRES_USER: ${POSTGRES_USER:-aelo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aelo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD in Backend/.env}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,9 +18,9 @@ services:
   api:
     build: .
     env_file: .env
-    command: sh -c "python manage.py migrate --run-syncdb && python manage.py seed_initial_data && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -32,15 +32,15 @@ services:
       context: .
       dockerfile: ai_service/Dockerfile
     env_file: .env
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     depends_on:
       - ollama
 
   ollama:
     image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
+    expose:
+      - "11434"
     volumes:
       - ollama_data:/root/.ollama
 

@@ -95,7 +95,7 @@ function mapPatient(patient: ApiPatient): Patient {
     sessionFrequency: "Semanal",
     lastSession: "-",
     nextSession: "-",
-    riskLevel: "baixo",
+    riskLevel: "não avaliado",
     therapist: "Equipe clínica",
     tags: [patient.internal_code],
   };
@@ -150,7 +150,7 @@ export const clinicalService = {
         patients: patientsResponse.status === "fulfilled" ? unwrap(patientsResponse.value.data).map(mapPatient) : [],
         sessions: sessionsResponse.status === "fulfilled" ? unwrap(sessionsResponse.value.data).map(mapSession) : [],
         analyses: analysesResponse.status === "fulfilled" ? unwrap(analysesResponse.value.data).map(mapAnalysis) : [],
-        longitudinalData,
+        longitudinalData: [],
         auditEvents: auditResponse.status === "fulfilled"
           ? unwrap(auditResponse.value.data).map((event) => ({
             id: event.id,
@@ -161,7 +161,7 @@ export const clinicalService = {
             date: new Date(event.created_at).toLocaleString("pt-BR"),
             ip: event.ip_address,
           }))
-          : auditEvents,
+          : [],
       };
     }
     return { patients, sessions, analyses, longitudinalData, auditEvents };
@@ -254,17 +254,9 @@ export const clinicalService = {
   },
   async getPatientLongitudinal(patientId: string): Promise<PatientLongitudinalMetric[]> {
     if (import.meta.env.VITE_USE_API === "true") {
-      const { sessions: patientSessions, analyses: patientAnalyses } = await this.getPatient(patientId);
-      const attention = patientAnalyses[0]?.relevanceScore ?? 0;
-      return longitudinalData.map((item) => ({
-        ...item,
-        patientId,
-        attention,
-        mood: Math.max(0, 100 - attention),
-        emotionalState: Math.max(0, 90 - attention),
-        psychologicalBurden: attention,
-        sessions: patientSessions.length,
-      }));
+      // The API does not yet publish validated per-session longitudinal metrics.
+      // Show an empty state rather than inventing measurements from relevance.
+      return [];
     }
     return patientLongitudinalData.filter((item) => item.patientId === patientId);
   },

@@ -7,7 +7,7 @@ POST `/api/auth/login/`
 ```json
 {
   "username": "admin",
-  "password": "admin12345"
+  "password": "<senha-definida-localmente-pelo-administrador>"
 }
 ```
 
