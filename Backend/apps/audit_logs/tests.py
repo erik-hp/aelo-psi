@@ -32,6 +32,8 @@ class AuditPrivacyTests(TestCase):
             clinic=cls.clinic, internal_code="SY-001",
             display_name="Pessoa Sintética", created_by=cls.professional,
         )
+        from apps.patients.models import PatientAccess
+        PatientAccess.objects.create(patient=cls.patient, user=cls.professional, granted_by=cls.professional, can_edit=True)
         cls.note = ClinicalNote.objects.create(
             patient=cls.patient, author=cls.professional,
             raw_text="Texto sintético sigiloso não deve estar no log",
