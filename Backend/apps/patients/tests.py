@@ -23,6 +23,7 @@ class PatientAccessTests(TestCase):
         cls.psych_a = User.objects.create_user(username="psy_a", password="temporary-testing-only", clinic=cls.a, role="PSYCHOLOGIST")
         cls.patient_a = Patient.objects.create(clinic=cls.a, internal_code="A-1", display_name="Pessoa fictícia A", created_by=cls.psych_a)
         cls.patient_b = Patient.objects.create(clinic=cls.b, internal_code="B-1", display_name="Pessoa fictícia B", created_by=cls.admin_b)
+        PatientAccess.objects.create(patient=cls.patient_a, user=cls.psych_a, can_edit=True, granted_by=cls.psych_a)
 
     def test_admin_is_confined_to_their_clinic(self):
         self.assertTrue(accessible_patients(self.admin_a).filter(pk=self.patient_a.pk).exists())
@@ -30,8 +31,9 @@ class PatientAccessTests(TestCase):
 
     def test_admin_is_not_implicitly_authorized_to_read_notes(self):
         self.assertFalse(accessible_patients(self.admin_a, clinical=True).filter(pk=self.patient_a.pk).exists())
-        PatientAccess.objects.create(patient=self.patient_a, user=self.admin_a, can_edit=False, granted_by=self.psych_a)
-        self.assertTrue(accessible_patients(self.admin_a, clinical=True).filter(pk=self.patient_a.pk).exists())
+        with self.assertRaises(ValidationError):
+            PatientAccess.objects.create(patient=self.patient_a, user=self.admin_a, can_edit=False, granted_by=self.psych_a)
+        self.assertFalse(accessible_patients(self.admin_a, clinical=True).filter(pk=self.patient_a.pk).exists())
         self.assertFalse(accessible_patients(self.admin_a, clinical=True, write=True).filter(pk=self.patient_a.pk).exists())
 
     def test_patient_endpoint_does_not_expose_other_clinic(self):
@@ -95,3 +97,64 @@ class PatientAccessTests(TestCase):
                 patient=self.patient_a, user=self.admin_a,
                 granted_by=self.admin_a, can_edit=True,
             )
+
+    def test_grant_then_revoke_ends_clinical_access(self):
+        User = get_user_model()
+        second = User.objects.create_user(
+            username="granted_psych", password="test-only",
+            role="PSYCHOLOGIST", clinic=self.a,
+        )
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        url = f"/api/patients/{self.patient_a.pk}/"
+        created = client.post(url + "grant-access/", {"user": str(second.pk), "can_edit": True}, format="json")
+        self.assertEqual(created.status_code, 201, getattr(created, "data", ""))
+        self.assertTrue(accessible_patients(second, clinical=True, write=True).filter(pk=self.patient_a.pk).exists())
+        revoked = client.post(url + "revoke-access/", {"user": str(second.pk)}, format="json")
+        self.assertEqual(revoked.status_code, 204, getattr(revoked, "data", ""))
+        self.assertFalse(accessible_patients(second, clinical=True).filter(pk=self.patient_a.pk).exists())
+
+    def test_cannot_revoke_last_responsible_psychologist(self):
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        response = client.post(
+            f"/api/patients/{self.patient_a.pk}/revoke-access/",
+            {"user": str(self.psych_a.pk)}, format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(PatientAccess.objects.filter(patient=self.patient_a, user=self.psych_a).exists())
+
+    def test_cross_clinic_grant_endpoint_refused(self):
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        response = client.post(
+            f"/api/patients/{self.patient_a.pk}/grant-access/",
+            {"user": str(self.admin_b.pk), "can_edit": True}, format="json",
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_administrator_cannot_grant_access_to_themselves(self):
+        client = APIClient()
+        client.force_authenticate(user=self.admin_a)
+        response = client.post(
+            f"/api/patients/{self.patient_a.pk}/grant-access/",
+            {"user": str(self.admin_a.pk), "can_edit": True}, format="json",
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_patient_creator_cannot_read_after_explicit_revoke(self):
+        User = get_user_model()
+        second = User.objects.create_user(
+            username="delegate_psych", password="test-only", role="PSYCHOLOGIST", clinic=self.a,
+        )
+        PatientAccess.objects.create(
+            patient=self.patient_a, user=second, granted_by=self.psych_a, can_edit=True,
+        )
+        client = APIClient()
+        client.force_authenticate(user=second)
+        r = client.post(
+            f"/api/patients/{self.patient_a.pk}/revoke-access/",
+            {"user": str(self.psych_a.pk)}, format="json",
+        )
+        self.assertEqual(r.status_code, 204, getattr(r, "data", ""))
+        self.assertFalse(accessible_patients(self.psych_a, clinical=True).filter(pk=self.patient_a.pk).exists())
