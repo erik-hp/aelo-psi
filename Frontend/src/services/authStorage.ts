@@ -8,7 +8,7 @@ export const authStorage = {
   getRefreshToken: () => sessionStorage.getItem(REFRESH_TOKEN_KEY),
   setTokens: (tokens: AuthTokens) => {
     sessionStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
   },
   clear: () => {
     sessionStorage.removeItem(ACCESS_TOKEN_KEY);
