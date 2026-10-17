@@ -167,6 +167,12 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Criado o procedimento [F0_DEPENDENCY_AUDIT.md](validation/F0_DEPENDENCY_AUDIT.md). Ainda faltam lock de dependências Python e varredura formal do histórico por segredos, além de políticas de thresholds e atualização segura das bibliotecas.
 - **Não marcar F0-05 concluída** antes de analisar os resultados reais, classificar vulnerabilidades e revisar os riscos. Gate G0 BLOQUEADO.
 
+## F0-05 — Atualização das dependências do front-end (PR em revisão)
+
+- Pacotes de produção atualizados no lockfile: axios 1.20.0, form-data 4.0.6, react-router e react-router-dom 7.18.4.
+- [GitHub Actions #39052124534](https://github.com/erik-hp/aelo-psi/actions/runs/39052124534): npm audit (produção/nível alto), npm ci, lint e build aprovados durante a atualização. Workflow temporário de escrita removido.
+- Evidências e ressalvas: [F0_FRONTEND_REMEDIATION.md](validation/F0_FRONTEND_REMEDIATION.md). Confirmar checks no último commit e manter análise de segredos, dependências de desenvolvimento e bloqueios G0 como pendências.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
