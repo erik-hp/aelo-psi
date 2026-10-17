@@ -59,7 +59,7 @@ class EvidenceValidationTests(unittest.TestCase):
                 {"note_id": "synthetic-note", "session_id": None, "excerpt": "trecho inventado", "relevance_score": 0.5}
             ], "relevance_score": 0.5,
         }
-        response = httpx.Response(200, json={"response": json.dumps(valid)})
+        response = httpx.Response(200, json={"response": json.dumps(valid)}, request=httpx.Request("POST", "http://ollama.test/api/generate"))
         with patch("ai_service.main.httpx.AsyncClient") as client:
             client.return_value.__aenter__.return_value.post = AsyncMock(return_value=response)
             with self.assertRaises(ValueError):
@@ -71,7 +71,7 @@ class EvidenceValidationTests(unittest.TestCase):
         import json
         uncited = {"patterns": ["Inferência sem origem"], "longitudinal_evolution": "",
                    "attention_points": [], "sources": [], "relevance_score": 0.1}
-        response = httpx.Response(200, json={"response": json.dumps(uncited)})
+        response = httpx.Response(200, json={"response": json.dumps(uncited)}, request=httpx.Request("POST", "http://ollama.test/api/generate"))
         with patch("ai_service.main.httpx.AsyncClient") as client:
             client.return_value.__aenter__.return_value.post = AsyncMock(return_value=response)
             with self.assertRaises(ValueError):
