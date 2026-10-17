@@ -1,5 +1,6 @@
 """Regression coverage for cross-tenant and clinical data isolation (F0-02)."""
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from apps.clinical_notes.models import ClinicalNote
@@ -73,3 +74,24 @@ class PatientAccessTests(TestCase):
         self.assertEqual(response.status_code, 403)
         note.refresh_from_db()
         self.assertEqual(note.raw_text, "Original sintético")
+
+    def test_admin_patient_creation_does_not_grant_clinical_access(self):
+        client = APIClient()
+        client.force_authenticate(user=self.admin_a)
+        response = client.post("/api/patients/", {"internal_code": "A-NEW", "display_name": "Pessoa Sintética"}, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertFalse(PatientAccess.objects.filter(patient_id=response.data["id"], user=self.admin_a).exists())
+
+    def test_cross_clinic_grant_rejected_at_model_boundary(self):
+        with self.assertRaises(ValidationError):
+            PatientAccess.objects.create(
+                patient=self.patient_a, user=self.admin_b,
+                granted_by=self.psych_a, can_edit=True,
+            )
+
+    def test_admin_cannot_self_assign_clinical_access(self):
+        with self.assertRaises(ValidationError):
+            PatientAccess.objects.create(
+                patient=self.patient_a, user=self.admin_a,
+                granted_by=self.admin_a, can_edit=True,
+            )
