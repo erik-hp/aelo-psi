@@ -47,6 +47,9 @@ def audit(request, action: str, entity: Any, metadata: dict | None = None) -> Au
         entity=entity.__class__.__name__[:120],
         entity_id=str(getattr(entity, "pk", ""))[:64],
         ip_address=get_client_ip(request),
-        user_agent=request.META.get("HTTP_USER_AGENT", "")[:256],
+        # User-Agent is entirely client controlled; a malicious client can
+        # place patient narratives or identifiers in this header. Keep the
+        # legacy schema field blank instead of persisting untrusted text.
+        user_agent="",
         metadata=sanitized_metadata(metadata),
     )
