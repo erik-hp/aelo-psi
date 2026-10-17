@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** validar testes de ciclo de vida JWT/clínica da branch `fix/f0-clinic-session-lifecycle`, revisar resultados da PR e continuar segurança/privacidade F0. Os PRs #3 e #4 foram integrados, sendo `03c589d4ccc96a29874dfac5149ec38f76ab5706` o commit-base desta rodada. G0 continua bloqueado.
+- **Próxima tarefa:** revisar PR de retenção de pacientes e minimização de auditoria, validar CI e continuar F0. PR #5 integrado à `main` no commit `54d478f3e9c78d181c4d9f3cfe5204baf5757a47`; G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -152,6 +152,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Logout verifica que o token de atualização enviado pertence ao usuário autenticado antes de colocá-lo na lista de bloqueio.
 - Testes sintéticos de login, suspensão, refresh, logout próprio e tentativa de bloquear token alheio foram adicionados. **A execução CI deve ser confirmada após o commit final.**
 - Proteção de tokens contra XSS e encerramento de sessão em outros dispositivos permanecem pendentes. Não representa solução completa de gestão de identidade. Gate G0 bloqueado.
+
+## F0 — Retenção de prontuários e minimização de auditoria (17/10/2026)
+
+- A API de pacientes passa a negar DELETE, inclusive soft-delete, até existir uma política formal de retenção e eliminação aprovada. Arquivamento e alteração de status ficam limitados a administradores da clínica. Isso evita que simples ações operacionais ocultem sessões e notas.
+- O registro de auditoria deixa de copiar o cabeçalho User-Agent controlado pelo cliente. O campo legado permanece vazio; a revisão de logs persistidos anteriormente é pendente.
+- Testes sintéticos verificam restrições de status/retensão e ausência do cabeçalho nos logs. CI ainda precisa ser comprovado no último commit; G0 não está liberado.
+- Pendências: governança de direitos dos titulares, revisão de backups, registros arquivados, assinatura, criptografia e auditoria de acesso abrangente.
 
 ## Pendências de decisão
 
