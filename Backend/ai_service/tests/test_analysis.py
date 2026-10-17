@@ -47,3 +47,32 @@ class ServiceAuthenticationTests(unittest.TestCase):
         with patch.dict("os.environ", {"AI_SERVICE_TOKEN": ""}):
             with self.assertRaises(HTTPException):
                 require_service_token("something")
+
+class EvidenceValidationTests(unittest.TestCase):
+    def test_citation_excerpt_must_match_authorized_note(self):
+        from ai_service.main import ollama_analysis
+        import httpx
+        import json
+        valid = {
+            "patterns": ["Relato sintético"], "longitudinal_evolution": "",
+            "attention_points": [], "sources": [
+                {"note_id": "synthetic-note", "session_id": None, "excerpt": "trecho inventado", "relevance_score": 0.5}
+            ], "relevance_score": 0.5,
+        }
+        response = httpx.Response(200, json={"response": json.dumps(valid)})
+        with patch("ai_service.main.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(return_value=response)
+            with self.assertRaises(ValueError):
+                asyncio.run(ollama_analysis(fake_payload()))
+
+    def test_narrative_without_citations_is_rejected(self):
+        from ai_service.main import ollama_analysis
+        import httpx
+        import json
+        uncited = {"patterns": ["Inferência sem origem"], "longitudinal_evolution": "",
+                   "attention_points": [], "sources": [], "relevance_score": 0.1}
+        response = httpx.Response(200, json={"response": json.dumps(uncited)})
+        with patch("ai_service.main.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(return_value=response)
+            with self.assertRaises(ValueError):
+                asyncio.run(ollama_analysis(fake_payload()))
