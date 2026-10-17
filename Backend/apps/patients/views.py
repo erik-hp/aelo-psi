@@ -1,10 +1,10 @@
-from django.db.models import Q
-from rest_framework import mixins, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from apps.audit_logs.services import audit
-from apps.users.models import UserRole
-from .models import Patient, PatientAccess, PatientStatus
+from .models import PatientAccess, PatientStatus
+from .access import accessible_patients
 from .permissions import PatientObjectPermission
 from .serializers import PatientSerializer
 
@@ -16,15 +16,11 @@ class PatientViewSet(viewsets.ModelViewSet):
     search_fields = ("internal_code", "display_name")
 
     def get_queryset(self):
-        user = self.request.user
-        qs = Patient.objects.filter(deleted_at__isnull=True)
-        if user.is_admin_role:
-            return qs
-        direct = Q(created_by=user) if user.role == UserRole.PSYCHOLOGIST else Q()
-        granted = Q(access_grants__user=user)
-        return qs.filter(Q(clinic=user.clinic) & (direct | granted)).distinct()
+        return accessible_patients(self.request.user, write=self.request.method not in ('GET', 'HEAD', 'OPTIONS'))
 
     def perform_create(self, serializer):
+        if not self.request.user.clinic_id or self.request.user.is_admin_role and not self.request.user.is_active:
+            raise PermissionDenied('A clínica ativa é obrigatória.')
         patient = serializer.save(clinic=self.request.user.clinic, created_by=self.request.user)
         PatientAccess.objects.get_or_create(
             patient=patient,
