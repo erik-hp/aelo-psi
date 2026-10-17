@@ -173,3 +173,45 @@ class PatientAccessTests(TestCase):
         )
         self.assertEqual(r.status_code, 204, getattr(r, "data", ""))
         self.assertFalse(accessible_patients(self.psych_a, clinical=True).filter(pk=self.patient_a.pk).exists())
+
+    def test_psychologist_cannot_delete_patient_or_hide_history(self):
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        response = client.delete(f"/api/patients/{self.patient_a.pk}/")
+        self.assertEqual(response.status_code, 403)
+        self.patient_a.refresh_from_db()
+        self.assertIsNone(self.patient_a.deleted_at)
+
+    def test_administrator_cannot_delete_patient(self):
+        client = APIClient()
+        client.force_authenticate(user=self.admin_a)
+        response = client.delete(f"/api/patients/{self.patient_a.pk}/")
+        self.assertEqual(response.status_code, 403)
+        self.patient_a.refresh_from_db()
+        self.assertIsNone(self.patient_a.deleted_at)
+
+    def test_psychologist_cannot_archive_patient(self):
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        response = client.post(f"/api/patients/{self.patient_a.pk}/archive/")
+        self.assertEqual(response.status_code, 403)
+        self.patient_a.refresh_from_db()
+        self.assertEqual(self.patient_a.status, "ACTIVE")
+
+    def test_administrator_can_archive_patient_without_deletion(self):
+        client = APIClient()
+        client.force_authenticate(user=self.admin_a)
+        response = client.post(f"/api/patients/{self.patient_a.pk}/archive/")
+        self.assertEqual(response.status_code, 200)
+        self.patient_a.refresh_from_db()
+        self.assertEqual(self.patient_a.status, "ARCHIVED")
+        self.assertIsNone(self.patient_a.deleted_at)
+
+    def test_psychologist_cannot_change_patient_status_through_patch(self):
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        response = client.patch(
+            f"/api/patients/{self.patient_a.pk}/",
+            {"status": "INACTIVE"}, format="json"
+        )
+        self.assertEqual(response.status_code, 403)
