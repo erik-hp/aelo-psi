@@ -1,10 +1,12 @@
+"""Assistive local inference. Never fabricate clinical results on outages."""
+import json
 import os
+
 import httpx
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field, ValidationError
 
-app = FastAPI(title="AELO Assistive AI Service", version="0.1.0")
-
+app = FastAPI(title="AELO Assistive AI Service", version="0.2.0")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 
@@ -23,62 +25,50 @@ class AnalysisRequest(BaseModel):
     context: list[ContextItem] = Field(default_factory=list)
 
 
-def fallback_analysis(payload: AnalysisRequest) -> dict:
-    sources = [
-        {
-            "note_id": item.note_id,
-            "session_id": item.session_id,
-            "excerpt": item.text[:240],
-            "relevance_score": 0.75,
-        }
-        for item in payload.context[:5]
-    ]
-    word_count = sum(len(item.text.split()) for item in payload.context)
-    return {
-        "patterns": ["Context reviewed for recurring narrative elements."],
-        "longitudinal_evolution": "Assistive summary pending richer model output.",
-        "attention_points": ["Review abrupt narrative changes and missing follow-up themes."],
-        "narrative_metrics": {"context_items": len(payload.context), "word_count": word_count},
-        "behavioral_changes": [],
-        "longitudinal_coherence": "No autonomous clinical conclusion generated.",
-        "possible_inconsistencies": [],
-        "sources": sources,
-        "sentiment_metrics": [],
-        "relevance_score": 0.7 if sources else 0,
-    }
+class AnalysisSource(BaseModel):
+    note_id: str
+    session_id: str | None = None
+    excerpt: str = ""
+    relevance_score: float = Field(ge=0, le=1, default=0)
 
 
-async def ollama_analysis(payload: AnalysisRequest) -> dict:
+class AnalysisResult(BaseModel):
+    patterns: list[str]
+    longitudinal_evolution: str
+    attention_points: list[str]
+    narrative_metrics: dict = Field(default_factory=dict)
+    behavioral_changes: list[str] = Field(default_factory=list)
+    longitudinal_coherence: str = ""
+    possible_inconsistencies: list[str] = Field(default_factory=list)
+    sources: list[AnalysisSource]
+    sentiment_metrics: list[dict] = Field(default_factory=list)
+    relevance_score: float = Field(ge=0, le=1)
+
+
+async def ollama_analysis(payload: AnalysisRequest) -> AnalysisResult:
     prompt = {
         "role": "assistive_analysis",
-        "rules": payload.guardrails,
-        "expected_json_keys": [
-            "patterns",
-            "longitudinal_evolution",
-            "attention_points",
-            "narrative_metrics",
-            "behavioral_changes",
-            "longitudinal_coherence",
-            "possible_inconsistencies",
-            "sources",
-            "sentiment_metrics",
-            "relevance_score",
+        "rules": payload.guardrails + [
+            "Use only supplied notes. Never diagnose or predict clinical risk.",
+            "Return JSON, and abstain when sources are insufficient.",
         ],
+        "expected_json_keys": list(AnalysisResult.model_fields),
         "context": [item.model_dump() for item in payload.context],
     }
     async with httpx.AsyncClient(timeout=25) as client:
         response = await client.post(
             f"{OLLAMA_BASE_URL.rstrip('/')}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": str(prompt), "stream": False, "format": "json"},
+            json={"model": OLLAMA_MODEL, "prompt": json.dumps(prompt, ensure_ascii=False), "stream": False, "format": "json"},
         )
         response.raise_for_status()
-        data = response.json()
-    try:
-        import json
-
-        return json.loads(data.get("response", "{}"))
-    except Exception:
-        return fallback_analysis(payload)
+        raw = response.json()
+    output = AnalysisResult.model_validate_json(raw.get("response", "{}"))
+    note_ids = {item.note_id for item in payload.context}
+    for source in output.sources:
+        if source.note_id not in note_ids:
+            raise ValueError("AI cited a note outside the supplied patient context.")
+    # Scores remain model-generated claims, not evaluated clinical measurements.
+    return output
 
 
 @app.get("/health")
@@ -86,12 +76,12 @@ def health() -> dict:
     return {"status": "ok"}
 
 
-@app.post("/analysis")
-async def analysis(payload: AnalysisRequest) -> dict:
+@app.post("/analysis", response_model=AnalysisResult)
+async def analysis(payload: AnalysisRequest) -> AnalysisResult:
+    if not payload.context:
+        raise HTTPException(status_code=422, detail="No authorized clinical context provided.")
     try:
-        result = await ollama_analysis(payload)
-    except Exception:
-        result = fallback_analysis(payload)
-    result.setdefault("sources", fallback_analysis(payload)["sources"])
-    result.setdefault("relevance_score", 0)
-    return result
+        return await ollama_analysis(payload)
+    except (httpx.HTTPError, ValueError, ValidationError, KeyError) as exc:
+        # Do not leak any prompt, response or clinical text in an exception body.
+        raise HTTPException(status_code=503, detail="AI analysis unavailable or unverified.") from None
