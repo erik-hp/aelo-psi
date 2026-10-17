@@ -107,11 +107,7 @@ git clone https://github.com/erik-hp/aelo-psi.git
 cd aelo-psi
 ```
 
-O repositório é privado: é preciso ter permissão no GitHub. Para consultar esta documentação antes do merge na `main`:
-
-```bash
-git switch feat/tcc2-foundation-security-docs
-```
+O repositório é privado: é preciso ter permissão no GitHub. Este README pertence à `main` após a integração do PR de documentação. O histórico da proposta e sua revisão permanecem disponíveis no [Pull Request #1](https://github.com/erik-hp/aelo-psi/pull/1). Para reproduzir exatamente uma versão, utilize o commit/release registrado na avaliação do TCC.
 
 ### 6.2. Back-end, banco e IA
 
