@@ -111,6 +111,15 @@
 - **Evidência:** [CI #39036905565](https://github.com/erik-hp/aelo-psi/actions/runs/39036905565), commit `ecca5854032a51c5a7e451fe5fd4fd8ba4ecb162`, 3 jobs aprovados.
 - **Pendente:** política completa de transferência de responsabilidade, revogação e auditoria de concessões; fluxo clínico de assinatura, criptografia e revisões LGPD; G0 permanece BLOQUEADO.
 
+## F0-02 — Concessão e revogação explícitas, com histórico preservado
+
+- **Mudança efetiva:** `accessible_patients` não concede mais acesso clínico por `created_by`; somente concessões explícitas ativas são usadas. Administradores mantêm acesso ao diretório administrativo, mas não ao conteúdo clínico.
+- **Migração:** `patients.0003_backfill_creator_grants` preserva em `PatientAccess` o acesso de psicólogos criadores elegíveis antes de remover o privilégio implícito. Não remove notas nem histórico; auditar especialmente bases com grants legados inconsistentes.
+- **APIs de paciente:** `GET /api/patients/{id}/access-grants/`, `POST /api/patients/{id}/grant-access/`, `POST /api/patients/{id}/revoke-access/`. Concessão inicial limitada a administrador que cadastrou o paciente designando psicólogo, ou delegação por psicólogo com concessão de edição; revogação somente por psicólogo com permissão de edição, sem deixar paciente sem psicólogo responsável.
+- **Validações:** clínica e usuários ativos, papéis adequados para atribuição, limitação de estagiários a leitura e bloqueio de autoconcessão administrativa; transações e locks por paciente para alterações concorrentes.
+- **Evidência de testes:** [run #39037986080](https://github.com/erik-hp/aelo-psi/actions/runs/39037986080), commit `6e0cd338401bf5ce1f7c199ed4d3884abe32fff9`, três jobs concluídos com sucesso. Mudanças posteriores a esse commit exigem nova validação.
+- **Limites:** `full_clean` no modelo não protege SQL direto/`QuerySet.update`, e não há trilha de auditoria imutável ou governança de concessões histórica em tabelas próprias. Transferência formal de titularidade clínica, políticas de suspensão do paciente e segurança de scripts operacionais continuam pendentes de avaliação. G0 continua **BLOQUEADO** e PR #2 não está integrado.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
