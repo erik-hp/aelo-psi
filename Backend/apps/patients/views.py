@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from apps.audit_logs.services import audit
 from .models import PatientAccess, PatientStatus
+from apps.users.models import UserRole
 from .access import accessible_patients
 from .permissions import PatientObjectPermission
 from .serializers import PatientSerializer
@@ -22,11 +23,12 @@ class PatientViewSet(viewsets.ModelViewSet):
         if not self.request.user.clinic_id or self.request.user.is_admin_role and not self.request.user.is_active:
             raise PermissionDenied('A clínica ativa é obrigatória.')
         patient = serializer.save(clinic=self.request.user.clinic, created_by=self.request.user)
-        PatientAccess.objects.get_or_create(
-            patient=patient,
-            user=self.request.user,
-            defaults={"can_edit": True, "granted_by": self.request.user},
-        )
+        if self.request.user.role == UserRole.PSYCHOLOGIST:
+            PatientAccess.objects.get_or_create(
+                patient=patient,
+                user=self.request.user,
+                defaults={"can_edit": True, "granted_by": self.request.user},
+            )
         audit(self.request, "CREATE", patient, {"module": "patients"})
 
     def perform_update(self, serializer):
