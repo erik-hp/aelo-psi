@@ -46,7 +46,8 @@ class PatientAccessTests(TestCase):
 
     def test_admin_is_not_implicitly_authorized_to_read_notes(self):
         self.assertFalse(accessible_patients(self.admin_a, clinical=True).filter(pk=self.patient_a.pk).exists())
-        PatientAccess.objects.create(patient=self.patient_a, user=self.admin_a, can_edit=False, granted_by=self.psych_a)
+        with self.assertRaises(ValidationError):
+            PatientAccess.objects.create(patient=self.patient_a, user=self.admin_a, can_edit=False, granted_by=self.psych_a)
         self.assertFalse(accessible_patients(self.admin_a, clinical=True).filter(pk=self.patient_a.pk).exists())
         self.assertFalse(accessible_patients(self.admin_a, clinical=True, write=True).filter(pk=self.patient_a.pk).exists())
 
