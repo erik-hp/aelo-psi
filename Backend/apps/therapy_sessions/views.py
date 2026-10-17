@@ -12,7 +12,12 @@ class TherapySessionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
         allowed = accessible_patients(self.request.user, clinical=True, write=write)
-        return TherapySession.objects.filter(deleted_at__isnull=True, patient__in=allowed)
+        qs = TherapySession.objects.filter(deleted_at__isnull=True, patient__in=allowed)
+        # Shared patient grants authorize reading prior sessions, not editing
+        # another psychologist's session or changing their schedule/summary.
+        if write:
+            qs = qs.filter(professional=self.request.user)
+        return qs
 
     def perform_create(self, serializer):
         session = serializer.save(professional=self.request.user)

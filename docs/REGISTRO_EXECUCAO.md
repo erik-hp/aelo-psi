@@ -138,6 +138,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **F0-06:** [inventário inicial/RIPD rascunho](privacy/F0_DATA_MAP_RIPD_DRAFT.md), com fluxo de dados, riscos, responsáveis e decisões pendentes; não equivale a RIPD legalmente validado.
 - **Validação:** CI e testes pendentes de verificação do último commit do PR associado. G0 permanece `BLOQUEADO`; não há prontuários cifrados, pentest, homologação clínica ou autorização para dados reais.
 
+## F0 — Integridade de notas e sessões (PR em revisão, 17/10/2026)
+
+- Restrições propostas: apenas autor altera/exclui a própria nota; apenas profissional responsável altera sessão; notas não podem ser movidas a outra sessão nem vinculadas a sessão excluída ou de outro profissional.
+- Atualização de nota e histórico passa a ocorrer em transação com lock, evitando corrida de versionamento no fluxo da API. Não substitui assinatura formal nem constraints completas na camada SQL.
+- Testes sintéticos em `apps/clinical_notes/tests_integrity.py`: negar edição por outro profissional, negar troca de sessão, preservar versão anterior. Executar CI e registrar resultados antes de aprovar.
+- **G0 permanece BLOQUEADO** por governança de chaves, criptografia, revisão ampla de dados/segurança e demais requisitos do plano. Não usar dados reais.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
