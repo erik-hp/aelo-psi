@@ -1,0 +1,39 @@
+name: Temporary frontend lockfile refresh
+on:
+  push:
+    branches: [fix/f0-frontend-dependency-remediation]
+    paths: [.github/workflows/frontend-lock-refresh.yml]
+permissions:
+  contents: write
+jobs:
+  refresh:
+    if: github.repository == 'erik-hp/aelo-psi'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/f0-frontend-dependency-remediation
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+      - name: Resolve patched production dependencies
+        working-directory: Frontend
+        run: |
+          npm install --package-lock-only --save-exact axios@latest react-router-dom@latest
+          npm update form-data --package-lock-only
+          npm audit --omit=dev --audit-level=high
+          npm ci
+          npm run lint
+          npm run build
+      - name: Commit only dependency manifests
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Frontend/package.json Frontend/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(frontend): resolve patched production dependencies [deps-lock]"
+            git push origin HEAD:fix/f0-frontend-dependency-remediation
+          fi
