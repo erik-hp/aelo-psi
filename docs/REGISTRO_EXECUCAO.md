@@ -173,6 +173,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - [GitHub Actions #39052124534](https://github.com/erik-hp/aelo-psi/actions/runs/39052124534): npm audit (produção/nível alto), npm ci, lint e build aprovados durante a atualização. Workflow temporário de escrita removido.
 - Evidências e ressalvas: [F0_FRONTEND_REMEDIATION.md](validation/F0_FRONTEND_REMEDIATION.md). Confirmar checks no último commit e manter análise de segredos, dependências de desenvolvimento e bloqueios G0 como pendências.
 
+## F0-05 — Varredura de segredos e política de dependências (PR #10)
+
+- Árvores atuais passam por Gitleaks bloqueante, com saída redigida e sem materialização de segredos em artefatos. Histórico completo fica em inventário protegido e ainda requer triagem privada.
+- `pip-audit` dos dois serviços Python e `npm audit` de produção tornaram-se checks bloqueantes. O inventário de bibliotecas de desenvolvimento ainda não bloqueia e exige classificação.
+- Evidências do primeiro ciclo: [segredos #39056220574](https://github.com/erik-hp/aelo-psi/actions/runs/39056220574), [dependências #39056220430](https://github.com/erik-hp/aelo-psi/actions/runs/39056220430) e [CI #39056220385](https://github.com/erik-hp/aelo-psi/actions/runs/39056220385) aprovados. Detalhes e riscos em [F0_SECURITY_CHECKS.md](validation/F0_SECURITY_CHECKS.md).
+- **G0 permanece BLOQUEADO** até documentação de riscos residuais, varredura histórica revisada, dependências de desenvolvimento tratadas, revisão de infraestrutura/privacidade e demais critérios do Plano Mestre.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
