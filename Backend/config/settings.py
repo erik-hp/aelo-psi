@@ -1,11 +1,18 @@
 from datetime import timedelta
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-in-production")
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
+if not DEBUG and (len(SECRET_KEY) < 32 or SECRET_KEY.startswith("CHANGE_ME")):
+    raise ImproperlyConfigured("Set a strong DJANGO_SECRET_KEY before starting Django outside development.")
+if not SECRET_KEY:
+    # Only an isolated DEBUG environment may use this fixed development key.
+    SECRET_KEY = "aelo-unsafe-debug-only-key-do-not-deploy"
+AELO_ENABLE_DJANGO_ADMIN = DEBUG and os.getenv("AELO_ENABLE_DJANGO_ADMIN", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS = [
@@ -134,6 +141,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://ai-service:8001")
 AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "30"))
+AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_HTTPONLY = True
