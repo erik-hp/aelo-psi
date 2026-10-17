@@ -39,12 +39,18 @@ class PatientViewSet(viewsets.ModelViewSet):
         audit(self.request, "CREATE", patient, {"module": "patients"})
 
     def perform_update(self, serializer):
+        previous_status = serializer.instance.status
+        requested_status = serializer.validated_data.get("status", previous_status)
+        if requested_status != previous_status and not self.request.user.is_admin_role:
+            raise PermissionDenied("Only clinic administrators may change patient status.")
         patient = serializer.save()
         audit(self.request, "UPDATE", patient, {"module": "patients"})
 
     def perform_destroy(self, instance):
-        instance.soft_delete()
-        audit(self.request, "SOFT_DELETE", instance, {"module": "patients"})
+        # Patient documents are longitudinal records. Even a soft-delete can
+        # conceal sessions, notes and required retention from clinical queries.
+        # A supervised retention/deletion policy has not yet been approved.
+        raise PermissionDenied("Patient deletion is disabled; use archive instead.")
 
     @action(detail=True, methods=["get"], url_path="access-grants")
     def access_grants(self, request, pk=None):
@@ -113,6 +119,8 @@ class PatientViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def archive(self, request, pk=None):
+        if not request.user.is_admin_role:
+            raise PermissionDenied("Only clinic administrators may archive patients.")
         patient = self.get_object()
         patient.status = PatientStatus.ARCHIVED
         patient.save(update_fields=["status", "updated_at"])
