@@ -34,8 +34,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          AI_SERVICE_TOKEN: ci-only-separate-service-token-for-unit-tests
-      POSTGRES_DB: aelo_ci
+          POSTGRES_DB: aelo_ci
           POSTGRES_USER: aelo_ci
           POSTGRES_PASSWORD: test-only-not-for-production
         ports: ['5432:5432']
@@ -48,6 +47,7 @@ jobs:
     env:
       DJANGO_SECRET_KEY: ci-only-nonproduction-random-secret-not-for-real-usage
       DJANGO_DEBUG: 'False'
+      AI_SERVICE_TOKEN: ci-only-separate-service-token-for-unit-tests
       POSTGRES_DB: aelo_ci
       POSTGRES_USER: aelo_ci
       POSTGRES_PASSWORD: test-only-not-for-production
