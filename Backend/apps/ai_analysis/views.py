@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from apps.audit_logs.services import audit
 from apps.clinical_notes.models import ClinicalNote
-from apps.patients.models import Patient
+from apps.patients.access import accessible_patients
 from apps.users.models import UserRole
 from .models import AIAnalysis, AnalysisStatus, HumanValidation
 from .permissions import CanRequestAI, CanReviewAI
@@ -19,9 +19,7 @@ class AIThrottle(UserRateThrottle):
 
 
 def accessible_patient_or_403(user, patient_id):
-    qs = Patient.objects.filter(deleted_at__isnull=True)
-    if not user.is_admin_role:
-        qs = qs.filter(access_grants__user=user)
+    qs = accessible_patients(user, clinical=True)
     patient = get_object_or_404(qs.distinct(), id=patient_id)
     return patient
 
@@ -52,9 +50,7 @@ class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = AIAnalysis.objects.select_related("patient", "requested_by", "note").prefetch_related("sources", "sentiment_metrics")
-        if self.request.user.is_admin_role:
-            return qs
-        return qs.filter(patient__access_grants__user=self.request.user).distinct()
+        return qs.filter(patient__in=accessible_patients(self.request.user, clinical=True)).distinct()
 
     @action(detail=True, methods=["post"], permission_classes=[CanReviewAI])
     def validate(self, request, pk=None):
@@ -66,7 +62,7 @@ class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
 
     def _review(self, request, decision):
         analysis = self.get_object()
-        if not (request.user.is_admin_role or request.user.role == UserRole.PSYCHOLOGIST):
+        if request.user.role != UserRole.PSYCHOLOGIST or not accessible_patients(request.user, clinical=True, write=True).filter(pk=analysis.patient_id).exists():
             raise PermissionDenied("Only psychologists can review AI analyses.")
         serializer = ReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
