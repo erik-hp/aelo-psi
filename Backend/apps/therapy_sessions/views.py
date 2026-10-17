@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from apps.audit_logs.services import audit
-from apps.patients.models import Patient
+from apps.patients.access import accessible_patients
 from .models import TherapySession
 from .serializers import TherapySessionSerializer
 
@@ -10,11 +10,9 @@ class TherapySessionViewSet(viewsets.ModelViewSet):
     filterset_fields = ("status", "patient")
 
     def get_queryset(self):
-        patient_ids = Patient.objects.filter(access_grants__user=self.request.user, deleted_at__isnull=True).values("id")
-        qs = TherapySession.objects.filter(deleted_at__isnull=True)
-        if self.request.user.is_admin_role:
-            return qs
-        return qs.filter(patient_id__in=patient_ids).distinct()
+        write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
+        allowed = accessible_patients(self.request.user, clinical=True, write=write)
+        return TherapySession.objects.filter(deleted_at__isnull=True, patient__in=allowed)
 
     def perform_create(self, serializer):
         session = serializer.save(professional=self.request.user)
