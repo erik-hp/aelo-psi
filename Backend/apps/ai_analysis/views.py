@@ -55,6 +55,11 @@ def request_analysis(request):
 
 
 class AIAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
+    def list(self, request, *args, **kwargs):
+        result = super().list(request, *args, **kwargs)
+        audit(request, 'LIST', self, {'module': 'ai_analysis', 'method': 'GET'})
+        return result
+
     serializer_class = AIAnalysisSerializer
     filterset_fields = ("patient", "status")
 
