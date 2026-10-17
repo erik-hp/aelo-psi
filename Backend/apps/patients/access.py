@@ -25,6 +25,10 @@ def accessible_patients(user, *, clinical=False, write=False):
 
     if user.role not in {UserRole.PSYCHOLOGIST, UserRole.INTERN}:
         return qs.none()
+    # Until supervised clinical editing is implemented, interns are read-only,
+    # even when an older grant still has can_edit=True.
+    if write and user.role != UserRole.PSYCHOLOGIST:
+        return qs.none()
 
     grant = Q(access_grants__user=user)
     if write:
