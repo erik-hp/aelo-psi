@@ -1,14 +1,21 @@
 """Assistive local inference. Never fabricate clinical results on outages."""
 import json
 import os
+import secrets
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from pydantic import BaseModel, Field, ValidationError
 
 app = FastAPI(title="AELO Assistive AI Service", version="0.2.0")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
+
+
+def require_service_token(x_aelo_service_token: str | None = Header(default=None)) -> None:
+    configured = os.getenv("AI_SERVICE_TOKEN", "")
+    if not configured or configured.startswith("CHANGE_ME") or not x_aelo_service_token or not secrets.compare_digest(x_aelo_service_token, configured):
+        raise HTTPException(status_code=403, detail="Service authentication required.")
 
 
 class ContextItem(BaseModel):
@@ -76,7 +83,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
-@app.post("/analysis", response_model=AnalysisResult)
+@app.post("/analysis", response_model=AnalysisResult, dependencies=[Depends(require_service_token)])
 async def analysis(payload: AnalysisRequest) -> AnalysisResult:
     if not payload.context:
         raise HTTPException(status_code=422, detail="No authorized clinical context provided.")
