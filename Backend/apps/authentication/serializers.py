@@ -1,4 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
+from .policy import active_clinic_account
 
 
 class LoginSerializer(TokenObtainPairSerializer):
@@ -11,6 +13,8 @@ class LoginSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+        if not active_clinic_account(self.user):
+            raise AuthenticationFailed('Account or clinic is not active.')
         data["user"] = {
             "id": self.user.id,
             "username": self.user.username,
