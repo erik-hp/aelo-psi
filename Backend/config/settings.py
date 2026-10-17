@@ -7,7 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
-if not DEBUG and (len(SECRET_KEY) < 32 or SECRET_KEY.startswith("CHANGE_ME")):
+if not DEBUG and (
+    len(SECRET_KEY) < 32
+    or SECRET_KEY.startswith("CHANGE_ME")
+    or SECRET_KEY == "aelo-unsafe-debug-only-key-do-not-deploy"
+):
     raise ImproperlyConfigured("Set a strong DJANGO_SECRET_KEY before starting Django outside development.")
 if not SECRET_KEY:
     # Only an isolated DEBUG environment may use this fixed development key.
@@ -69,12 +73,23 @@ TEMPLATES = [
     }
 ]
 
+# Never quietly fall back to the original development database credentials.
+# The expected CI password is deliberately injected in the workflow, never
+# committed for use in a real environment.
+DATABASE_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
+if not DEBUG and (
+    len(DATABASE_PASSWORD) < 12
+    or DATABASE_PASSWORD in {"aelo", "postgres", "password"}
+    or DATABASE_PASSWORD.startswith("CHANGE_ME")
+):
+    raise ImproperlyConfigured("Set a strong POSTGRES_PASSWORD outside development.")
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("POSTGRES_DB", "aelo"),
         "USER": os.getenv("POSTGRES_USER", "aelo"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "aelo"),
+        "PASSWORD": DATABASE_PASSWORD,
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 60,
@@ -125,10 +140,14 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    origin for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",") if origin
+    origin.strip() for origin in os.getenv(
+        "CORS_ALLOWED_ORIGINS", "http://localhost:3000" if DEBUG else ""
+    ).split(",") if origin.strip()
 ]
 CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000").split(",") if origin
+    origin.strip() for origin in os.getenv(
+        "CSRF_TRUSTED_ORIGINS", "http://localhost:3000" if DEBUG else ""
+    ).split(",") if origin.strip()
 ]
 
 LANGUAGE_CODE = "pt-br"
@@ -143,7 +162,15 @@ AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://ai-service:8001")
 AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "30"))
 AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Only trust proxy protocol headers when the deployment operator explicitly
+# confirms a trusted reverse proxy that strips client-supplied headers.
+SECURE_PROXY_SSL_HEADER = (
+    ("HTTP_X_FORWARDED_PROTO", "https")
+    if os.getenv("DJANGO_TRUST_PROXY_SSL_HEADER", "False").lower() == "true"
+    else None
+)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 X_FRAME_OPTIONS = "DENY"
