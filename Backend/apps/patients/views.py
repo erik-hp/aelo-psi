@@ -25,8 +25,10 @@ class PatientViewSet(viewsets.ModelViewSet):
         return accessible_patients(self.request.user, write=self.request.method not in ('GET', 'HEAD', 'OPTIONS'))
 
     def perform_create(self, serializer):
-        if not self.request.user.clinic_id or self.request.user.is_admin_role and not self.request.user.is_active:
+        if not self.request.user.clinic_id or not self.request.user.clinic.is_active or self.request.user.clinic.deleted_at is not None:
             raise PermissionDenied('A clínica ativa é obrigatória.')
+        if not (self.request.user.is_admin_role or self.request.user.role == UserRole.PSYCHOLOGIST):
+            raise PermissionDenied('Somente administração ou psicólogos podem cadastrar pacientes.')
         patient = serializer.save(clinic=self.request.user.clinic, created_by=self.request.user)
         if self.request.user.role == UserRole.PSYCHOLOGIST:
             PatientAccess.objects.get_or_create(
