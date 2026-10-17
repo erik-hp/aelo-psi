@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** revisar PR de retenção de pacientes e minimização de auditoria, validar CI e continuar F0. PR #5 integrado à `main` no commit `54d478f3e9c78d181c4d9f3cfe5204baf5757a47`; G0 permanece bloqueado.
+- **Próxima tarefa:** triar alertas do inventário de dependências F0-05, após validar o workflow no GitHub Actions; a `main` consultada nesta rodada é `2fd3084a259aa887eaa5d2adb5f4801062eae273` (PR #6 integrado). G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -159,6 +159,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - O registro de auditoria deixa de copiar o cabeçalho User-Agent controlado pelo cliente. O campo legado permanece vazio; a revisão de logs persistidos anteriormente é pendente.
 - Testes sintéticos verificam restrições de status/retensão e ausência do cabeçalho nos logs. CI ainda precisa ser comprovado no último commit; G0 não está liberado.
 - Pendências: governança de direitos dos titulares, revisão de backups, registros arquivados, assinatura, criptografia e auditoria de acesso abrangente.
+
+## F0-05 — Inventário de dependências (em revisão)
+
+- Criado o workflow `dependency-audit.yml` para inspeção de dependências Django, FastAPI e React, publicando resultados JSON e resumo de cada execução. **Primeira run #39049549738:** `pip-audit` encontrou 21 vulnerabilidades em quatro pacotes Django e 14 em um pacote de IA. O job permaneceu verde pelo modo de inventário não bloqueante; detalhes e limitações em `docs/validation/F0_DEPENDENCY_AUDIT.md`.
+- As verificações são inicialmente não bloqueantes para permitir medir a dívida; uma falha deve gerar triagem, não ser interpretada como aprovação.
+- Criado o procedimento [F0_DEPENDENCY_AUDIT.md](validation/F0_DEPENDENCY_AUDIT.md). Ainda faltam lock de dependências Python e varredura formal do histórico por segredos, além de políticas de thresholds e atualização segura das bibliotecas.
+- **Não marcar F0-05 concluída** antes de analisar os resultados reais, classificar vulnerabilidades e revisar os riscos. Gate G0 BLOQUEADO.
 
 ## Pendências de decisão
 
