@@ -1,6 +1,9 @@
 """Regression coverage for cross-tenant and clinical data isolation (F0-02)."""
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+from apps.clinical_notes.models import ClinicalNote
+from apps.therapy_sessions.models import TherapySession
 from rest_framework.test import APIClient
 
 from apps.clinics.models import Clinic
@@ -42,3 +45,31 @@ class PatientAccessTests(TestCase):
 
     def test_unauthenticated_user_cannot_list_patients(self):
         self.assertIn(APIClient().get("/api/patients/").status_code, (401, 403))
+
+    def test_clinical_notes_and_sessions_are_not_visible_across_clinics(self):
+        TherapySession.objects.create(patient=self.patient_b, professional=self.admin_b, scheduled_at=timezone.now())
+        ClinicalNote.objects.create(patient=self.patient_b, author=self.admin_b, raw_text="NOTA SINTÉTICA B")
+        client = APIClient()
+        client.force_authenticate(user=self.admin_a)
+        for endpoint in ("/api/clinical-notes/", "/api/sessions/", "/api/analysis/"):
+            response = client.get(endpoint)
+            self.assertEqual(response.status_code, 200, endpoint)
+            self.assertEqual(response.data["count"], 0, endpoint)
+
+    def test_administrator_without_clinical_grant_cannot_create_note(self):
+        client = APIClient()
+        client.force_authenticate(user=self.admin_a)
+        response = client.post("/api/clinical-notes/", {"patient": str(self.patient_a.pk), "raw_text": "Conteúdo fictício"})
+        self.assertIn(response.status_code, (400, 403))
+
+    def test_signed_note_cannot_be_modified(self):
+        note = ClinicalNote.objects.create(
+            patient=self.patient_a, author=self.psych_a,
+            raw_text="Original sintético", locked_at=timezone.now(),
+        )
+        client = APIClient()
+        client.force_authenticate(user=self.psych_a)
+        response = client.patch(f"/api/clinical-notes/{note.pk}/", {"raw_text": "Edição proibida"}, format="json")
+        self.assertEqual(response.status_code, 403)
+        note.refresh_from_db()
+        self.assertEqual(note.raw_text, "Original sintético")
