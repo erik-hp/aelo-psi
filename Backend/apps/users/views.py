@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
 from apps.audit_logs.services import audit
@@ -13,7 +15,9 @@ class IsAdminRole(BasePermission):
 
 class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
-        return User.objects.select_related('clinic').filter(clinic_id=self.request.user.clinic_id).order_by('username')
+        return User.objects.select_related('clinic').filter(
+            clinic_id=self.request.user.clinic_id,
+        ).exclude(Q(role='ADMIN') | Q(is_superuser=True)).order_by('username')
     serializer_class = UserSerializer
     permission_classes = [IsAdminRole]
     filterset_fields = ("role", "clinic", "is_active")
