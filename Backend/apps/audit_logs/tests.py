@@ -73,3 +73,17 @@ class AuditPrivacyTests(TestCase):
         response = other.get("/api/audit-logs/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 0)
+
+    def test_untrusted_user_agent_is_not_stored_in_audit(self):
+        client = APIClient()
+        client.force_authenticate(user=self.professional)
+        response = client.get(
+            f"/api/clinical-notes/{self.note.pk}/",
+            HTTP_USER_AGENT="Clinical text should not be logged",
+        )
+        self.assertEqual(response.status_code, 200)
+        log = AuditLog.objects.filter(
+            user=self.professional, action="READ", entity="ClinicalNote"
+        ).latest("created_at")
+        self.assertEqual(log.user_agent, "")
+        self.assertNotIn("Clinical text", str(log.metadata))
