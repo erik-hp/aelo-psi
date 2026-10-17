@@ -221,7 +221,7 @@ A execução detalhada está no [Plano Mestre](docs/PLANO_MESTRE_IMPLEMENTACAO.m
 | **F6 — Validação DSR** | RAG vs memória temporal; SUS, UMUX-Lite, usabilidade | Resultados reais e metodologia reproduzível |
 | **F7 — Entrega do TCC** | Documentação, testes finais, release e demonstração | Código, evidências e texto acadêmico coerentes |
 
-**Situação em 17/10/2026:** documentação estruturante iniciada na branch de trabalho; F0-01 é a próxima tarefa de implementação. **Nenhum gate de produção está liberado.**
+**Situação em 17/10/2026:** as primeiras correções de segurança F0 foram integradas pelo PR #2. A fase F0 continua em andamento e **nenhum gate para uso clínico real foi liberado**. O estado verificável e a próxima tarefa estão em [Registro de Execução](docs/REGISTRO_EXECUCAO.md).
 
 ## 9. Como contribuir sem perder o escopo do TCC
 
@@ -251,7 +251,7 @@ Indicadores de engenharia planejados: `Recall@k`, precisão das citações, taxa
 
 A pesquisa com pessoas exige verificar e cumprir a situação ética aplicável, incluindo CEP quando necessário, TCLE e tratamento adequado de gravações e respostas. Usar dados **sintéticos** nos protótipos de validação de prontuário, protegendo os próprios dados dos participantes da pesquisa.
 
-Documentação de avaliação e planos de segurança serão acrescentados nas fases correspondentes. O relatório do TCC deve ser atualizado à medida que existirem evidências e resultados concretos.
+O [inventário técnico inicial de dados e riscos (RIPD: rascunho)](docs/privacy/F0_DATA_MAP_RIPD_DRAFT.md) registra fluxos de tratamento, medidas existentes e pendências de avaliação jurídica/profissional. A documentação de avaliação e outros planos de segurança serão acrescentados nas fases correspondentes. O relatório do TCC deve ser atualizado à medida que existirem evidências e resultados concretos.
 
 ## 11. Perguntas frequentes
 
@@ -277,6 +277,7 @@ Documentação de avaliação e planos de segurança serão acrescentados nas fa
 - [Plano Mestre: fases, dependências e gates](docs/PLANO_MESTRE_IMPLEMENTACAO.md)
 - [Matriz de rastreabilidade](docs/MATRIZ_REQUISITOS.md)
 - [Registro de execução e decisões](docs/REGISTRO_EXECUCAO.md)
+- [F0-06: mapa de dados e riscos (rascunho)](docs/privacy/F0_DATA_MAP_RIPD_DRAFT.md)
 - [ADR-001: Memória Terapêutica Longitudinal Inteligente](docs/architecture/ADR-001-memoria-terapeutica-longitudinal.md)
 - [Instruções de contribuição e para assistentes](AGENTS.md)
 - [Operações atuais do back-end](Backend/docs/OPERATIONS.md)

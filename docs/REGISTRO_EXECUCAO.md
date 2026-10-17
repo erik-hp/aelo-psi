@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** validar a execução dos jobs CI de F0-01 e revisar as correções F0-02/F0-03 no Pull Request da branch `fix/f0-baseline-tenant-ai-integrity`. G0 ainda bloqueado.
+- **Próxima tarefa:** revisar/validar a PR F0-04/F0-06 (`fix/f0-runtime-secrets-privacy-inventory`) e continuar inventário de autorização, backup, chaves e proteção contra XSS. O PR #2 já foi integrado à `main` (`c2f2174c51e4ee408763cb4a4f3c33cf2bc9c0a4`); G0 continua bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -129,6 +129,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 **Pendências conhecidas após o merge:** completar governança de permissões (transferência, histórico de concessões, revogação sob concorrência e DB constraints/controle de privilégios SQL); prontuário assinado com retificações formalizadas; criptografia de campo e chaves conforme ADR-002; revisão de auditoria e incidentes; validação de produção, RIPD e parecer jurídico/profissional. Checks GitHub Actions são necessários, porém não equivalem a homologação clínica. O registro de gates permanece `G0 BLOQUEADO`.
 
 **Verificação:** usar o último commit do PR no GitHub e confirmar os três jobs do workflow. Após o merge registrar commit de integração e manter estas pendências ativas.
+
+## Ciclo F0-04 e F0-06 — configuração e dados (17/10/2026)
+
+- **Partida:** `main` em `c2f2174c51e4ee408763cb4a4f3c33cf2bc9c0a4`, integração confirmada do [PR #2](https://github.com/erik-hp/aelo-psi/pull/2).
+- **F0-04:** Django bloqueia credenciais padrão/fracas de PostgreSQL quando `DEBUG=False`; CORS e CSRF não têm origem HTTP local predefinida em produção; `SECURE_PROXY_SSL_HEADER` só é habilitado por configuração explícita de proxy confiável; cookies de sessão/CSRF são marcados Secure fora de DEBUG.
+- **F0-04 navegador:** refresh token passa de `localStorage` para `sessionStorage` — **mitigação de persistência, não proteção contra XSS**. Sessões antigas podem exigir novo login. Migração futura para cookies HttpOnly dependerá de desenho de CSRF/CORS e testes.
+- **F0-06:** [inventário inicial/RIPD rascunho](privacy/F0_DATA_MAP_RIPD_DRAFT.md), com fluxo de dados, riscos, responsáveis e decisões pendentes; não equivale a RIPD legalmente validado.
+- **Validação:** CI e testes pendentes de verificação do último commit do PR associado. G0 permanece `BLOQUEADO`; não há prontuários cifrados, pentest, homologação clínica ou autorização para dados reais.
 
 ## Pendências de decisão
 
