@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from django.db import transaction
 from apps.audit_logs.services import audit
 from apps.patients.access import accessible_patients
 from services.security.anonymization import anonymize_text
@@ -15,7 +15,15 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
-        return ClinicalNote.objects.filter(deleted_at__isnull=True, patient__in=accessible_patients(self.request.user, clinical=True, write=write))
+        qs = ClinicalNote.objects.filter(
+            deleted_at__isnull=True,
+            patient__in=accessible_patients(self.request.user, clinical=True, write=write),
+        )
+        # A grant permits reading other professionals' records, but it does
+        # not permit modifying their authored narrative or deleting it.
+        if write:
+            qs = qs.filter(author=self.request.user)
+        return qs
 
     def list(self, request, *args, **kwargs):
         result = super().list(request, *args, **kwargs)
@@ -27,6 +35,7 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
         audit(request, 'READ', note, {'module': 'clinical_notes', 'method': 'GET'})
         return Response(self.get_serializer(note).data)
 
+    @transaction.atomic
     def perform_create(self, serializer):
         patient = serializer.validated_data["patient"]
         allowed = accessible_patients(self.request.user, clinical=True, write=True).filter(pk=patient.pk)
@@ -35,8 +44,10 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
         note = serializer.save(author=self.request.user)
         audit(self.request, "CREATE", note, {"module": "clinical_notes"})
 
+    @transaction.atomic
     def perform_update(self, serializer):
-        note = self.get_object()
+        # Protect version and history writes against concurrent editors.
+        note = self.get_queryset().select_for_update().get(pk=serializer.instance.pk)
         if note.locked_at is not None:
             raise PermissionDenied('Nota assinada: utilize fluxo formal de retificação.')
         ClinicalNoteHistory.objects.create(
@@ -56,6 +67,7 @@ class ClinicalNoteViewSet(viewsets.ModelViewSet):
         )
         audit(self.request, "UPDATE", updated, {"module": "clinical_notes", "version": updated.version})
 
+    @transaction.atomic
     def perform_destroy(self, instance):
         if instance.locked_at is not None:
             raise PermissionDenied('Nota assinada não pode ser excluída.')
