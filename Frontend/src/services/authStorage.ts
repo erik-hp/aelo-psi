@@ -12,6 +12,6 @@ export const authStorage = {
   },
   clear: () => {
     sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
   },
 };
