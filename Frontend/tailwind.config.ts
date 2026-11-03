@@ -52,7 +52,7 @@ export default {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        clinical: "0 20px 80px -45px rgba(0, 178, 255, 0.32)",
+        clinical: "0 20px 80px -45px rgba(101, 220, 199, 0.20)",
       },
     },
   },

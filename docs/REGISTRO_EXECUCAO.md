@@ -221,3 +221,12 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 ## Regras
 
 O registro não é histórico de conversa: é histórico auditável de artefatos e testes. Não converter “escrito”, “planejado” ou “inspecionado” em “desenvolvido/testado”. Não iniciar F2/F3 sem G0/G1.
+
+
+## IDV-01 — Identidade visual do AELO (03/11/2026)
+
+- Escopo transversal solicitado: símbolo SVG original, versões de assinatura, favicon, tokens, componente reutilizável e integração no login/menu lateral; especificação em `docs/brand/IDENTIDADE_VISUAL_AELO.md`.
+- Limites: nenhum fluxo clínico, autenticação, API, permissões ou IA alterados. A tarefa **não desbloqueia G0**.
+- Revisões executadas: inspeção estática dos componentes, tema, README, AGENTS e testes existentes.
+- Pendências: `cd Frontend && npm ci && npm run lint && npm run test && npm run build`, teste visual responsivo, verificação de contraste em componentes reais e aprovação da marca.
+- Estado: **EM REVISÃO**; PR próprio; liberação clínica continua bloqueada.

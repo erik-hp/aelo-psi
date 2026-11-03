@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Brain,
   CalendarClock,
   ClipboardList,
   ClockAlert,
@@ -13,6 +12,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { AeloBrand } from "@/components/brand/AeloBrand";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,15 +87,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         )}
       >
         <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-md bg-primary text-primary-foreground shadow-sm">
-              <Brain className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-lg font-semibold tracking-tight">AELO</p>
-              <p className="text-xs text-muted-foreground">Clinical Intelligence</p>
-            </div>
-          </div>
+          <AeloBrand subtitle="Memória clínica inteligente" />
           <Button
             size="icon"
             variant="ghost"

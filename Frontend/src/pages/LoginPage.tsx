@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
-import { Brain, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { AeloBrand } from "@/components/brand/AeloBrand";
 import { LoginForm } from "@/components/forms/LoginForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,15 +17,7 @@ export function LoginPage() {
     <main className="grid min-h-screen grid-cols-1 bg-background lg:grid-cols-[1.1fr_0.9fr]">
       <section className="flex items-center px-6 py-10 lg:px-16">
         <div className="max-w-2xl">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-md bg-primary text-primary-foreground">
-              <Brain className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-semibold">AELO</h1>
-              <p className="text-sm text-muted-foreground">Plataforma clínica psicológica</p>
-            </div>
-          </div>
+          <AeloBrand subtitle="Plataforma clínica psicológica" size="regular" className="mb-8" />
           <h2 className="max-w-xl text-4xl font-semibold leading-tight md:text-5xl">
             Gestão clínica, prontuário narrativo e análise longitudinal em um ambiente seguro.
           </h2>
