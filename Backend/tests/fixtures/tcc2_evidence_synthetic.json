@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "declared_data_classification": "synthetic",
   "notes": [
     {"id": "nota-01", "patient_id": "ficticio-A", "version": 1, "text": "Registro sintético: personagem fictício relata sono irregular após troca de turno."},
     {"id": "nota-02", "patient_id": "ficticio-A", "version": 1, "text": "Registro sintético: personagem fictício descreve maior regularidade no descanso."},
