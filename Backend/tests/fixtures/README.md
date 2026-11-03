@@ -2,7 +2,7 @@
 
 `./tcc2_evidence_synthetic.json` contém somente narrativas inventadas para testar um **avaliador**, nunca prontuários reais ou resultados do AELO em produção.
 
-Esquema `schema_version: 1`:
+Esquema `schema_version: 1`, com declaração explícita `declared_data_classification: synthetic` (declaração do autor, não verificação automática):
 
 - `notes`: lista de `{id, patient_id, version, text}`. IDs globais devem ser únicos.
 - `cases`: lista de `{id, patient_id, gold_note_ids, retrieved_note_ids, claims}`.
