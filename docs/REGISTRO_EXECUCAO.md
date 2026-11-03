@@ -180,8 +180,6 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Evidências do primeiro ciclo: [segredos #39056220574](https://github.com/erik-hp/aelo-psi/actions/runs/39056220574), [dependências #39056220430](https://github.com/erik-hp/aelo-psi/actions/runs/39056220430) e [CI #39056220385](https://github.com/erik-hp/aelo-psi/actions/runs/39056220385) aprovados. Detalhes e riscos em [F0_SECURITY_CHECKS.md](validation/F0_SECURITY_CHECKS.md).
 - **G0 permanece BLOQUEADO** até documentação de riscos residuais, varredura histórica revisada, dependências de desenvolvimento tratadas, revisão de infraestrutura/privacidade e demais critérios do Plano Mestre.
 
-## Pendências de decisão
-
 ## Integração e envio ao GitHub — 03/11/2026
 
 - A implementação local do Vault, proteção de dados clínicos, sessão e ensaios de carga foi reunida no branch `feat/vault-security-validation-2026-11-03` com a série F0 recebida de `origin/main`.
@@ -201,9 +199,17 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 
 - O job Django do baseline falhou na migração de criptografia por não definir `CLINICAL_DATA_KEYS`; o serviço PostgreSQL da CI também não incluía pgvector. O workflow recebeu chaves sintéticas de teste e a imagem `pgvector/pgvector:pg16`.
 - A auditoria bloqueante apontou três CVEs em `djangorestframework==3.17.2`. A dependência foi elevada para `3.18.3`, que inclui as correções de segurança de `3.18.2` e um ajuste de regressão posterior. A auditoria local de `requirements/base.txt` terminou sem vulnerabilidades conhecidas.
-- O comando Django equivalente ao job remoto passou em Docker com PostgreSQL/pgvector: 48 testes e zero falhas. A nova execução remota após o push ainda precisa ser confirmada.
+- O comando Django equivalente ao job remoto passou em Docker com PostgreSQL/pgvector: 48 testes e zero falhas. A execução remota final foi confirmada no PR.
 - O smoke HTTP falhou porque a seed sintética criava pacientes sem grants clínicos, de modo que o psicólogo não via seus próprios pacientes. A seed agora cria o grant inicial explícito de cada psicólogo. O smoke também usava cookie `Secure` sobre HTTP sintético; o cliente de teste passou a enviá-lo explicitamente para verificar o fluxo no servidor sem enfraquecer o cookie de produção. Reexecução local: `LIVE_SECURITY_SMOKE_OK`.
-- No commit `cfc90ec`, a [CI baseline #41644942581](https://github.com/erik-hp/aelo-psi/actions/runs/41644942581), a [auditoria de dependências #41644942621](https://github.com/erik-hp/aelo-psi/actions/runs/41644942621), a [varredura de segredos #41644942870](https://github.com/erik-hp/aelo-psi/actions/runs/41644942870) e a [qualidade e segurança #41644942797](https://github.com/erik-hp/aelo-psi/actions/runs/41644942797) concluíram com sucesso. O PR segue em rascunho para revisão humana; sucesso da CI não libera o gate clínico ou de produção.
+- No commit `cfc90ec`, a [CI baseline #41644942581](https://github.com/erik-hp/aelo-psi/actions/runs/41644942581), a [auditoria de dependências #41644942621](https://github.com/erik-hp/aelo-psi/actions/runs/41644942621), a [varredura de segredos #41644942870](https://github.com/erik-hp/aelo-psi/actions/runs/41644942870) e a [qualidade e segurança #41644942797](https://github.com/erik-hp/aelo-psi/actions/runs/41644942797) concluíram com sucesso. O commit documental final `aaadc12` também passou nos quatro workflows.
+
+## Merge solicitado — 03/11/2026
+
+- O [PR #11](https://github.com/erik-hp/aelo-psi/pull/11) foi mesclado em `main` no commit `1287db18e696ed8dd6e622f4105b5fce167894ca`. O checkout local de `main` foi atualizado por fast-forward e corresponde a `origin/main`.
+- O Cérebro `tcc-cofre` integrou o branch documental em `main` por fast-forward até `10ca78624deeb8fb35ef712b242d59e1a9d1a9d1`, com push confirmado. Preferências locais do Obsidian e arquivos pessoais não integraram o commit.
+- O merge de código não altera o gate `G0 BLOQUEADO`: Ollama integral, governança clínica/jurídica, operação de produção e demais critérios do Plano Mestre continuam pendentes.
+
+## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
 - Validação da base jurídica, RIPD e governança de dados por profissionais competentes.
