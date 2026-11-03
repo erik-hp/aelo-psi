@@ -35,6 +35,8 @@ def evaluate_evidence(dataset: dict[str, Any], *, k: int = 5) -> dict[str, Any]:
         raise ValueError("k must be a positive integer")
     if not isinstance(dataset, dict) or dataset.get("schema_version") != 1:
         raise ValueError("Unsupported benchmark schema_version; expected 1")
+    if dataset.get("declared_data_classification") != "synthetic":
+        raise ValueError("Synthetic-only benchmark requires explicit data classification")
     rows = dataset.get("notes")
     cases = dataset.get("cases")
     if not isinstance(rows, list) or not isinstance(cases, list) or not cases:
@@ -113,7 +115,7 @@ def evaluate_evidence(dataset: dict[str, Any], *, k: int = 5) -> dict[str, Any]:
 
     return {
         "schema_version": 1,
-        "dataset_kind": "synthetic",
+        "declared_data_classification": "synthetic",
         "k": k,
         "counts": totals,
         "metrics": {
@@ -122,7 +124,8 @@ def evaluate_evidence(dataset: dict[str, Any], *, k: int = 5) -> dict[str, Any]:
         },
         "warning": (
             "Only literal evidence presence, note ownership and source version are checked. "
-            "This does not measure semantic faithfulness, clinical correctness or LGPD compliance."
+            "Data classification is declared, not verified. This does not measure semantic "
+            "faithfulness, clinical correctness or LGPD compliance."
         ),
     }
 
