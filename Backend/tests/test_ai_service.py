@@ -11,8 +11,8 @@ def test_analysis_requires_service_token(monkeypatch):
     client = TestClient(ai_module.app)
     payload = {"patient_id": "patient", "context": [{"note_id": "note", "created_at": "2026-11-02", "text": "context"}]}
 
-    assert client.post("/analysis", json=payload).status_code == 401
-    assert client.post("/analysis", json=payload, headers={"X-AI-Service-Token": "wrong"}).status_code == 401
+    assert client.post("/analysis", json=payload).status_code == 403
+    assert client.post("/analysis", json=payload, headers={"X-AI-Service-Token": "wrong"}).status_code == 403
 
 
 def test_analysis_only_returns_excerpts_from_supplied_context(monkeypatch):

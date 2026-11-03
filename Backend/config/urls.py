@@ -13,5 +13,5 @@ urlpatterns = [
     path("api/", include("apps.dashboard.urls")),
 ]
 
-if settings.DEBUG:
+if settings.DEBUG and getattr(settings, "AELO_ENABLE_DJANGO_ADMIN", False):
     urlpatterns.insert(0, path("admin/", admin.site.urls))

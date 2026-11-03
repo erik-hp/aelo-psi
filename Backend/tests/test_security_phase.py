@@ -48,7 +48,7 @@ def test_draft_is_encrypted_versioned_and_scoped(records):
     reader.force_authenticate(records["reader"])
     payload = {"title": "Sessão sintética", "content": "Texto clínico sintético confidencial", "version": 0}
     assert outsider.get(path).status_code == 404
-    assert reader.put(path, payload, format="json").status_code == 403
+    assert reader.put(path, payload, format="json").status_code == 404
     first = owner.put(path, payload, format="json")
     assert first.status_code == 200
     assert first.data["version"] == 1

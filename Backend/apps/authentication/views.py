@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from urllib.parse import urlsplit
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from .policy import active_clinic_account
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.audit_logs.services import audit
 from .serializers import LoginSerializer
@@ -55,6 +57,13 @@ class RefreshView(TokenRefreshView):
         refresh = request.COOKIES.get("aelo_refresh")
         if not refresh:
             return Response({"detail": "Refresh session is missing."}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            token = RefreshToken(refresh)
+            user = get_user_model().objects.select_related("clinic").get(pk=token.get("user_id"))
+        except (TokenError, ValueError, TypeError, get_user_model().DoesNotExist):
+            raise AuthenticationFailed("Invalid refresh credentials.") from None
+        if not active_clinic_account(user):
+            raise AuthenticationFailed("Account or clinic is not active.")
         serializer = self.get_serializer(data={"refresh": refresh})
         serializer.is_valid(raise_exception=True)
         data = dict(serializer.validated_data)
@@ -73,9 +82,11 @@ class LogoutView(APIView):
         if refresh:
             try:
                 token = RefreshToken(refresh)
+                if str(token.get("user_id")) != str(request.user.pk):
+                    return Response({"detail": "Invalid refresh token."}, status=status.HTTP_400_BAD_REQUEST)
                 token.blacklist()
             except TokenError:
-                pass
+                return Response({"detail": "Invalid refresh token."}, status=status.HTTP_400_BAD_REQUEST)
         audit(request, "LOGOUT", request.user, {"module": "authentication"})
         response = Response(status=status.HTTP_204_NO_CONTENT)
         response.delete_cookie("aelo_refresh", path="/api/auth/", samesite="Strict")
@@ -84,7 +95,7 @@ class LogoutView(APIView):
 
 def set_refresh_cookie(response, token):
     response.set_cookie(
-        "aelo_refresh", token, httponly=True, secure=settings.REQUIRE_HTTPS,
+        "aelo_refresh", token, httponly=True, secure=settings.SESSION_COOKIE_SECURE,
         samesite="Strict", path="/api/auth/",
     )
 

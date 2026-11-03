@@ -9,12 +9,13 @@ from django.core.exceptions import ImproperlyConfigured
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
-if len(SECRET_KEY) < 50 or SECRET_KEY.startswith(("replace-with", "change-me", "django-insecure-")):
+if len(SECRET_KEY) < 50 or SECRET_KEY.startswith(("replace-with", "change-me", "django-insecure-", "CHANGE_ME")):
     raise ImproperlyConfigured("DJANGO_SECRET_KEY must be a unique random secret with at least 50 characters.")
 CLINICAL_DATA_KEYS = [key.strip() for key in os.getenv("CLINICAL_DATA_KEYS", "").split(",") if key.strip()]
 AUDIT_LOG_HMAC_KEY = os.getenv("AUDIT_LOG_HMAC_KEY", "")
 CLINICAL_RETENTION_DAYS = int(os.getenv("CLINICAL_RETENTION_DAYS", "0"))
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
+AELO_ENABLE_DJANGO_ADMIN = DEBUG and os.getenv("AELO_ENABLE_DJANGO_ADMIN", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS = [
@@ -99,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "apps.authentication.jwt.ClinicJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
@@ -147,7 +148,7 @@ AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://ai-service:8001")
 AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "90"))
 AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 
-TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_HEADERS", "False").lower() == "true"
+TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_SSL_HEADER", "False").lower() == "true"
 if TRUST_PROXY_HEADERS:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 REQUIRE_HTTPS = os.getenv("DJANGO_REQUIRE_HTTPS", "False").lower() == "true"
@@ -156,9 +157,9 @@ SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "0")) if REQUIRE_HTTP
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = REQUIRE_HTTPS
+SESSION_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE = REQUIRE_HTTPS
+CSRF_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 X_FRAME_OPTIONS = "DENY"
 
 if REQUIRE_HTTPS:

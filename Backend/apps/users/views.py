@@ -4,7 +4,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from apps.ai_analysis.permissions import CanReviewAI
 from apps.ai_analysis.signatures import public_key_from_spki
+from django.db.models import Q
 from rest_framework.permissions import BasePermission
+from rest_framework.exceptions import PermissionDenied
 from apps.audit_logs.services import audit
 from .models import User, UserSigningKey
 from .serializers import UserSerializer
@@ -16,21 +18,23 @@ class IsAdminRole(BasePermission):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.select_related("clinic").all().order_by("username")
+    def get_queryset(self):
+        return User.objects.select_related('clinic').filter(
+            clinic_id=self.request.user.clinic_id,
+        ).exclude(Q(role='ADMIN') | Q(is_superuser=True)).order_by('username')
     serializer_class = UserSerializer
     permission_classes = [IsAdminRole]
     filterset_fields = ("role", "clinic", "is_active")
     search_fields = ("username", "email", "first_name", "last_name", "license_number")
 
-    def get_queryset(self):
-        return self.queryset.filter(clinic_id=self.request.user.clinic_id)
-
     def perform_create(self, serializer):
-        user = serializer.save(clinic=self.request.user.clinic)
+        if not self.request.user.clinic_id:
+            raise PermissionDenied('Clinic is required.')
+        user = serializer.save(clinic_id=self.request.user.clinic_id)
         audit(self.request, "CREATE", user, {"module": "users"})
 
     def perform_update(self, serializer):
-        user = serializer.save()
+        user = serializer.save(clinic_id=self.request.user.clinic_id)
         audit(self.request, "UPDATE", user, {"module": "users"})
 
     def perform_destroy(self, instance):

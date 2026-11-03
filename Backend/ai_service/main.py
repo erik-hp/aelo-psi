@@ -44,6 +44,12 @@ _circuit_failures = 0
 _circuit_open_until = 0.0
 
 
+def require_service_token(token: str | None) -> None:
+    configured = AI_SERVICE_TOKEN
+    if not configured or configured.startswith("CHANGE_ME") or not token or not secrets.compare_digest(token, configured):
+        raise HTTPException(status_code=403, detail="Service authentication required.")
+
+
 class CircuitOpenError(Exception):
     pass
 
@@ -162,6 +168,21 @@ async def ollama_analysis(payload: AnalysisRequest) -> dict:
     result = AnalysisResult.model_validate(json.loads(data["response"]))
     if not (result.patterns or result.longitudinal_evolution or result.attention_points):
         raise ValueError("Ollama returned an empty analysis.")
+    notes = {item.note_id: item for item in payload.context}
+    graph_evidence = {}
+    for fact in payload.graph_context:
+        graph_evidence.setdefault(fact.note_id, []).append(fact.evidence)
+    for source in result.sources:
+        original = notes.get(source.note_id)
+        if original is None and source.note_id not in graph_evidence:
+            raise ValueError("AI cited a note outside authorized context.")
+        if not source.excerpt.strip() or not (
+            (original is not None and source.excerpt in original.text)
+            or any(source.excerpt in excerpt for excerpt in graph_evidence.get(source.note_id, []))
+        ):
+            raise ValueError("AI citation excerpt does not match its source.")
+    if not result.sources:
+        raise ValueError("AI narrative contains no traceable evidence.")
     return result.model_dump()
 
 
@@ -222,8 +243,7 @@ async def health_ready() -> dict:
 
 @app.post("/vault/extract")
 async def extract_vault(payload: VaultRequest, x_ai_service_token: str | None = Header(default=None)) -> dict:
-    if not AI_SERVICE_TOKEN or not x_ai_service_token or not secrets.compare_digest(x_ai_service_token, AI_SERVICE_TOKEN):
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    require_service_token(x_ai_service_token)
     try:
         extraction = await ollama_vault(payload.note)
         allowed_kinds = {"symptom", "event", "context", "intervention"}
@@ -245,8 +265,7 @@ async def extract_vault(payload: VaultRequest, x_ai_service_token: str | None = 
 
 @app.post("/vault/synthesize")
 async def synthesize_vault(payload: VaultSynthesisRequest, x_ai_service_token: str | None = Header(default=None)) -> dict:
-    if not AI_SERVICE_TOKEN or not x_ai_service_token or not secrets.compare_digest(x_ai_service_token, AI_SERVICE_TOKEN):
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    require_service_token(x_ai_service_token)
     try:
         result = await ollama_vault_synthesis(payload)
         evidence = {(item.note_id, item.excerpt): "global" for item in payload.history}
@@ -264,8 +283,7 @@ async def synthesize_vault(payload: VaultSynthesisRequest, x_ai_service_token: s
 
 @app.post("/analysis")
 async def analysis(payload: AnalysisRequest, x_ai_service_token: str | None = Header(default=None)) -> dict:
-    if not AI_SERVICE_TOKEN or not x_ai_service_token or not secrets.compare_digest(x_ai_service_token, AI_SERVICE_TOKEN):
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    require_service_token(x_ai_service_token)
     try:
         selected = await retrieve_context(payload)
         selected = await retrieve_graph_context(selected)

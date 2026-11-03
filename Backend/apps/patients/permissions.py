@@ -1,6 +1,5 @@
 from rest_framework.permissions import BasePermission
-
-from .access import can_edit_patient, can_view_patient
+from .access import can_access_patient
 
 
 class PatientObjectPermission(BasePermission):
@@ -8,6 +7,5 @@ class PatientObjectPermission(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.method in ("GET", "HEAD", "OPTIONS"):
-            return can_view_patient(request.user, obj)
-        return can_edit_patient(request.user, obj)
+        user = request.user
+        return can_access_patient(user, obj, write=request.method not in ('GET', 'HEAD', 'OPTIONS'))

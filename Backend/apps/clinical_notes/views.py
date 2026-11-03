@@ -20,21 +20,42 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
     filterset_fields = ("patient", "session")
 
     def get_queryset(self):
-        patient_ids = accessible_patients(self.request.user).values("id")
-        return ClinicalNote.objects.filter(patient_id__in=patient_ids, deleted_at__isnull=True).order_by("-created_at", "-id")
+        write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
+        qs = ClinicalNote.objects.filter(
+            deleted_at__isnull=True,
+            patient__in=accessible_patients(self.request.user, clinical=True, write=write),
+        )
+        # A grant permits reading other professionals' records, but it does
+        # not permit modifying their authored narrative or deleting it.
+        if write:
+            qs = qs.filter(author=self.request.user)
+        return qs
 
+    def list(self, request, *args, **kwargs):
+        result = super().list(request, *args, **kwargs)
+        audit(request, 'LIST', self, {'module': 'clinical_notes', 'method': 'GET'})
+        return result
+
+    def retrieve(self, request, *args, **kwargs):
+        note = self.get_object()
+        audit(request, 'READ', note, {'module': 'clinical_notes', 'method': 'GET'})
+        return Response(self.get_serializer(note).data)
+
+    @transaction.atomic
     def perform_create(self, serializer):
         patient = serializer.validated_data["patient"]
-        if not can_edit_patient(self.request.user, patient):
-            raise PermissionDenied("Edit access to this patient is required.")
+        allowed = accessible_patients(self.request.user, clinical=True, write=True).filter(pk=patient.pk)
+        if not allowed.exists():
+            raise PermissionDenied("Patient is not accessible by this user.")
         note = serializer.save(author=self.request.user)
         audit(self.request, "CREATE", note, {"module": "clinical_notes"})
 
     @transaction.atomic
     def perform_update(self, serializer):
-        note = ClinicalNote.objects.select_for_update().get(pk=serializer.instance.pk)
-        if not can_edit_patient(self.request.user, note.patient) or note.locked_at:
-            raise PermissionDenied("This clinical note cannot be edited.")
+        # Protect version and history writes against concurrent editors.
+        note = self.get_queryset().select_for_update().get(pk=serializer.instance.pk)
+        if note.locked_at is not None:
+            raise PermissionDenied('Nota assinada: utilize fluxo formal de retificação.')
         ClinicalNoteHistory.objects.create(
             note=note,
             edited_by=self.request.user,
@@ -55,16 +76,15 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_destroy(self, instance):
-        instance = ClinicalNote.objects.select_for_update().get(pk=instance.pk)
-        if not can_edit_patient(self.request.user, instance.patient) or instance.locked_at:
-            raise PermissionDenied("This clinical note cannot be deleted.")
+        if instance.locked_at is not None:
+            raise PermissionDenied('Nota assinada não pode ser excluída.')
         instance.soft_delete()
         audit(self.request, "SOFT_DELETE", instance, {"module": "clinical_notes"})
 
 
 @api_view(["GET", "PUT", "DELETE"])
 def clinical_draft(request, patient_id):
-    patient = get_object_or_404(accessible_patients(request.user), pk=patient_id)
+    patient = get_object_or_404(accessible_patients(request.user, clinical=True, write=True), pk=patient_id)
     if not can_edit_patient(request.user, patient):
         raise PermissionDenied("Edit access to this patient is required.")
     if request.method == "GET":
@@ -104,7 +124,7 @@ def clinical_draft(request, patient_id):
 
 @api_view(["POST"])
 def preview_ai_text(request):
-    patient = get_object_or_404(accessible_patients(request.user), pk=request.data.get("patient"))
+    patient = get_object_or_404(accessible_patients(request.user, clinical=True, write=True), pk=request.data.get("patient"))
     if not can_edit_patient(request.user, patient):
         raise PermissionDenied("Edit access to this patient is required.")
     text = request.data.get("text")

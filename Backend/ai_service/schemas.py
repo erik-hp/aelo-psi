@@ -30,7 +30,7 @@ class AnalysisRequest(BaseModel):
 class SourceItem(BaseModel):
     note_id: str
     excerpt: str = Field(max_length=240)
-    relevance_score: float = 0
+    relevance_score: float = Field(default=0, ge=0, le=1)
 
 
 class SentimentItem(BaseModel):
@@ -49,7 +49,7 @@ class AnalysisResult(BaseModel):
     possible_inconsistencies: list[str] = Field(default_factory=list)
     sources: list[SourceItem] = Field(default_factory=list)
     sentiment_metrics: list[SentimentItem] = Field(default_factory=list)
-    relevance_score: float = 0
+    relevance_score: float = Field(default=0, ge=0, le=1)
 
 
 class VaultNodeItem(BaseModel):

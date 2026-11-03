@@ -13,8 +13,14 @@ class TherapySessionViewSet(AuditReadMixin, viewsets.ModelViewSet):
     filterset_fields = ("status", "patient")
 
     def get_queryset(self):
-        patient_ids = accessible_patients(self.request.user).values("id")
-        return TherapySession.objects.filter(patient_id__in=patient_ids, deleted_at__isnull=True).order_by("-scheduled_at", "-id")
+        write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
+        allowed = accessible_patients(self.request.user, clinical=True, write=write)
+        qs = TherapySession.objects.filter(deleted_at__isnull=True, patient__in=allowed)
+        # Shared patient grants authorize reading prior sessions, not editing
+        # another psychologist's session or changing their schedule/summary.
+        if write:
+            qs = qs.filter(professional=self.request.user)
+        return qs
 
     def perform_create(self, serializer):
         session = serializer.save(professional=self.request.user)

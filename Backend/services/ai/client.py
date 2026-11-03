@@ -19,7 +19,7 @@ class AIClient:
         return self._post("/analysis", payload)
 
     def _post(self, path: str, payload: dict) -> dict:
-        if not settings.AI_SERVICE_TOKEN:
+        if not settings.AI_SERVICE_TOKEN or settings.AI_SERVICE_TOKEN.startswith("CHANGE_ME"):
             raise AIServiceError()
         url = f"{settings.AI_SERVICE_URL.rstrip('/')}{path}"
         try:

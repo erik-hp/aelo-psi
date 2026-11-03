@@ -13,7 +13,7 @@ from apps.audit_logs.mixins import AuditReadMixin
 from apps.audit_logs.services import audit
 from apps.clinical_notes.models import ClinicalNote
 from apps.patients.access import accessible_patients, can_edit_patient
-from apps.users.models import UserSigningKey
+from apps.users.models import UserRole, UserSigningKey
 from .models import AIAnalysis, AnalysisStatus, HumanValidation, VaultCheckpoint, VaultEdge, VaultNode, VaultJob, AnalysisJob
 from .permissions import CanRequestAI, CanReviewAI
 from .serializers import AIAnalysisSerializer, AnalysisRequestSerializer, ReviewSerializer, SigningPayloadSerializer, VaultNodeSerializer, VaultEdgeSerializer, VaultCheckpointSummarySerializer, VaultCheckpointDetailSerializer
@@ -26,7 +26,9 @@ class AIThrottle(UserRateThrottle):
 
 
 def accessible_patient_or_403(user, patient_id):
-    return get_object_or_404(accessible_patients(user), id=patient_id)
+    qs = accessible_patients(user, clinical=True)
+    patient = get_object_or_404(qs.distinct(), id=patient_id)
+    return patient
 
 
 @api_view(["POST"])
@@ -49,7 +51,7 @@ def request_analysis(request):
 @api_view(["GET"])
 @permission_classes([CanRequestAI])
 def read_analysis_job(request, job_id):
-    job = get_object_or_404(AnalysisJob, pk=job_id, patient_id__in=accessible_patients(request.user).values("id"))
+    job = get_object_or_404(AnalysisJob, pk=job_id, patient_id__in=accessible_patients(request.user, clinical=True).values("id"))
     audit(request, "AI_JOB_READ", job, {"patient": str(job.patient_id)})
     response = Response({"id": str(job.id), "status": job.status, "error_code": job.error_code if job.status == VaultJob.Status.FAILED else "", "analysis_id": str(job.result_id) if job.result_id else None})
     response["Cache-Control"] = "no-store"
@@ -80,7 +82,7 @@ def patient_vault(request, patient_id):
 @permission_classes([CanRequestAI])
 @throttle_classes([AIThrottle])
 def build_vault_checkpoint(request, analysis_id):
-    analysis = get_object_or_404(AIAnalysis.objects.select_related("patient", "note"), pk=analysis_id, patient_id__in=accessible_patients(request.user).values("id"))
+    analysis = get_object_or_404(AIAnalysis.objects.select_related("patient", "note"), pk=analysis_id, patient_id__in=accessible_patients(request.user, clinical=True).values("id"))
     if not can_edit_patient(request.user, analysis.patient):
         raise PermissionDenied("Edit access to this patient is required.")
     if analysis.status != AnalysisStatus.PENDING_REVIEW or analysis.note is None or analysis.note.deleted_at is not None:
@@ -100,7 +102,7 @@ def build_vault_checkpoint(request, analysis_id):
 @api_view(["GET"])
 @permission_classes([CanRequestAI])
 def read_vault_job(request, job_id):
-    job = get_object_or_404(VaultJob.objects.select_related("analysis"), pk=job_id, analysis__patient_id__in=accessible_patients(request.user).values("id"))
+    job = get_object_or_404(VaultJob.objects.select_related("analysis"), pk=job_id, analysis__patient_id__in=accessible_patients(request.user, clinical=True).values("id"))
     audit(request, "VAULT_JOB_READ", job, {"patient": str(job.analysis.patient_id)})
     response = Response({"id": str(job.id), "status": job.status, "error_code": job.error_code if job.status == VaultJob.Status.FAILED else "", "checkpoint_id": str(job.analysis.vault_checkpoint.id) if job.status == VaultJob.Status.COMPLETED and hasattr(job.analysis, "vault_checkpoint") else None})
     response["Cache-Control"] = "no-store"
@@ -110,7 +112,7 @@ def read_vault_job(request, job_id):
 @api_view(["GET"])
 @permission_classes([CanRequestAI])
 def read_vault_checkpoint(request, checkpoint_id):
-    checkpoint = get_object_or_404(VaultCheckpoint.objects.select_related("analysis", "patient"), pk=checkpoint_id, patient_id__in=accessible_patients(request.user).values("id"))
+    checkpoint = get_object_or_404(VaultCheckpoint.objects.select_related("analysis", "patient"), pk=checkpoint_id, patient_id__in=accessible_patients(request.user, clinical=True).values("id"))
     audit(request, "VAULT_CHECKPOINT_READ", checkpoint, {"patient": str(checkpoint.patient_id)})
     if request.query_params.get("download") == "1":
         if checkpoint.analysis.status != AnalysisStatus.VALIDATED:
@@ -139,7 +141,7 @@ class AIAnalysisViewSet(AuditReadMixin, viewsets.ReadOnlyModelViewSet):
     filterset_fields = ("patient", "status")
 
     def get_queryset(self):
-        patient_ids = accessible_patients(self.request.user).values("id")
+        patient_ids = accessible_patients(self.request.user, clinical=True).values("id")
         return (
             AIAnalysis.objects.filter(patient_id__in=patient_ids)
             .order_by("-created_at", "-id")
@@ -178,8 +180,8 @@ class AIAnalysisViewSet(AuditReadMixin, viewsets.ReadOnlyModelViewSet):
     @transaction.atomic
     def _review(self, request, decision):
         analysis = self.get_object()
-        if not can_edit_patient(request.user, analysis.patient):
-            raise PermissionDenied("Edit access to this patient is required.")
+        if request.user.role != UserRole.PSYCHOLOGIST or not accessible_patients(request.user, clinical=True, write=True).filter(pk=analysis.patient_id).exists():
+            raise PermissionDenied("Only psychologists can review AI analyses.")
         serializer = ReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         analysis = AIAnalysis.objects.select_for_update().get(pk=analysis.pk)
@@ -204,5 +206,5 @@ class AIAnalysisViewSet(AuditReadMixin, viewsets.ReadOnlyModelViewSet):
             public_key_spki=key.public_key_spki,
             signed_payload_sha256=hashlib.sha256(payload).hexdigest(),
         )
-        audit(request, f"AI_{decision}", analysis, {"patient": str(analysis.patient_id)})
+        audit(request, f"AI_{decision}", analysis, {"module": "ai_analysis"})
         return Response(self.get_serializer(analysis).data)

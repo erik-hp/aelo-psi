@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.patients.models import Patient
-from apps.patients.access import can_edit_patient
+from apps.patients.access import can_access_patient
 from .models import TherapySession
 
 
@@ -23,11 +23,11 @@ class TherapySessionSerializer(serializers.ModelSerializer):
 
     def validate_patient(self, patient: Patient):
         request = self.context["request"]
-        if not can_edit_patient(request.user, patient):
-            raise serializers.ValidationError("Edit access to this patient is required.")
+        if not can_access_patient(request.user, patient, clinical=True, write=True):
+            raise serializers.ValidationError("Patient is not accessible by this user.")
         return patient
 
     def validate(self, attrs):
-        if self.instance and "patient" in attrs and attrs["patient"].pk != self.instance.patient_id:
-            raise serializers.ValidationError({"patient": "The session's patient cannot be changed."})
+        if self.instance and 'patient' in attrs and attrs['patient'].pk != self.instance.patient_id:
+            raise serializers.ValidationError('Não é permitido transferir uma sessão para outro paciente.')
         return attrs

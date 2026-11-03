@@ -13,7 +13,7 @@ from apps.therapy_sessions.models import TherapySession
 @permission_classes([IsAuthenticated])
 def longitudinal_dashboard(request):
     patient_id = request.query_params.get("patient")
-    patient_qs = accessible_patients(request.user)
+    patient_qs = accessible_patients(request.user, clinical=True)
     if patient_id:
         patient_qs = patient_qs.filter(id=patient_id)
     patient_ids = patient_qs.values("id")
