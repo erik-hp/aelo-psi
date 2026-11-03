@@ -21,6 +21,16 @@ def login(username):
     return client
 
 
+def refresh(client, origin=None):
+    # The synthetic stack serves HTTP while production cookies are Secure.
+    # Supply the test cookie explicitly to exercise the server-side flow.
+    token = client.cookies.get("aelo_refresh")
+    headers = {"X-AELO-Session": "1", "Cookie": f"aelo_refresh={token}"}
+    if origin:
+        headers["Origin"] = origin
+    return client.post("/api/auth/refresh/", headers=headers, json={})
+
+
 def main():
     for attempt in range(30):
         try:
@@ -74,7 +84,7 @@ def main():
             assert "httponly" in browser_login.headers["set-cookie"].lower()
             proxied.headers["Authorization"] = f"Bearer {browser_login.json()['access']}"
             assert proxied.get("/api/patients/").status_code == 200
-            assert proxied.post("/api/auth/refresh/", headers={"X-AELO-Session": "1"}, json={}).status_code == 200
+            assert refresh(proxied).status_code == 200
         assert first.get("/api/auth/me/").json()["username"] == "security1_1"
         draft_path = f"/api/clinical-notes/drafts/{own_id}/"
         payload = {"title": "Synthetic title", "content": "Synthetic clinical draft", "version": 0}
@@ -87,9 +97,9 @@ def main():
         assert unsafe.status_code == 422 and "Ana Pereira" not in unsafe.text
         safe = first.post("/api/clinical-notes/preview-ai/", json={"patient": own_id, "text": "Paciente relatou melhora no sono."})
         assert safe.status_code == 200
-        foreign = first.post("/api/auth/refresh/", headers={"Origin": "https://attacker.example", "X-AELO-Session": "1"}, json={})
+        foreign = refresh(first, origin="https://attacker.example")
         assert foreign.status_code == 403
-        assert first.post("/api/auth/refresh/", headers={"X-AELO-Session": "1"}, json={}).status_code == 200
+        assert refresh(first).status_code == 200
         assert first.delete(draft_path).status_code == 204
         assert first.get(draft_path).status_code == 404
         print("LIVE_SECURITY_SMOKE_OK: clinic and graph isolation, draft, preview, cookies, origin, cache, proxy headers")

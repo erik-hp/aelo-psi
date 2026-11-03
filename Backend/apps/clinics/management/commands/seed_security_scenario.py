@@ -5,7 +5,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.clinics.models import Clinic
-from apps.patients.models import Patient
+from apps.patients.models import Patient, PatientAccess
 from apps.users.models import User, UserRole
 
 
@@ -36,8 +36,12 @@ class Command(BaseCommand):
                 if created:
                     user.set_password("synthetic-only-password-2026")
                     user.save(update_fields=["password"])
-                Patient.objects.get_or_create(
+                patient, _ = Patient.objects.get_or_create(
                     clinic=clinic, internal_code=f"S-{clinic_number}-{number}",
                     defaults={"display_name": f"Synthetic Patient {clinic_number}-{number}", "created_by": user},
+                )
+                PatientAccess.objects.get_or_create(
+                    patient=patient, user=user,
+                    defaults={"can_edit": True, "granted_by": user},
                 )
         self.stdout.write(self.style.SUCCESS("Synthetic security fixtures ready."))
