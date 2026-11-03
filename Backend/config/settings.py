@@ -1,21 +1,20 @@
 from datetime import timedelta
 from pathlib import Path
+import base64
+import binascii
 import os
+from corsheaders.defaults import default_headers
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
-if not DEBUG and (
-    len(SECRET_KEY) < 32
-    or SECRET_KEY.startswith("CHANGE_ME")
-    or SECRET_KEY == "aelo-unsafe-debug-only-key-do-not-deploy"
-):
-    raise ImproperlyConfigured("Set a strong DJANGO_SECRET_KEY before starting Django outside development.")
-if not SECRET_KEY:
-    # Only an isolated DEBUG environment may use this fixed development key.
-    SECRET_KEY = "aelo-unsafe-debug-only-key-do-not-deploy"
+if len(SECRET_KEY) < 50 or SECRET_KEY.startswith(("replace-with", "change-me", "django-insecure-", "CHANGE_ME")):
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY must be a unique random secret with at least 50 characters.")
+CLINICAL_DATA_KEYS = [key.strip() for key in os.getenv("CLINICAL_DATA_KEYS", "").split(",") if key.strip()]
+AUDIT_LOG_HMAC_KEY = os.getenv("AUDIT_LOG_HMAC_KEY", "")
+CLINICAL_RETENTION_DAYS = int(os.getenv("CLINICAL_RETENTION_DAYS", "0"))
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 AELO_ENABLE_DJANGO_ADMIN = DEBUG and os.getenv("AELO_ENABLE_DJANGO_ADMIN", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
@@ -50,7 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.audit_logs.middleware.RequestAuditContextMiddleware",
+    "services.security.middleware.NoStoreApiMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -73,23 +72,12 @@ TEMPLATES = [
     }
 ]
 
-# Never quietly fall back to the original development database credentials.
-# The expected CI password is deliberately injected in the workflow, never
-# committed for use in a real environment.
-DATABASE_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
-if not DEBUG and (
-    len(DATABASE_PASSWORD) < 12
-    or DATABASE_PASSWORD in {"aelo", "postgres", "password"}
-    or DATABASE_PASSWORD.startswith("CHANGE_ME")
-):
-    raise ImproperlyConfigured("Set a strong POSTGRES_PASSWORD outside development.")
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("POSTGRES_DB", "aelo"),
         "USER": os.getenv("POSTGRES_USER", "aelo"),
-        "PASSWORD": DATABASE_PASSWORD,
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 60,
@@ -140,14 +128,12 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.getenv(
-        "CORS_ALLOWED_ORIGINS", "http://localhost:3000" if DEBUG else ""
-    ).split(",") if origin.strip()
+    origin for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",") if origin
 ]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (*default_headers, "x-aelo-session")
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip() for origin in os.getenv(
-        "CSRF_TRUSTED_ORIGINS", "http://localhost:3000" if DEBUG else ""
-    ).split(",") if origin.strip()
+    origin for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000").split(",") if origin
 ]
 
 LANGUAGE_CODE = "pt-br"
@@ -159,18 +145,32 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://ai-service:8001")
-AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "30"))
+AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "90"))
 AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 
-# Only trust proxy protocol headers when the deployment operator explicitly
-# confirms a trusted reverse proxy that strips client-supplied headers.
-SECURE_PROXY_SSL_HEADER = (
-    ("HTTP_X_FORWARDED_PROTO", "https")
-    if os.getenv("DJANGO_TRUST_PROXY_SSL_HEADER", "False").lower() == "true"
-    else None
-)
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_SSL_HEADER", "False").lower() == "true"
+if TRUST_PROXY_HEADERS:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+REQUIRE_HTTPS = os.getenv("DJANGO_REQUIRE_HTTPS", "False").lower() == "true"
+SECURE_SSL_REDIRECT = REQUIRE_HTTPS
+SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "0")) if REQUIRE_HTTPS else 0
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 X_FRAME_OPTIONS = "DENY"
+
+if REQUIRE_HTTPS:
+    if DEBUG or os.getenv("POSTGRES_PASSWORD", "") in ("", "aelo", "replace-with-a-random-database-password"):
+        raise ImproperlyConfigured("HTTPS deployment requires DEBUG=False and a rotated database password.")
+    if (not CLINICAL_DATA_KEYS or len(AUDIT_LOG_HMAC_KEY) < 32 or AUDIT_LOG_HMAC_KEY.startswith("replace-with")
+            or len(AI_SERVICE_TOKEN) < 32 or AI_SERVICE_TOKEN.startswith("replace-with")):
+        raise ImproperlyConfigured("HTTPS deployment requires independent clinical, audit, and AI service keys.")
+    try:
+        decoded_keys = [base64.b64decode(key.encode("ascii"), altchars=b"-_", validate=True) for key in CLINICAL_DATA_KEYS]
+    except (ValueError, UnicodeEncodeError, binascii.Error) as exc:
+        raise ImproperlyConfigured("CLINICAL_DATA_KEYS must contain valid base64 encoded keys.") from exc
+    if any(len(key) != 32 for key in decoded_keys):
+        raise ImproperlyConfigured("Every CLINICAL_DATA_KEYS key must contain 32 random bytes.")

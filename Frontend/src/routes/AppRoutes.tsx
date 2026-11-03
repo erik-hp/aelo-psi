@@ -11,6 +11,7 @@ import { AgendaPage } from "@/pages/AgendaPage";
 import { FinancePage } from "@/pages/FinancePage";
 import { UsersPage } from "@/pages/UsersPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { NarrativeEditorPage } from "@/pages/NarrativeEditorPage";
 
 export function AppRoutes() {
   return (
@@ -23,8 +24,9 @@ export function AppRoutes() {
           <Route path="/patients" element={<PatientsPage />} />
           <Route path="/patients/:patientId" element={<PatientProfilePage />} />
           <Route path="/agenda" element={<AgendaPage />} />
+          <Route path="/editor" element={<NarrativeEditorPage />} />
           <Route path="/sessions" element={<Navigate to="/agenda" replace />} />
-          <Route path="/notes" element={<Navigate to="/patients" replace />} />
+          <Route path="/notes" element={<Navigate to="/editor" replace />} />
           <Route path="/analysis" element={<Navigate to="/patients" replace />} />
           <Route path="/longitudinal" element={<Navigate to="/patients" replace />} />
           <Route path="/finance" element={<ProtectedRoute permission="finance:read" />}>

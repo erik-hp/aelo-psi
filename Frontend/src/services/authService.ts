@@ -1,5 +1,6 @@
-import { apiClient } from "@/api/client";
+import { apiClient, refreshAccessToken } from "@/api/client";
 import type { AuthTokens, User } from "@/types/auth";
+import { isApiMode } from "@/services/runtime";
 
 export interface LoginPayload {
   email: string;
@@ -13,7 +14,6 @@ export interface LoginResponse {
 
 interface ApiLoginResponse {
   access: string;
-  refresh: string;
   user: {
     id: number | string;
     username: string;
@@ -47,11 +47,20 @@ const demoUsers: Record<string, User> = {
 };
 
 export const authService = {
+  async restoreSession(): Promise<User | null> {
+    if (!isApiMode) return null;
+    try {
+      await refreshAccessToken();
+      const { data } = await apiClient.get<ApiLoginResponse["user"]>("/auth/me/");
+      return { id: String(data.id), name: data.username, email: data.email, role: data.role };
+    } catch {
+      return null;
+    }
+  },
   async login(payload: LoginPayload): Promise<LoginResponse> {
-    if (import.meta.env.VITE_USE_API === "true") {
-      const username = payload.email.includes("@") ? payload.email.split("@")[0] : payload.email;
+    if (isApiMode) {
       const { data } = await apiClient.post<ApiLoginResponse>("/auth/login/", {
-        username,
+        username: payload.email,
         password: payload.password,
       });
       return {
@@ -63,19 +72,26 @@ export const authService = {
         },
         tokens: {
           accessToken: data.access,
-          refreshToken: data.refresh,
         },
       };
     }
 
     await new Promise((resolve) => window.setTimeout(resolve, 700));
-    const user = demoUsers[payload.email.toLowerCase()] ?? demoUsers["psi@aelo.com"];
+    const user = demoUsers[payload.email.toLowerCase()];
+    if (!user) throw new Error("Usuário de demonstração não encontrado.");
     return {
       user,
       tokens: {
         accessToken: "demo-access-token",
-        refreshToken: "demo-refresh-token",
       },
     };
+  },
+  async logout(): Promise<void> {
+    if (!isApiMode) return;
+    try {
+      await apiClient.post("/auth/logout/", {}, { headers: { "X-AELO-Session": "1" } });
+    } catch {
+      // Local credentials are cleared even when the API is unavailable.
+    }
   },
 };

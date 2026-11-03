@@ -3,9 +3,12 @@ import { Brain, ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/forms/LoginForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { isApiMode } from "@/services/runtime";
 
 export function LoginPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return null;
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
@@ -37,7 +40,11 @@ export function LoginPage() {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <CardTitle>Acesso profissional</CardTitle>
-            <CardDescription>Use `psi@aelo.com`, `admin@aelo.com` ou `intern@aelo.com` com senha `aelo123`.</CardDescription>
+            <CardDescription>
+              {isApiMode
+                ? "Use o e-mail e a senha da sua conta profissional cadastrada."
+                : "Demonstração: use psi@aelo.com, admin@aelo.com ou intern@aelo.com com senha aelo123."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <LoginForm />

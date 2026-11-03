@@ -1,7 +1,6 @@
 """Record authorization failures without storing path, query or clinical text."""
 from rest_framework import exceptions, status
 from rest_framework.views import exception_handler
-
 from .services import audit
 
 

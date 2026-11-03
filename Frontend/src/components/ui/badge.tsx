@@ -4,7 +4,7 @@ export function Badge({
   className,
   variant = "default",
   ...props
-}: React.HTMLAttributes<HTMLSpanElement> & { variant?: "default" | "success" | "warning" | "muted" }) {
+}: React.HTMLAttributes<HTMLSpanElement> & { variant?: "default" | "success" | "warning" | "muted" | "critical" }) {
   return (
     <span
       className={cn(
@@ -13,6 +13,7 @@ export function Badge({
         variant === "success" && "border-accent/30 bg-accent/10 text-accent",
         variant === "warning" && "border-amber-400/30 bg-amber-400/10 text-amber-300",
         variant === "muted" && "border-border bg-secondary text-muted-foreground",
+        variant === "critical" && "border-destructive/40 bg-destructive/15 text-destructive font-semibold",
         className,
       )}
       {...props}

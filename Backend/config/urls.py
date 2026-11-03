@@ -1,5 +1,5 @@
-from django.conf import settings
 from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path
 
 urlpatterns = [
@@ -13,7 +13,5 @@ urlpatterns = [
     path("api/", include("apps.dashboard.urls")),
 ]
 
-# Django admin bypasses the DRF patient-permission layer. Do not expose it
-# outside explicit local development until object-level admin policies exist.
 if settings.DEBUG and getattr(settings, "AELO_ENABLE_DJANGO_ADMIN", False):
-    urlpatterns.append(path("admin/", admin.site.urls))
+    urlpatterns.insert(0, path("admin/", admin.site.urls))

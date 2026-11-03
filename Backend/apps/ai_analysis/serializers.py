@@ -1,5 +1,50 @@
 from rest_framework import serializers
-from .models import AIAnalysis, AISource, HumanValidation, SentimentMetric
+from .models import AIAnalysis, AISource, HumanValidation, SentimentMetric, VaultCheckpoint, VaultEdge, VaultNode
+
+
+class VaultNodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VaultNode
+        fields = ("id", "kind", "label", "mention_count", "weight", "first_seen_at", "last_seen_at")
+        read_only_fields = fields
+
+
+class VaultEdgeSerializer(serializers.ModelSerializer):
+    note_id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = VaultEdge
+        fields = ("id", "source", "target", "relation", "evidence", "note_id", "observed_at", "confidence", "weight")
+        read_only_fields = fields
+
+
+class VaultCheckpointSummarySerializer(serializers.ModelSerializer):
+    analysis_id = serializers.UUIDField(read_only=True)
+    review_status = serializers.CharField(source="analysis.status", read_only=True)
+    reviewed_by = serializers.SerializerMethodField()
+    reviewed_at = serializers.SerializerMethodField()
+
+    class Meta:
+        model = VaultCheckpoint
+        fields = ("id", "analysis_id", "review_status", "reviewed_by", "reviewed_at", "node_count", "edge_count", "created_at")
+        read_only_fields = fields
+
+    def get_reviewed_by(self, obj):
+        validation = getattr(obj.analysis, "human_validation", None)
+        return str(validation.reviewed_by_id) if validation else None
+
+    def get_reviewed_at(self, obj):
+        validation = getattr(obj.analysis, "human_validation", None)
+        return validation.created_at if validation else None
+
+
+class VaultCheckpointDetailSerializer(serializers.ModelSerializer):
+    review_status = serializers.CharField(source="analysis.status", read_only=True)
+
+    class Meta:
+        model = VaultCheckpoint
+        fields = ("id", "markdown", "content_sha256", "review_status")
+        read_only_fields = fields
 
 
 class AISourceSerializer(serializers.ModelSerializer):
@@ -60,4 +105,10 @@ class AnalysisRequestSerializer(serializers.Serializer):
 
 
 class ReviewSerializer(serializers.Serializer):
+    comment = serializers.CharField(required=False, allow_blank=True)
+    signature = serializers.CharField()
+
+
+class SigningPayloadSerializer(serializers.Serializer):
+    decision = serializers.ChoiceField(choices=("VALIDATED", "REJECTED"))
     comment = serializers.CharField(required=False, allow_blank=True)

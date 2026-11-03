@@ -6,8 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
-from apps.clinics.models import Clinic
-from apps.patients.models import Patient, PatientAccess, PatientStatus
+from apps.patients.models import Patient, PatientStatus
 from apps.therapy_sessions.models import SessionStatus, TherapySession
 
 

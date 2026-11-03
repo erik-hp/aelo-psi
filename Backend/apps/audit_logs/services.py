@@ -4,8 +4,8 @@ Never accept arbitrary user-supplied strings as audit metadata. Patient and
 record contents belong in protected clinical storage, not an audit log.
 """
 from typing import Any
-
 from .models import AuditLog
+from .integrity import append_audit_log
 
 
 _ALLOWED_MODULES = frozenset({
@@ -41,7 +41,7 @@ def sanitized_metadata(metadata: dict | None) -> dict:
 
 def audit(request, action: str, entity: Any, metadata: dict | None = None) -> AuditLog:
     user = getattr(request, "user", None)
-    return AuditLog.objects.create(
+    return append_audit_log(
         user=user if getattr(user, "is_authenticated", False) else None,
         action=action[:64],
         entity=entity.__class__.__name__[:120],

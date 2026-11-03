@@ -11,6 +11,10 @@ class AuditLog(TimestampedModel):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     metadata = models.JSONField(default=dict, blank=True)
+    actor_id = models.CharField(max_length=64, blank=True)
+    sequence = models.PositiveBigIntegerField(unique=True)
+    previous_hash = models.CharField(max_length=64, blank=True)
+    entry_hash = models.CharField(max_length=64, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -22,3 +26,9 @@ class AuditLog(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.action} {self.entity}:{self.entity_id}"
+
+
+class AuditChainState(models.Model):
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    sequence = models.PositiveBigIntegerField(default=0)
+    head_hash = models.CharField(max_length=64, blank=True)

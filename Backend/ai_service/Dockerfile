@@ -8,5 +8,7 @@ COPY requirements/ai.txt requirements/ai.txt
 RUN pip install --no-cache-dir -r requirements/ai.txt
 
 COPY ai_service /app/ai_service
+RUN useradd --system --uid 10001 --home-dir /nonexistent --shell /usr/sbin/nologin aelo
+USER 10001:10001
 EXPOSE 8001
 CMD ["uvicorn", "ai_service.main:app", "--host", "0.0.0.0", "--port", "8001"]

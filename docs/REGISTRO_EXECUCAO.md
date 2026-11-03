@@ -182,6 +182,29 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 
 ## Pendências de decisão
 
+## Integração e envio ao GitHub — 03/11/2026
+
+- A implementação local do Vault, proteção de dados clínicos, sessão e ensaios de carga foi reunida no branch `feat/vault-security-validation-2026-11-03` com a série F0 recebida de `origin/main`.
+- Conflitos foram resolvidos preservando o worker assíncrono, pgvector, cookie HttpOnly e os grants clínicos explícitos. A autenticação JWT foi ligada a `ClinicJWTAuthentication`, que reconsulta a conta e a clínica em cada request. O painel administrativo Django depende de ativação explícita em ambiente de desenvolvimento.
+- Erros encontrados na integração: fixtures antigas concediam edição a estagiário e ignoravam o grant do autor; testes de sessão presumiam refresh token no corpo; o endpoint de auditoria tinha `get_queryset` duplicado e inválido; a classe JWT restritiva não estava configurada. Fixtures, contratos de teste, queryset e configuração foram corrigidos.
+- Evidência local após integração: suíte combinada do backend SQLite 101 aprovados e 2 ignorados; PostgreSQL/pgvector em Docker 56 aprovados; frontend 89 aprovados; build de produção gerado; Ruff sem erros; `npm audit` na atualização do lockfile encontrou zero vulnerabilidades. Os avisos de paginação sem ordenação e tamanho de bundle ainda exigem acompanhamento.
+- A validação do modelo Ollama com dados sintéticos e o resultado dos checks do GitHub Actions deste branch devem ser registrados após execução. Os gates de produção permanecem bloqueados conforme o Plano Mestre.
+
+## Correção do login local — 03/11/2026
+
+- O frontend local apontava para `localhost:18080`, porta da pilha sintética de segurança que estava desligada; a API principal também estava parada. `Frontend/.env` local foi ajustado para `localhost:8000`, as migrações foram concluídas e a API principal foi iniciada sem Ollama.
+- O banco local não continha usuários. Uma conta profissional sintética foi criada em clínica ativa com senha aleatória forte, mantida fora do repositório. O frontend deixou de mostrar a senha fraca de demonstração quando conectado à API.
+- O formulário agora envia o e-mail completo; o backend resolve e-mail único para a conta cadastrada sem alterar a resposta genérica de falha. O ciclo HTTP real retornou 200 para login, `/auth/me/` e refresh com cookie HttpOnly.
+- Testes após a correção: suíte combinada do backend 102 aprovados e 2 ignorados, Ruff sem erros, frontend 89 aprovados e build concluído. A análise de IA segue indisponível até iniciar e configurar Ollama e o worker. O ambiente sintético local não equivale a liberação para uso clínico.
+
+## Triagem da CI do PR #11 — 03/11/2026
+
+- O job Django do baseline falhou na migração de criptografia por não definir `CLINICAL_DATA_KEYS`; o serviço PostgreSQL da CI também não incluía pgvector. O workflow recebeu chaves sintéticas de teste e a imagem `pgvector/pgvector:pg16`.
+- A auditoria bloqueante apontou três CVEs em `djangorestframework==3.17.2`. A dependência foi elevada para `3.18.3`, que inclui as correções de segurança de `3.18.2` e um ajuste de regressão posterior. A auditoria local de `requirements/base.txt` terminou sem vulnerabilidades conhecidas.
+- O comando Django equivalente ao job remoto passou em Docker com PostgreSQL/pgvector: 48 testes e zero falhas. A nova execução remota após o push ainda precisa ser confirmada.
+- O smoke HTTP falhou porque a seed sintética criava pacientes sem grants clínicos, de modo que o psicólogo não via seus próprios pacientes. A seed agora cria o grant inicial explícito de cada psicólogo. O smoke também usava cookie `Secure` sobre HTTP sintético; o cliente de teste passou a enviá-lo explicitamente para verificar o fluxo no servidor sem enfraquecer o cookie de produção. Reexecução local: `LIVE_SECURITY_SMOKE_OK`.
+- No commit `cfc90ec`, a [CI baseline #41644942581](https://github.com/erik-hp/aelo-psi/actions/runs/41644942581), a [auditoria de dependências #41644942621](https://github.com/erik-hp/aelo-psi/actions/runs/41644942621), a [varredura de segredos #41644942870](https://github.com/erik-hp/aelo-psi/actions/runs/41644942870) e a [qualidade e segurança #41644942797](https://github.com/erik-hp/aelo-psi/actions/runs/41644942797) concluíram com sucesso. O PR segue em rascunho para revisão humana; sucesso da CI não libera o gate clínico ou de produção.
+
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
 - Validação da base jurídica, RIPD e governança de dados por profissionais competentes.
 - Política de assinatura/guarda documental apropriada.

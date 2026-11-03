@@ -17,14 +17,14 @@ class AnalysisFailureTests(unittest.TestCase):
     def test_outage_is_failure_not_fabricated_result(self):
         with patch("ai_service.main.ollama_analysis", new_callable=AsyncMock, side_effect=ValueError("not valid")):
             with self.assertRaises(HTTPException) as ctx:
-                asyncio.run(analysis(fake_payload()))
+                with patch("ai_service.main.AI_SERVICE_TOKEN", "local-test-only-strong-service-secret"):
+                    asyncio.run(analysis(fake_payload(), x_ai_service_token="local-test-only-strong-service-secret"))
         self.assertEqual(ctx.exception.status_code, 503)
         self.assertNotIn("not valid", str(ctx.exception.detail))
 
     def test_empty_context_is_rejected(self):
-        with self.assertRaises(HTTPException) as ctx:
-            asyncio.run(analysis(AnalysisRequest(patient_id="synthetic-patient")))
-        self.assertEqual(ctx.exception.status_code, 422)
+        with self.assertRaises(ValueError):
+            AnalysisRequest(patient_id="synthetic-patient", context=[])
 
     def test_result_schema_rejects_invalid_scores(self):
         with self.assertRaises(ValueError):
@@ -34,17 +34,17 @@ class AnalysisFailureTests(unittest.TestCase):
 
 class ServiceAuthenticationTests(unittest.TestCase):
     def test_missing_token_rejected(self):
-        with patch.dict("os.environ", {"AI_SERVICE_TOKEN": "local-test-only-strong-service-secret"}):
+        with patch("ai_service.main.AI_SERVICE_TOKEN", "local-test-only-strong-service-secret"):
             with self.assertRaises(HTTPException) as ctx:
                 require_service_token(None)
         self.assertEqual(ctx.exception.status_code, 403)
 
     def test_valid_service_token_accepted(self):
-        with patch.dict("os.environ", {"AI_SERVICE_TOKEN": "local-test-only-strong-service-secret"}):
+        with patch("ai_service.main.AI_SERVICE_TOKEN", "local-test-only-strong-service-secret"):
             self.assertIsNone(require_service_token("local-test-only-strong-service-secret"))
 
     def test_unconfigured_service_token_is_rejected(self):
-        with patch.dict("os.environ", {"AI_SERVICE_TOKEN": ""}):
+        with patch("ai_service.main.AI_SERVICE_TOKEN", ""):
             with self.assertRaises(HTTPException):
                 require_service_token("something")
 

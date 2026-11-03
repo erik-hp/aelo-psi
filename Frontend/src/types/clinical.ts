@@ -1,14 +1,14 @@
 export type PatientStatus = "active" | "watch" | "inactive";
-export type SessionStatus = "draft" | "completed" | "needs_review";
+export type SessionStatus = "draft" | "completed" | "needs_review" | "cancelled" | "missed" | "in_progress";
 export type AnalysisStatus = "pending" | "validated" | "rejected";
 
 export interface Patient {
   id: string;
   name: string;
-  age: number;
+  age: number | null;
   status: PatientStatus;
   treatmentDuration: string;
-  sessionFrequency: "Semanal" | "Quinzenal" | "Mensal";
+  sessionFrequency: "Semanal" | "Quinzenal" | "Mensal" | "Não informada";
   lastSession: string;
   nextSession: string;
   riskLevel: "baixo" | "moderado" | "atenção" | "não avaliado";
@@ -21,7 +21,7 @@ export interface TherapySession {
   patientId: string;
   patientName?: string;
   date: string;
-  duration: number;
+  duration: number | null;
   status: SessionStatus;
   title: string;
   summary: string;
@@ -34,15 +34,15 @@ export interface AIAnalysis {
   patientId: string;
   status: AnalysisStatus;
   relevanceScore: number;
-  moodScore: number;
-  emotionalStateScore: number;
-  psychologicalBurdenScore: number;
+  moodScore: number | null;
+  emotionalStateScore: number | null;
+  psychologicalBurdenScore: number | null;
   patterns: string[];
   riskScenarios: string[];
   considerations: string[];
   longitudinalEvolution: string;
   attentionPoints: string[];
-  narrativeCoherence: number;
+  narrativeCoherence: number | null;
   sources: string[];
 }
 
@@ -54,6 +54,9 @@ export interface AuditEvent {
   entity: string;
   date: string;
   ip: string;
+  sha256?: string;
+  payload?: Record<string, unknown> | string;
+  category?: string;
 }
 
 export interface PatientNote {
@@ -64,7 +67,7 @@ export interface PatientNote {
   title: string;
   content: string;
   complement?: string;
-  attentionIndex: number;
+  attentionIndex: number | null;
 }
 
 export interface PatientLongitudinalMetric {
@@ -88,7 +91,7 @@ export interface AgendaItem {
   time: string;
   status: SessionStatus;
   complement: string;
-  attentionIndex: number;
+  attentionIndex: number | null;
 }
 
 export interface FinancialRecord {

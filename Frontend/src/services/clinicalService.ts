@@ -10,6 +10,12 @@ import {
   analyses,
   longitudinalData,
 } from "@/services/mockData";
+import { isApiMode } from "@/services/runtime";
+import { vaultGraphSchema, vaultCheckpointDetailSchema } from "@/schemas/vault";
+import type { VaultGraph } from "@/types/vault";
+import { mockVaultGraph } from "@/services/mockVault";
+import { mapAnalysis, mapPatient, mapSession, unwrap } from "@/services/clinicalMappers";
+import type { ApiAnalysis, ApiAuditEvent, ApiPatient, ApiSession, PaginatedResponse } from "@/services/clinicalMappers";
 import type {
   AgendaItem,
   AIAnalysis,
@@ -28,153 +34,76 @@ interface DashboardData {
   auditEvents: typeof auditEvents;
 }
 
-interface PaginatedResponse<T> {
-  results: T[];
-}
-
-interface ApiPatient {
-  id: string;
-  internal_code: string;
-  display_name: string;
-  status: "ACTIVE" | "ARCHIVED" | "INACTIVE";
-  created_at: string;
-  updated_at: string;
-}
-
-interface ApiSession {
-  id: string;
-  patient: string;
-  scheduled_at: string;
-  started_at?: string | null;
-  ended_at?: string | null;
-  status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "MISSED";
-  summary: string;
-}
-
-interface ApiAnalysis {
-  id: string;
-  patient: string;
-  status: "PENDING" | "PROCESSING" | "VALIDATED" | "REJECTED" | "FAILED";
-  patterns: string[];
-  longitudinal_evolution: string;
-  attention_points: string[];
-  longitudinal_coherence: number | null;
-  relevance_score: number | null;
-  behavioral_changes?: string[];
-  possible_inconsistencies?: string[];
-  sentiment_metrics?: Array<{ label: string; value: number }>;
-  sources: Array<{ excerpt: string }>;
-}
-
-interface ApiAuditEvent {
-  id: string;
-  user: string | number | null;
-  action: string;
-  entity: string;
-  ip_address: string;
-  created_at: string;
-}
-
 interface AnalysisRequestPayload {
   patientId: string;
   sessionId?: string;
   content: string;
 }
 
-function unwrap<T>(data: T[] | PaginatedResponse<T>): T[] {
-  return Array.isArray(data) ? data : data.results;
-}
-
-function mapPatient(patient: ApiPatient): Patient {
-  return {
-    id: patient.id,
-    name: patient.display_name,
-    age: 0,
-    status: patient.status === "INACTIVE" || patient.status === "ARCHIVED" ? "inactive" : "active",
-    treatmentDuration: "Em acompanhamento",
-    sessionFrequency: "Semanal",
-    lastSession: "-",
-    nextSession: "-",
-    riskLevel: "não avaliado",
-    therapist: "Equipe clínica",
-    tags: [patient.internal_code],
-  };
-}
-
-function mapSession(session: ApiSession): TherapySession {
-  const startedAt = session.started_at ? new Date(session.started_at).getTime() : null;
-  const endedAt = session.ended_at ? new Date(session.ended_at).getTime() : null;
-  return {
-    id: session.id,
-    patientId: session.patient,
-    patientName: undefined,
-    date: new Date(session.scheduled_at).toLocaleDateString("pt-BR"),
-    duration: startedAt && endedAt ? Math.max(0, Math.round((endedAt - startedAt) / 60000)) : 50,
-    status: session.status === "COMPLETED" ? "completed" : session.status === "SCHEDULED" ? "draft" : "needs_review",
-    title: `Sessão ${session.status.toLowerCase()}`,
-    summary: session.summary || "Sem resumo registrado.",
-    narrative: session.summary || "",
-    complement: session.summary || "",
-  };
-}
-
-function mapAnalysis(analysis: ApiAnalysis): AIAnalysis {
-  return {
-    id: analysis.id,
-    patientId: analysis.patient,
-    status: analysis.status === "VALIDATED" ? "validated" : analysis.status === "REJECTED" ? "rejected" : "pending",
-    relevanceScore: analysis.relevance_score ?? 0,
-    moodScore: analysis.sentiment_metrics?.find?.((metric: { label: string }) => metric.label === "mood")?.value ?? 0,
-    emotionalStateScore: analysis.sentiment_metrics?.find?.((metric: { label: string }) => metric.label === "emotional_state")?.value ?? 0,
-    psychologicalBurdenScore: analysis.sentiment_metrics?.find?.((metric: { label: string }) => metric.label === "psychological_burden")?.value ?? 0,
-    patterns: analysis.patterns ?? [],
-    riskScenarios: analysis.possible_inconsistencies ?? [],
-    considerations: analysis.behavioral_changes ?? [],
-    longitudinalEvolution: analysis.longitudinal_evolution ?? "",
-    attentionPoints: analysis.attention_points ?? [],
-    narrativeCoherence: analysis.longitudinal_coherence ?? 0,
-    sources: analysis.sources?.map((source) => source.excerpt) ?? [],
-  };
-}
 
 export const clinicalService = {
+  async previewAiText(patientId: string, text: string): Promise<string> {
+    if (!isApiMode) return text;
+    const { data } = await apiClient.post<{ prepared_text: string }>("/clinical-notes/preview-ai/", { patient: patientId, text });
+    return data.prepared_text;
+  },
+  async getPatientVault(patientId: string): Promise<VaultGraph> {
+    if (!isApiMode) return mockVaultGraph;
+    const { data } = await apiClient.get<VaultGraph>(`/vault/patients/${patientId}/`);
+    return vaultGraphSchema.parse(data);
+  },
+  async createVaultCheckpoint(analysisId: string): Promise<void> {
+    if (!isApiMode) return;
+    const { data } = await apiClient.post<{ job_id: string; status: string }>(`/vault/analyses/${analysisId}/checkpoint/`);
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const result = await apiClient.get<{ status: string; error_code: string }>(`/vault/jobs/${data.job_id}/`);
+      if (result.data.status === "COMPLETED") return;
+      if (result.data.status === "FAILED") throw new Error(`Falha no processamento: ${result.data.error_code}`);
+      await new Promise((resolve) => window.setTimeout(resolve, 2000));
+    }
+    throw new Error("O processamento excedeu o tempo de acompanhamento. Consulte o Vault novamente.");
+  },
+  async getVaultCheckpoint(checkpointId: string): Promise<string> {
+    if (!isApiMode) return `# Checkpoint sintético\n\nEste relatório contém apenas dados demonstrativos.\n\n- Checkpoint: ${checkpointId}`;
+    const { data } = await apiClient.get(`/vault/checkpoints/${checkpointId}/`);
+    return vaultCheckpointDetailSchema.parse(data).markdown;
+  },
+  async downloadVaultCheckpoint(checkpointId: string): Promise<void> {
+    if (!isApiMode) return;
+    const { data } = await apiClient.get<Blob>(`/vault/checkpoints/${checkpointId}/`, { params: { download: 1 }, responseType: "blob" });
+    const url = URL.createObjectURL(data);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `aelo-checkpoint-${checkpointId}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+  },
   async getDashboard(): Promise<DashboardData> {
-    if (import.meta.env.VITE_USE_API === "true") {
-      const [patientsResponse, sessionsResponse, analysesResponse, auditResponse] = await Promise.allSettled([
+    if (isApiMode) {
+      const [patientsResponse, sessionsResponse, analysesResponse] = await Promise.all([
         apiClient.get<ApiPatient[] | PaginatedResponse<ApiPatient>>("/patients/"),
         apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/"),
         apiClient.get<ApiAnalysis[] | PaginatedResponse<ApiAnalysis>>("/analysis/"),
-        apiClient.get<ApiAuditEvent[] | PaginatedResponse<ApiAuditEvent>>("/audit-logs/"),
       ]);
       return {
-        patients: patientsResponse.status === "fulfilled" ? unwrap(patientsResponse.value.data).map(mapPatient) : [],
-        sessions: sessionsResponse.status === "fulfilled" ? unwrap(sessionsResponse.value.data).map(mapSession) : [],
-        analyses: analysesResponse.status === "fulfilled" ? unwrap(analysesResponse.value.data).map(mapAnalysis) : [],
+        patients: unwrap(patientsResponse.data).map(mapPatient),
+        sessions: unwrap(sessionsResponse.data).map(mapSession),
+        analyses: unwrap(analysesResponse.data).map(mapAnalysis),
         longitudinalData: [],
-        auditEvents: auditResponse.status === "fulfilled"
-          ? unwrap(auditResponse.value.data).map((event) => ({
-            id: event.id,
-            actor: String(event.user ?? "Sistema"),
-            role: "-",
-            action: event.action,
-            entity: event.entity,
-            date: new Date(event.created_at).toLocaleString("pt-BR"),
-            ip: event.ip_address,
-          }))
-          : [],
+        auditEvents: [],
       };
     }
     return { patients, sessions, analyses, longitudinalData, auditEvents };
   },
   async getPatients(): Promise<Patient[]> {
-    if (import.meta.env.VITE_USE_API === "true") {
+    if (isApiMode) {
       const { data } = await apiClient.get<ApiPatient[] | PaginatedResponse<ApiPatient>>("/patients/");
       return unwrap(data).map(mapPatient);
     }
     return patients;
   },
   async getPatient(id: string): Promise<{ patient: Patient; sessions: TherapySession[]; analyses: AIAnalysis[] }> {
-    if (import.meta.env.VITE_USE_API === "true") {
+    if (isApiMode) {
       const [patientResponse, sessionsResponse, analysesResponse] = await Promise.all([
         apiClient.get<ApiPatient>(`/patients/${id}/`),
         apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/", { params: { patient: id } }),
@@ -193,37 +122,42 @@ export const clinicalService = {
       analyses: analyses.filter((item) => item.patientId === patient.id),
     };
   },
-  async requestAnalysis(note: string): Promise<AIAnalysis> {
-    if (import.meta.env.VITE_USE_API === "true") {
-      const availablePatients = await this.getPatients();
-      const patient = availablePatients[0];
-      if (!patient) {
-        throw new Error("Cadastre um paciente antes de solicitar análise assistiva.");
-      }
-      return this.requestPatientAnalysis({ patientId: patient.id, content: note });
+  async requestAnalysis(_note: string): Promise<AIAnalysis> {
+    if (isApiMode) {
+      throw new Error("Selecione o paciente no perfil antes de solicitar a análise.");
     }
     await new Promise((resolve) => window.setTimeout(resolve, 1100));
     return analyses[0];
   },
   async requestPatientAnalysis(payload: AnalysisRequestPayload): Promise<AIAnalysis> {
-    if (import.meta.env.VITE_USE_API === "true") {
+    if (isApiMode) {
+      await apiClient.post("/clinical-notes/preview-ai/", { patient: payload.patientId, text: payload.content });
       const noteResponse = await apiClient.post<{ id: string }>("/clinical-notes/", {
         patient: payload.patientId,
         session: payload.sessionId,
         raw_text: payload.content,
       });
-      const { data } = await apiClient.post<ApiAnalysis>("/analysis/request/", {
+      const { data } = await apiClient.post<{ job_id: string }>("/analysis/request/", {
         patient: payload.patientId,
         note: noteResponse.data.id,
         context_limit: 10,
-      });
-      return mapAnalysis(data);
+      }, { timeout: 45_000 });
+      for (let attempt = 0; attempt < 60; attempt += 1) {
+        const result = await apiClient.get<{ status: string; analysis_id: string | null; error_code: string }>(`/analysis/jobs/${data.job_id}/`);
+        if (result.data.status === "COMPLETED" && result.data.analysis_id) {
+          const analysis = await apiClient.get<ApiAnalysis>(`/analysis/${result.data.analysis_id}/`);
+          return mapAnalysis(analysis.data);
+        }
+        if (result.data.status === "FAILED") throw new Error(`Falha na análise: ${result.data.error_code}`);
+        await new Promise((resolve) => window.setTimeout(resolve, 2000));
+      }
+      throw new Error("A análise continua em processamento. Atualize o perfil para conferir o resultado.");
     }
     await new Promise((resolve) => window.setTimeout(resolve, 900));
     return analyses.find((analysis) => analysis.patientId === payload.patientId) ?? analyses[0];
   },
   async getPatientNotes(patientId: string): Promise<PatientNote[]> {
-    if (import.meta.env.VITE_USE_API === "true") {
+    if (isApiMode) {
       const { data } = await apiClient.get<Array<{
         id: string;
         patient: string;
@@ -247,35 +181,28 @@ export const clinicalService = {
         title: "Prontuário da sessão",
         content: note.anonymized_text || note.raw_text,
         complement: "Complemento pendente de revisão clínica.",
-        attentionIndex: 0,
+        attentionIndex: null,
       }));
     }
     return patientNotes.filter((note) => note.patientId === patientId);
   },
   async getPatientLongitudinal(patientId: string): Promise<PatientLongitudinalMetric[]> {
-    if (import.meta.env.VITE_USE_API === "true") {
-      // The API does not yet publish validated per-session longitudinal metrics.
-      // Show an empty state rather than inventing measurements from relevance.
+    if (isApiMode) {
       return [];
     }
     return patientLongitudinalData.filter((item) => item.patientId === patientId);
   },
   async getAgenda(): Promise<AgendaItem[]> {
-    if (import.meta.env.VITE_USE_API === "true") {
-      const [patientsData, sessionsData, analysesData] = await Promise.all([
+    if (isApiMode) {
+      const [patientsData, sessionsData] = await Promise.all([
         this.getPatients(),
         apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/"),
-        apiClient.get<ApiAnalysis[] | PaginatedResponse<ApiAnalysis>>("/analysis/"),
       ]);
       const apiSessions = unwrap(sessionsData.data);
       const mappedSessions = apiSessions.map(mapSession);
-      const mappedAnalyses = unwrap(analysesData.data).map(mapAnalysis);
       return mappedSessions.map((session, index) => {
         const scheduledAt = apiSessions[index]?.scheduled_at ?? "";
         const patient = patientsData.find((item) => item.id === session.patientId);
-        const attentionIndex = mappedAnalyses
-          .filter((analysis) => analysis.patientId === session.patientId)
-          .reduce((max, analysis) => Math.max(max, analysis.relevanceScore), 0);
         return {
           id: session.id,
           patientId: session.patientId,
@@ -284,13 +211,31 @@ export const clinicalService = {
           time: scheduledAt.slice(11, 16) || "08:00",
           status: session.status,
           complement: session.complement || session.summary,
-          attentionIndex,
+          attentionIndex: null,
         };
       });
     }
     return agendaItems;
   },
   async getFinance(): Promise<FinancialRecord[]> {
-    return financialRecords;
+    return isApiMode ? [] : financialRecords;
+  },
+  async getAuditEvents() {
+    if (!isApiMode) return auditEvents;
+    const { data } = await apiClient.get<ApiAuditEvent[] | PaginatedResponse<ApiAuditEvent>>("/audit-logs/");
+    return unwrap(data).map((event) => {
+      const anyEvent = event as unknown as Record<string, unknown>;
+      return {
+        id: event.id,
+        actor: String(event.user ?? "Sistema"),
+        role: String(anyEvent.role || anyEvent.user_role || "PSYCHOLOGIST"),
+        action: event.action,
+        entity: event.entity,
+        date: new Date(event.created_at).toLocaleString("pt-BR"),
+        ip: event.ip_address,
+        sha256: typeof anyEvent.sha256 === "string" ? anyEvent.sha256 : typeof anyEvent.hash_sha256 === "string" ? anyEvent.hash_sha256 : undefined,
+        payload: (anyEvent.payload || anyEvent.details) as Record<string, unknown> | undefined,
+      };
+    });
   },
 };

@@ -1,7 +1,6 @@
 """Audit privacy regression tests using synthetic records only."""
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.utils import timezone
 from rest_framework.test import APIClient
 from apps.clinics.models import Clinic
 from apps.patients.models import Patient

@@ -38,3 +38,12 @@ def accessible_patients(user, *, clinical=False, write=False):
 
 def can_access_patient(user, patient, *, clinical=False, write=False):
     return accessible_patients(user, clinical=clinical, write=write).filter(pk=patient.pk).exists()
+
+
+def can_view_patient(user, patient):
+    """Compatibility helper for clinical views; a directory grant is insufficient."""
+    return can_access_patient(user, patient, clinical=True)
+
+
+def can_edit_patient(user, patient):
+    return can_access_patient(user, patient, clinical=True, write=True)

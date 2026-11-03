@@ -19,9 +19,9 @@ export function PatientCard({ patient, completedSessions = 0, scheduledSessions 
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="font-semibold">{patient.name}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{patient.age} anos • {patient.therapist}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{patient.age === null ? "Idade não informada" : `${patient.age} anos`} • {patient.therapist}</p>
             </div>
-            <Badge variant={patient.riskLevel === "atenção" ? "warning" : patient.status === "active" ? "success" : "muted"}>
+            <Badge variant={patient.riskLevel === "atenção" ? "warning" : patient.riskLevel === "não avaliado" ? "muted" : patient.status === "active" ? "success" : "muted"}>
               {patient.riskLevel}
             </Badge>
           </div>
@@ -48,7 +48,7 @@ export function PatientCard({ patient, completedSessions = 0, scheduledSessions 
               <Clock className="h-3.5 w-3.5" />
               {scheduledSessions} agendadas
             </span>
-            {analysis ? (
+            {analysis?.psychologicalBurdenScore !== null && analysis?.psychologicalBurdenScore !== undefined ? (
               <span className="inline-flex items-center gap-1 rounded-md border border-amber-400/30 px-2 py-1 text-amber-300">
                 Carga {analysis.psychologicalBurdenScore}%
               </span>

@@ -3,20 +3,23 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from apps.patients.access import can_access_patient
-from .serializers import PatientAccessSerializer
+from rest_framework.response import Response
+from django.http import JsonResponse
+from apps.audit_logs.mixins import AuditReadMixin
 from apps.audit_logs.services import audit
+from .access import accessible_patients, can_access_patient
+from .fhir import patient_bundle
 from .models import PatientAccess, PatientStatus
+from .serializers import PatientAccessSerializer
 from apps.users.models import UserRole
-from .access import accessible_patients
 from .permissions import PatientObjectPermission
 from .serializers import PatientSerializer
 
 
-class PatientViewSet(viewsets.ModelViewSet):
+class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
     serializer_class = PatientSerializer
+    audit_module = "patients"
     permission_classes = [PatientObjectPermission]
     filterset_fields = ("status",)
     search_fields = ("internal_code", "display_name")
@@ -126,3 +129,14 @@ class PatientViewSet(viewsets.ModelViewSet):
         patient.save(update_fields=["status", "updated_at"])
         audit(request, "ARCHIVE", patient, {"module": "patients"})
         return Response(self.get_serializer(patient).data)
+
+    @action(detail=True, methods=["get"])
+    def fhir(self, request, pk=None):
+        patient = self.get_object()
+        if not can_access_patient(request.user, patient, clinical=True):
+            raise PermissionDenied("Clinical access is required for FHIR export.")
+        bundle = patient_bundle(patient)
+        audit(request, "FHIR_EXPORT", patient, {"module": "patients", "resource_count": len(bundle["entry"])})
+        response = JsonResponse(bundle, content_type="application/fhir+json")
+        response["Cache-Control"] = "no-store"
+        return response

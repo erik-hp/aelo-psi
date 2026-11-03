@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from services.security.models import SoftDeleteModel
+from services.security.encrypted_fields import EncryptedTextField
 
 
 class SessionStatus(models.TextChoices):
@@ -17,7 +18,7 @@ class TherapySession(SoftDeleteModel):
     started_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=32, choices=SessionStatus.choices, default=SessionStatus.SCHEDULED, db_index=True)
-    summary = models.TextField(blank=True)
+    summary = EncryptedTextField(blank=True)
 
     class Meta:
         indexes = [

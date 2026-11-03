@@ -6,6 +6,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { clinicalService } from "@/services/clinicalService";
+import { isApiMode } from "@/services/runtime";
 import type { FinancialRecord } from "@/types/clinical";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -30,6 +31,8 @@ export function FinancePage() {
         title="Financeiro"
         description="Controle de sessões, repasses e valores líquidos para os agentes psicológicos."
       />
+      {isApiMode ? <p className="text-sm text-muted-foreground">O módulo financeiro ainda não está integrado à API.</p> : (
+      <>
       <section className="mb-6 grid gap-4 md:grid-cols-3">
         <MetricCard label="Valor bruto" value={money.format(totals.gross)} icon={CircleDollarSign} />
         <MetricCard label="Taxas da plataforma" value={money.format(totals.fees)} icon={WalletCards} tone="amber" />
@@ -51,6 +54,8 @@ export function FinancePage() {
           },
         ]}
       />
+      </>
+      )}
     </>
   );
 }

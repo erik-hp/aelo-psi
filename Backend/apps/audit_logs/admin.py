@@ -8,3 +8,12 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_filter = ("action", "entity", "created_at")
     search_fields = ("entity", "entity_id", "user__username", "metadata")
     readonly_fields = ("id", "user", "action", "entity", "entity_id", "ip_address", "user_agent", "metadata", "created_at", "updated_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

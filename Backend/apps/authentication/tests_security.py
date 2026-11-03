@@ -1,5 +1,5 @@
 """Security configuration checks, without handling real credentials."""
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase
 from django.conf import settings
 from django.urls import resolve, Resolver404
 
