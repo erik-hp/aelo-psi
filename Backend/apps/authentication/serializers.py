@@ -1,5 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth import get_user_model
 from .policy import active_clinic_account
 
 
@@ -12,6 +13,11 @@ class LoginSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        identifier = attrs.get(self.username_field, "")
+        if "@" in identifier:
+            matches = list(get_user_model().objects.filter(email__iexact=identifier).values_list("username", flat=True)[:2])
+            if len(matches) == 1:
+                attrs[self.username_field] = matches[0]
         data = super().validate(attrs)
         if not active_clinic_account(self.user):
             raise AuthenticationFailed('Account or clinic is not active.')

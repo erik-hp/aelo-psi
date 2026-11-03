@@ -59,9 +59,8 @@ export const authService = {
   },
   async login(payload: LoginPayload): Promise<LoginResponse> {
     if (isApiMode) {
-      const username = payload.email.includes("@") ? payload.email.split("@")[0] : payload.email;
       const { data } = await apiClient.post<ApiLoginResponse>("/auth/login/", {
-        username,
+        username: payload.email,
         password: payload.password,
       });
       return {

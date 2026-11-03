@@ -17,7 +17,7 @@ class AuthenticationLifecycleTests(TestCase):
         cls.other_clinic = Clinic.objects.create(name="Outra Clínica Sintética JWT")
         U = get_user_model()
         cls.professional = U.objects.create_user(
-            username="jwt_psych", password="Testing!Strong1234",
+            username="jwt_psych", email="jwt-psych@example.test", password="Testing!Strong1234",
             clinic=cls.clinic, role="PSYCHOLOGIST",
         )
         cls.other_professional = U.objects.create_user(
@@ -51,6 +51,11 @@ class AuthenticationLifecycleTests(TestCase):
         refreshed = self.refresh(client)
         self.assertEqual(refreshed.status_code, 200)
         self.assertIn("access", refreshed.data)
+
+    def test_email_login_uses_exact_account_email(self):
+        response = self.login("jwt-psych@example.test")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["user"]["username"], "jwt_psych")
 
     def test_login_rejects_unassigned_clinic(self):
         response = self.login(self.no_clinic.username)

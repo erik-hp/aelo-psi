@@ -190,6 +190,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Evidência local após integração: suíte combinada do backend SQLite 101 aprovados e 2 ignorados; PostgreSQL/pgvector em Docker 56 aprovados; frontend 89 aprovados; build de produção gerado; Ruff sem erros; `npm audit` na atualização do lockfile encontrou zero vulnerabilidades. Os avisos de paginação sem ordenação e tamanho de bundle ainda exigem acompanhamento.
 - A validação do modelo Ollama com dados sintéticos e o resultado dos checks do GitHub Actions deste branch devem ser registrados após execução. Os gates de produção permanecem bloqueados conforme o Plano Mestre.
 
+## Correção do login local — 03/11/2026
+
+- O frontend local apontava para `localhost:18080`, porta da pilha sintética de segurança que estava desligada; a API principal também estava parada. `Frontend/.env` local foi ajustado para `localhost:8000`, as migrações foram concluídas e a API principal foi iniciada sem Ollama.
+- O banco local não continha usuários. Uma conta profissional sintética foi criada em clínica ativa com senha aleatória forte, mantida fora do repositório. O frontend deixou de mostrar a senha fraca de demonstração quando conectado à API.
+- O formulário agora envia o e-mail completo; o backend resolve e-mail único para a conta cadastrada sem alterar a resposta genérica de falha. O ciclo HTTP real retornou 200 para login, `/auth/me/` e refresh com cookie HttpOnly.
+- Testes após a correção: suíte combinada do backend 102 aprovados e 2 ignorados, Ruff sem erros, frontend 89 aprovados e build concluído. A análise de IA segue indisponível até iniciar e configurar Ollama e o worker. O ambiente sintético local não equivale a liberação para uso clínico.
+
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
 - Validação da base jurídica, RIPD e governança de dados por profissionais competentes.
 - Política de assinatura/guarda documental apropriada.
