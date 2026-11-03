@@ -11,6 +11,7 @@ from services.metrics.evidence_benchmark import evaluate_evidence
 def sample():
     return {
         "schema_version": 1,
+        "declared_data_classification": "synthetic",
         "notes": [
             {"id": "n1", "patient_id": "p1", "version": 2,
              "text": "Pessoa fictícia relata sono irregular após alteração de rotina."},
@@ -86,3 +87,9 @@ def test_empty_gold_and_claims_have_no_invented_scores(sample):
 def test_invalid_k_fails(sample):
     with pytest.raises(ValueError, match="positive integer"):
         evaluate_evidence(sample, k=0)
+
+
+def test_missing_classification_is_rejected(sample):
+    del sample["declared_data_classification"]
+    with pytest.raises(ValueError, match="Synthetic-only"):
+        evaluate_evidence(sample)
