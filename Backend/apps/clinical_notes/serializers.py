@@ -21,6 +21,11 @@ class ClinicalNoteSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "author", "anonymized_text", "version", "locked_at", "created_at", "updated_at")
 
     def validate(self, attrs):
+        if self.instance:
+            if "patient" in attrs and attrs["patient"].pk != self.instance.patient_id:
+                raise serializers.ValidationError({"patient": "The note's patient cannot be changed."})
+            if "session" in attrs and getattr(attrs["session"], "pk", None) != self.instance.session_id:
+                raise serializers.ValidationError({"session": "The note's session cannot be changed."})
         session = attrs.get("session") or getattr(self.instance, "session", None)
         patient = attrs.get("patient") or getattr(self.instance, "patient", None)
         if session and patient and session.patient_id != patient.id:

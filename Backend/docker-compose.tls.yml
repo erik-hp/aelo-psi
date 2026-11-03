@@ -1,0 +1,29 @@
+services:
+  api:
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: ${AELO_DOMAIN:?Set AELO_DOMAIN in Backend/.env}
+      DJANGO_TRUST_PROXY_HEADERS: "True"
+      DJANGO_REQUIRE_HTTPS: "True"
+      DJANGO_HSTS_SECONDS: "31536000"
+      CORS_ALLOWED_ORIGINS: https://${AELO_DOMAIN:?Set AELO_DOMAIN in Backend/.env}
+      CSRF_TRUSTED_ORIGINS: https://${AELO_DOMAIN:?Set AELO_DOMAIN in Backend/.env}
+
+  web:
+    build:
+      context: ../Frontend
+      dockerfile: Dockerfile.production
+    environment:
+      AELO_DOMAIN: ${AELO_DOMAIN:?Set AELO_DOMAIN in Backend/.env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:

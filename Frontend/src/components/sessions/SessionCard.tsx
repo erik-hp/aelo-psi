@@ -20,13 +20,13 @@ export function SessionCard({ session, notes = [] }: { session: TherapySession; 
         {notes.length ? (
           <div className="mt-4 space-y-3 border-t border-border pt-4">
             {notes.map((note) => (
-              <div key={note.id}>
+              <div key={note.id} id={`note-${note.id}`} className="rounded-md p-2 transition-all">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     <FileText className="h-4 w-4 text-primary" />
                     Prontuário da sessão
                   </div>
-                  <Badge variant={note.attentionIndex >= 80 ? "warning" : "muted"}>{note.attentionIndex}</Badge>
+                  {note.attentionIndex !== null ? <Badge variant={note.attentionIndex >= 80 ? "warning" : "muted"}>{note.attentionIndex}</Badge> : null}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{note.content}</p>
                 {note.complement ? <p className="mt-2 text-sm leading-6">{note.complement}</p> : null}
@@ -36,7 +36,7 @@ export function SessionCard({ session, notes = [] }: { session: TherapySession; 
         ) : null}
         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <Clock className="h-4 w-4" />
-          {session.duration} minutos
+          {session.duration === null ? "Duração não registrada" : `${session.duration} minutos`}
         </div>
       </CardContent>
     </Card>

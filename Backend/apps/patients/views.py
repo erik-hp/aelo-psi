@@ -1,30 +1,30 @@
-from django.db.models import Q
-from rest_framework import mixins, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from django.http import JsonResponse
+from apps.audit_logs.mixins import AuditReadMixin
 from apps.audit_logs.services import audit
-from apps.users.models import UserRole
-from .models import Patient, PatientAccess, PatientStatus
+from .access import accessible_patients
+from .fhir import patient_bundle
+from .models import PatientAccess, PatientStatus
 from .permissions import PatientObjectPermission
 from .serializers import PatientSerializer
 
 
-class PatientViewSet(viewsets.ModelViewSet):
+class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
     serializer_class = PatientSerializer
+    audit_module = "patients"
     permission_classes = [PatientObjectPermission]
     filterset_fields = ("status",)
     search_fields = ("internal_code", "display_name")
 
     def get_queryset(self):
-        user = self.request.user
-        qs = Patient.objects.filter(deleted_at__isnull=True)
-        if user.is_admin_role:
-            return qs
-        direct = Q(created_by=user) if user.role == UserRole.PSYCHOLOGIST else Q()
-        granted = Q(access_grants__user=user)
-        return qs.filter(Q(clinic=user.clinic) & (direct | granted)).distinct()
+        return accessible_patients(self.request.user)
 
     def perform_create(self, serializer):
+        if self.request.user.clinic_id is None:
+            raise PermissionDenied("A clinic is required to create a patient.")
         patient = serializer.save(clinic=self.request.user.clinic, created_by=self.request.user)
         PatientAccess.objects.get_or_create(
             patient=patient,
@@ -48,3 +48,12 @@ class PatientViewSet(viewsets.ModelViewSet):
         patient.save(update_fields=["status", "updated_at"])
         audit(request, "ARCHIVE", patient, {"module": "patients"})
         return Response(self.get_serializer(patient).data)
+
+    @action(detail=True, methods=["get"])
+    def fhir(self, request, pk=None):
+        patient = self.get_object()
+        bundle = patient_bundle(patient)
+        audit(request, "FHIR_EXPORT", patient, {"module": "patients", "resource_count": len(bundle["entry"])})
+        response = JsonResponse(bundle, content_type="application/fhir+json")
+        response["Cache-Control"] = "no-store"
+        return response

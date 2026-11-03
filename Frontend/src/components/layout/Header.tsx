@@ -3,13 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 
-export function Header() {
+export interface HeaderProps {
+  onOpenSidebar?: () => void;
+}
+
+export function Header({ onOpenSidebar }: HeaderProps) {
   const { user, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/88 backdrop-blur">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-8">
-        <Button className="lg:hidden" size="icon" variant="ghost" aria-label="Abrir navegação">
+        <Button
+          className="lg:hidden"
+          size="icon"
+          variant="ghost"
+          aria-label="Abrir navegação"
+          onClick={onOpenSidebar}
+        >
           <Menu className="h-5 w-5" />
         </Button>
         <div className="relative hidden flex-1 md:block">

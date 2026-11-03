@@ -20,8 +20,8 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "admin@aelo.local",
-      password: "admin12345",
+      email: "",
+      password: "",
     },
   });
 

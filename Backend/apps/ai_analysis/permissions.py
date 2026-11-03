@@ -14,4 +14,4 @@ class CanRequestAI(BasePermission):
 
 class CanReviewAI(BasePermission):
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and (request.user.role == UserRole.PSYCHOLOGIST or request.user.is_admin_role))
+        return bool(request.user and request.user.is_authenticated and request.user.role == UserRole.PSYCHOLOGIST)

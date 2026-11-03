@@ -1,8 +1,8 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("api/auth/", include("apps.authentication.urls")),
     path("api/", include("apps.users.urls")),
     path("api/", include("apps.patients.urls")),
@@ -12,3 +12,6 @@ urlpatterns = [
     path("api/", include("apps.audit_logs.urls")),
     path("api/", include("apps.dashboard.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns.insert(0, path("admin/", admin.site.urls))

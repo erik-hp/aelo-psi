@@ -3,8 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Permission } from "@/types/auth";
 
 export function ProtectedRoute({ permission }: { permission?: Permission }) {
-  const { isAuthenticated, can } = useAuth();
+  const { isAuthenticated, isLoading, can } = useAuth();
   const location = useLocation();
+
+  if (isLoading) return null;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;

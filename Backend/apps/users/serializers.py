@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "password",
         )
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "clinic")
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)

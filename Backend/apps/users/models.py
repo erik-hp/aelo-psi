@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
 
 
 class UserRole(models.TextChoices):
@@ -21,3 +22,10 @@ class User(AbstractUser):
     @property
     def is_clinician(self) -> bool:
         return self.role in {UserRole.PSYCHOLOGIST, UserRole.INTERN}
+
+
+class UserSigningKey(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="signing_key")
+    public_key_spki = models.TextField()
+    fingerprint = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
