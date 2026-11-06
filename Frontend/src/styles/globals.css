@@ -54,10 +54,6 @@
     @apply border-border;
   }
 
-  html {
-    color-scheme: dark;
-  }
-
   body {
     @apply min-h-screen bg-background-full text-text-primary antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -69,6 +65,26 @@
 }
 
 @layer components {
+  /* Native popup options need an opaque surface as well as a text color.
+     The surrounding field is transparent; the OS popup must not inherit that. */
+  .aelo-select {
+    color-scheme: light;
+  }
+
+  .dark .aelo-select {
+    color-scheme: dark;
+  }
+
+  .aelo-select option,
+  .aelo-select optgroup {
+    background-color: var(--color-background-primary-default);
+    color: var(--color-text-primary);
+  }
+
+  .aelo-select option:disabled {
+    color: var(--color-text-tertiary);
+  }
+
   .clinical-panel {
     @apply rounded-3xl border border-border-button-default bg-background-primary-default shadow-xs;
   }

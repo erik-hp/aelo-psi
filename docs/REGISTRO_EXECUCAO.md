@@ -250,6 +250,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Achados, causas, soluções, contratos, evidências e pendências em [AUDITORIA_FUNCIONAL_2026-11-06.md](validation/AUDITORIA_FUNCIONAL_2026-11-06.md). Sem navegador disponível: não houve inspeção visual, leitor de tela ou validação integral worker/Ollama. Financeiro, notificações, edição de preferências/contas, autosave, concorrência e workflow integral de assinatura continuam pendentes.
 - Implementação `f0f7a5e`, [PR #16 em rascunho](https://github.com/erik-hp/aelo-psi/pull/16), dependente do PR #15; sem merge. Checks remotos ainda não confirmados nesta entrada. Próximo item: revisar CI e os achados residuais F0; validar visualmente os fluxos com dados sintéticos. **G0 continua BLOQUEADO**.
 
+## UI-02 — Contraste dos seletores compartilhados — 06/11/2026 — EM REVISÃO
+
+- Base `3333a78`, branch `fix/contraste-seletores`, dependente do PR #16 (aberto/em rascunho, confirmado via GitHub). Escopo: regressão visual F0-01/F0-05, RNF-06/RNF-08. Risco baixo, apenas estilos compartilhados; sem alteração de API, autorização ou dados.
+- Causa: o Select aplicava texto temático, mas não definia superfície opaca para o popup nativo de opções. Definidos fundo/texto por tokens semânticos para `option`/`optgroup`, texto de opções desabilitadas e `color-scheme` claro/escuro. Removida declaração global redundante que fixava esquema escuro; a raiz continua controlada pelo tema BoardUI.
+- Padrão obrigatório para novos campos desse tipo: importar `Select` de `@/components/ui/select`, associar `label`/`id` ou `aria-label`, passar as opções nativas e usar `disabled` quando indisponível. Ref, eventos, validação e teclado nativos preservados. A busca por `<select` em `Frontend/src` encontrou somente esse componente: Editor, Agenda, Pacientes, Auditoria e página longitudinal herdam a correção.
+- Executados: `npm.cmd test -- --run` (**132 aprovados/24 arquivos**), `npm.cmd run build` (aprovado; avisos conhecidos Zod/chunks), `npm.cmd run lint` (**0 erros/11 avisos**), `git diff --check` sem erros. Testes DOM comprovam regressão funcional, não aparência do popup do sistema. Conferência visual em navegador claro/escuro/alto contraste continua pendente.
+- Commit/PR a registrar após publicação. Próximo item: revisar o menu aberto em navegador e os checks remotos. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

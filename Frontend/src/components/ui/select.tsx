@@ -4,13 +4,14 @@ import { Group } from "react-aria-components";
 import { inputFieldClassName } from "@/components/base/input/input";
 import { RiArrowDownSLine } from "@remixicon/react";
 
+/** Standard option picker for application forms. Keep native keyboard/form behavior. */
 export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className, ...props }, ref) => (
     <Group className={(state) => cn(inputFieldClassName(state), "min-w-0 border border-border-button-default focus-within:ring-border-focus-ring", className)}>
     <select
       ref={ref}
       className={cn(
-        "min-h-6 w-full min-w-0 appearance-none border-0 bg-transparent px-1 pe-7 text-body-regular text-text-primary outline-none disabled:cursor-not-allowed disabled:text-text-tertiary",
+        "aelo-select min-h-6 w-full min-w-0 appearance-none border-0 bg-transparent px-1 pe-7 text-body-regular text-text-primary outline-none disabled:cursor-not-allowed disabled:text-text-tertiary",
       )}
       {...props}
     />
