@@ -38,7 +38,7 @@ const clinicalItems: NavItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard, permission: "dashboard:read" },
   { label: "Agenda", to: "/agenda", icon: CalendarClock, permission: "sessions:read", badge: "agenda" },
   { label: "Pacientes", to: "/patients", icon: Users, permission: "patients:read" },
-  { label: "Editor Clínico", to: "/editor", icon: FileEdit },
+  { label: "Editor Clínico", to: "/editor", icon: FileEdit, permission: "notes:write" },
 ];
 
 const managementItems: NavItem[] = [

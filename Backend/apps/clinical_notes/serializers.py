@@ -5,6 +5,7 @@ from apps.patients.access import can_access_patient
 
 
 class ClinicalNoteSerializer(serializers.ModelSerializer):
+    expected_version = serializers.IntegerField(write_only=True, required=False, min_value=1)
     class Meta:
         model = ClinicalNote
         fields = (
@@ -15,6 +16,7 @@ class ClinicalNoteSerializer(serializers.ModelSerializer):
             "raw_text",
             "anonymized_text",
             "version",
+            "expected_version",
             "locked_at",
             "created_at",
             "updated_at",
@@ -22,6 +24,8 @@ class ClinicalNoteSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "author", "anonymized_text", "version", "locked_at", "created_at", "updated_at")
 
     def validate(self, attrs):
+        if not self.instance and "expected_version" in attrs:
+            raise serializers.ValidationError({"expected_version": "Use version checks only when updating a note."})
         if self.instance:
             if "patient" in attrs and attrs["patient"].pk != self.instance.patient_id:
                 raise serializers.ValidationError({"patient": "The note's patient cannot be changed."})

@@ -6,6 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import { AgendaPage } from "./AgendaPage";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { clinicalService } from "@/services/clinicalService";
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "synthetic-professional", role: "PSYCHOLOGIST" } }) }));
 
 vi.mock("@/services/clinicalService", () => ({
   clinicalService: {

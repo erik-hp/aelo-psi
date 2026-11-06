@@ -8,10 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { clinicalService } from "@/services/clinicalService";
+import { useSearchParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { CreatePatientDialog } from "@/components/patients/CreatePatientDialog";
+import { usePermissions } from "@/hooks/usePermissions";
+import { isApiMode } from "@/services/runtime";
 import { PageError, PageLoading } from "@/components/ui/page-state";
 
 export function PatientsPage() {
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get("search") ?? "";
+  const { can } = usePermissions();
+  const [creating, setCreating] = useState(false);
   const [status, setStatus] = useState("all");
   const debouncedSearch = useDebouncedValue(search);
   const { data: patients = [], isLoading, isError } = useQuery({ queryKey: ["patients"], queryFn: clinicalService.getPatients });
@@ -30,11 +38,12 @@ export function PatientsPage() {
     <>
       <PageHeader
         title="Pacientes"
-        description="Dados clínicos, tempo de tratamento, periodicidade, sessões realizadas/agendadas e leitura dos prontuários analisados."
+        description="Cadastro e acesso ao histórico dos pacientes autorizados."
+        action={can("patients:write") ? <Button disabled={!isApiMode} title={!isApiMode ? "O cadastro exige conexão com a API." : undefined} onClick={() => setCreating(true)}>Adicionar paciente</Button> : null}
       />
       <div className="mb-5 flex flex-col gap-3 md:flex-row">
         <div className="relative flex-1">
-          <Input leadingIcon={RiSearchLine} aria-label="Buscar por nome" placeholder="Buscar por nome" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Input leadingIcon={RiSearchLine} aria-label="Buscar por nome" placeholder="Buscar por nome" value={search} onChange={(event) => setSearchParams(event.target.value ? { search: event.target.value } : {}, { replace: true })} />
         </div>
         <Select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filtrar status">
           <option value="all">Todos os status</option>
@@ -59,8 +68,9 @@ export function PatientsPage() {
         <EmptyState title="Nenhum paciente encontrado" description="Ajuste os filtros ou cadastre um novo paciente quando permitido pelo seu perfil." />
       )}
       <div className="mt-6 flex justify-end gap-2 text-body-regular text-text-secondary">
-        Página 1 de 1 • {filtered.length} registros
+        {filtered.length} registros encontrados
       </div>
+      {creating && <CreatePatientDialog onClose={() => setCreating(false)} />}
     </>
   );
 }

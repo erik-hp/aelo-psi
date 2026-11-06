@@ -2,11 +2,12 @@ import { Settings } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { isApiMode } from "@/services/runtime";
 
 export function SettingsPage() {
   return (
     <>
-      <PageHeader title="Configurações" description="Parâmetros globais de segurança, integração com API e preferências clínicas." />
+      <PageHeader title="Configurações" description="Informações da aplicação. A edição de preferências ainda não está disponível nesta tela." />
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -23,9 +24,8 @@ export function SettingsPage() {
             <CardTitle>Integrações</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <Badge variant="success">Django REST API ready</Badge>
-            <Badge variant="muted">Axios interceptors</Badge>
-            <Badge variant="muted">TanStack Query cache</Badge>
+            <Badge variant="muted">{isApiMode ? "Modo API" : "Demonstração"}</Badge>
+            <p className="text-body-regular text-text-secondary">O modo configurado não comprova a disponibilidade dos serviços. Falhas são informadas nas telas que os consultam.</p>
           </CardContent>
         </Card>
       </div>

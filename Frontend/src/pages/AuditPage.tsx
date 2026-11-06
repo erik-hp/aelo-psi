@@ -49,8 +49,8 @@ export function AuditPage() {
   return (
     <>
       <PageHeader
-        title="Trilha de Auditoria & Conformidade LGPD"
-        description="Rastreabilidade criptográfica imutável, cadeia de custódia de dados de saúde mental e controle de acessos (LGPD Art. 11/20 e CFP nº 01/2009)."
+        title="Trilha de Auditoria"
+        description="Eventos de acesso e alteração registrados pelo servidor. A presença de hashes não comprova, isoladamente, integridade ou conformidade jurídica."
       />
 
       {/* Indicadores de Segurança e Conformidade */}

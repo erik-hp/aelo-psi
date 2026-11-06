@@ -3,6 +3,8 @@ import { RiSearchLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export interface HeaderProps {
   onOpenSidebar?: () => void;
@@ -11,6 +13,8 @@ export interface HeaderProps {
 
 export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
   const { user, logout } = useAuth();
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-20 border-b border-border-button-default bg-background-full backdrop-blur">
@@ -26,11 +30,11 @@ export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="relative hidden flex-1 md:block">
-          <Input leadingIcon={RiSearchLine} className="max-w-xl" placeholder="Buscar paciente, sessão, prontuário ou evento" aria-label="Busca global" />
-        </div>
+        <form role="search" className="relative hidden flex-1 md:block" onSubmit={(event) => { event.preventDefault(); navigate(`/patients?search=${encodeURIComponent(search.trim())}`); }}>
+          <Input leadingIcon={RiSearchLine} className="max-w-xl" placeholder="Buscar pacientes por nome e pressionar Enter" aria-label="Buscar pacientes" value={search} onChange={(event) => setSearch(event.target.value)} />
+        </form>
         <div className="ml-auto flex items-center gap-2">
-          <Button size="icon" variant="ghost" aria-label="Notificações">
+          <Button size="icon" variant="ghost" aria-label="Notificações indisponíveis" title="Notificações ainda não implementadas" disabled>
             <Bell className="h-4 w-4" />
           </Button>
           <div className="hidden items-center gap-3 rounded-md border border-border-button-default bg-background-primary-default px-3 py-2 sm:flex">

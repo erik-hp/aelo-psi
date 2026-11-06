@@ -16,6 +16,7 @@ export interface ApiPatient {
 export interface ApiSession {
   id: string;
   patient: string;
+  professional?: string | number;
   scheduled_at: string;
   started_at?: string | null;
   ended_at?: string | null;
@@ -73,6 +74,7 @@ export function mapSession(session: ApiSession): TherapySession {
   return {
     id: session.id,
     patientId: session.patient,
+    professionalId: session.professional == null ? undefined : String(session.professional),
     patientName: undefined,
     date: new Date(session.scheduled_at).toLocaleDateString("pt-BR"),
     duration: startedAt && endedAt ? Math.max(0, Math.round((endedAt - startedAt) / 60000)) : null,
@@ -85,7 +87,7 @@ export function mapSession(session: ApiSession): TherapySession {
 }
 
 export function mapAnalysis(analysis: ApiAnalysis): AIAnalysis {
-  const score = Number(analysis.relevance_score ?? 0);
+  const score = analysis.relevance_score == null || analysis.relevance_score === "" ? null : Number(analysis.relevance_score);
   const metric = (label: string) => {
     const value = analysis.sentiment_metrics?.find((item) => item.label === label)?.value;
     if (value === undefined) return null;
@@ -96,7 +98,7 @@ export function mapAnalysis(analysis: ApiAnalysis): AIAnalysis {
     id: analysis.id,
     patientId: analysis.patient,
     status: analysis.status === "VALIDATED" ? "validated" : analysis.status === "REJECTED" ? "rejected" : "pending",
-    relevanceScore: Number.isFinite(score) ? (score <= 1 ? score * 100 : score) : 0,
+    relevanceScore: score !== null && Number.isFinite(score) ? (score <= 1 ? score * 100 : score) : null,
     moodScore: metric("mood"),
     emotionalStateScore: metric("emotional_state"),
     psychologicalBurdenScore: metric("psychological_burden"),

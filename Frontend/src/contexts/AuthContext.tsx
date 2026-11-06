@@ -5,21 +5,26 @@ import { authStorage, clearLegacySessionStorage } from "@/services/authStorage";
 import { isApiMode } from "@/services/runtime";
 import type { User } from "@/types/auth";
 import { getPermissions, hasPermission } from "@/utils/permissions";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(isApiMode);
   const channel = useRef<BroadcastChannel | null>(null);
 
   const clearLocalSession = useCallback(() => {
+    void queryClient.cancelQueries();
+    queryClient.clear();
     authStorage.clear();
     setUser(null);
-  }, []);
+  }, [queryClient]);
 
   const logout = useCallback(async () => {
-    await authService.logout();
+    const pending = authService.logout();
     clearLocalSession();
     channel.current?.postMessage("logout");
+    await pending;
   }, [clearLocalSession]);
 
   useEffect(() => {
@@ -54,12 +59,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const response = await authService.login(payload);
+      void queryClient.cancelQueries();
+      queryClient.clear();
       authStorage.setTokens(response.tokens);
       setUser(response.user);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   const permissions = useMemo(() => (user ? getPermissions(user.role) : []), [user]);
 

@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.response import Response
 from apps.audit_logs.mixins import AuditReadMixin
 from apps.audit_logs.services import audit
@@ -12,6 +12,12 @@ from apps.patients.access import accessible_patients, can_edit_patient
 from services.security.anonymization import UnsafeClinicalText, anonymize_text, prepare_ai_text
 from .models import ClinicalNote, ClinicalNoteDraft, ClinicalNoteHistory
 from .serializers import ClinicalNoteSerializer
+
+
+class NoteVersionConflict(APIException):
+    status_code = 409
+    default_detail = "A nota foi alterada. Recarregue antes de salvar novamente."
+    default_code = "NOTE_VERSION_CONFLICT"
 
 
 class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
@@ -29,7 +35,7 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
         # not permit modifying their authored narrative or deleting it.
         if write:
             qs = qs.filter(author=self.request.user)
-        return qs
+        return qs.order_by("-created_at", "-id")
 
     def list(self, request, *args, **kwargs):
         result = super().list(request, *args, **kwargs)
@@ -54,6 +60,9 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
     def perform_update(self, serializer):
         # Protect version and history writes against concurrent editors.
         note = self.get_queryset().select_for_update().get(pk=serializer.instance.pk)
+        expected_version = serializer.validated_data.pop("expected_version", None)
+        if expected_version is not None and expected_version != note.version:
+            raise NoteVersionConflict()
         if note.locked_at is not None:
             raise PermissionDenied('Nota assinada: utilize fluxo formal de retificação.')
         ClinicalNoteHistory.objects.create(

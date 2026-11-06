@@ -47,6 +47,8 @@ Ver [Plano Mestre](PLANO_MESTRE_IMPLEMENTACAO.md) e [registro](REGISTRO_EXECUCAO
 
 ## Regras de atualização
 
+Evidência incremental da auditoria funcional (06/11/2026): RF-01–RF-04 e RNF-02/RNF-03/RNF-06/RNF-08 recebem correções e testes parciais em [AUDITORIA_FUNCIONAL_2026-11-06.md](validation/AUDITORIA_FUNCIONAL_2026-11-06.md). **EM REVISÃO**: cadastro/agendamento/nota persistidos e negações verificadas nos cenários descritos; assinatura/retificação completas, acessibilidade manual, concorrência e IA integral continuam pendentes. Não altera os estados completos dos requisitos ou os gates.
+
 Evidência incremental UI-01 (06/11/2026): RNF-06/RNF-08 recebem a integração visual BoardUI e testes de regressão em [UI_BOARDUI.md](validation/UI_BOARDUI.md). **EM REVISÃO**; os critérios completos desses requisitos continuam não validados e os gates não são alterados.
 
 1. Cada PR cita ID(s) F0–F7 + requisito(s) RF/RNF/VAL.

@@ -60,7 +60,7 @@ export function VaultApprovalModal({
               Aprovação clínica do checkpoint
             </h2>
             <p className="mt-1 text-caption-1-regular text-text-secondary">
-              Supervisão humana ativa (HITL - CFP nº 009/2024 e LGPD Art. 20). A assinatura vincula sua decisão de forma auditável e irrevogável.
+              Revise o conteúdo e suas fontes. A assinatura registra a decisão e permite verificar a integridade do conteúdo revisado.
             </p>
           </div>
           <Badge variant="success" className="shrink-0 gap-1 py-1">
