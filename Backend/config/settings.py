@@ -154,6 +154,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://ai-service:8001")
 AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "90"))
 AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
+# Layered retrieval stays off until the decision recorded in ADR-003 is approved.
+AI_LOD_RETRIEVAL = os.getenv("AI_LOD_RETRIEVAL", "False").lower() == "true"
+AI_LOD_MAX_REMOTE_NOTES = max(1, min(5, int(os.getenv("AI_LOD_MAX_REMOTE_NOTES", "2"))))
 
 # Enable only behind a reverse proxy that overwrites client-supplied scheme headers.
 TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_HEADERS", "False").lower() == "true"

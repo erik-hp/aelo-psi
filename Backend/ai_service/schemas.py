@@ -1,5 +1,7 @@
 """Validated request and response contracts for the assistive AI service."""
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -8,6 +10,7 @@ class ContextItem(BaseModel):
     session_id: str | None = None
     created_at: str
     text: str = Field(max_length=10_000)
+    tier: Literal["near", "far"] = "near"
 
 
 class GraphFact(BaseModel):
