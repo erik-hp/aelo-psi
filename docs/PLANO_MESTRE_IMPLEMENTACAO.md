@@ -6,6 +6,8 @@
 
 ## 0. Contrato do projeto
 
+**Adendo de estabilização de 06/11/2026:** [revisão de navegação/UX](validation/PLANO_REVISAO_UX_NAVEGACAO.md) documenta o problema relatado de estrutura e clareza das telas, com análise e pesquisa de frontends a executar (F1-06/F6-01/F6-05). [Avaliação futura do Strix](security/PLANO_AVALIACAO_STRIX.md) detalha o ensaio no marco aproximado de 80% do escopo funcional aprovado pronto/auditável, sem adiar controles F0 ou equivaler a gate de release. Pesquisa/documentação inicial, sem redesign, instalação ou pentest executados nesta rodada.
+
 **Complemento documental de 06/11/2026:** [Plano operacional digital da clínica](PLANO_OPERACIONAL_CLINICA.md), pesquisa e proposta SC-OP-01 solicitadas pelo autor para priorizar a operação antes da análise por IA. Refina capacidades relacionadas a F0/F1 e registra ampliações em backlog; não altera IDs, critérios de aceite ou gates F0–F7. Financeiro, novos papéis, comunicação e portal dependem de decisão de escopo antes de implementação.
 
 **Título acadêmico:** Plataforma Web Inteligente para Gestão Operacional e Auxílio ao Monitoramento Terapêutico em Clínicas de Psicologia.
