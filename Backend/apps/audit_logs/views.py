@@ -14,5 +14,9 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminRole]
     def get_queryset(self):
         # Admin audits concern only users from the same clinic.
-        return AuditLog.objects.select_related('user').filter(user__clinic_id=self.request.user.clinic_id)
+        return (
+            AuditLog.objects.select_related('user')
+            .filter(user__clinic_id=self.request.user.clinic_id)
+            .order_by('-sequence')
+        )
     filterset_fields = ("action", "entity", "user")

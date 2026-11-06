@@ -1,12 +1,12 @@
 # Registro de execução e decisões — AELO-PSI (TCC2)
 
-**Atualizado em:** 17/10/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
+**Atualizado em:** 06/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
 
 ## Estado geral
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** triar alertas do inventário de dependências F0-05, após validar o workflow no GitHub Actions; a `main` consultada nesta rodada é `2fd3084a259aa887eaa5d2adb5f4801062eae273` (PR #6 integrado). G0 permanece bloqueado.
+- **Próxima tarefa:** conciliar a pilha de PRs em rascunho #15–#19 e o PR #21, confirmando checks remotos; em seguida OP-00/UX-01. Ver a entrada "Revisão transversal F0" abaixo. G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -133,6 +133,7 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 ## Ciclo F0-04 e F0-06 — configuração e dados (17/10/2026)
 
 - **Partida:** `main` em `c2f2174c51e4ee408763cb4a4f3c33cf2bc9c0a4`, integração confirmada do [PR #2](https://github.com/erik-hp/aelo-psi/pull/2).
+- **Correção posterior (06/11/2026):** os bloqueios de senha e de origem local descritos neste item foram perdidos na integração do PR #11 e restaurados na "Revisão transversal F0".
 - **F0-04:** Django bloqueia credenciais padrão/fracas de PostgreSQL quando `DEBUG=False`; CORS e CSRF não têm origem HTTP local predefinida em produção; `SECURE_PROXY_SSL_HEADER` só é habilitado por configuração explícita de proxy confiável; cookies de sessão/CSRF são marcados Secure fora de DEBUG.
 - **F0-04 navegador:** refresh token passa de `localStorage` para `sessionStorage` — **mitigação de persistência, não proteção contra XSS**. Sessões antigas podem exigir novo login. Migração futura para cookies HttpOnly dependerá de desenho de CSRF/CORS e testes.
 - **F0-06:** [inventário inicial/RIPD rascunho](privacy/F0_DATA_MAP_RIPD_DRAFT.md), com fluxo de dados, riscos, responsáveis e decisões pendentes; não equivale a RIPD legalmente validado.
@@ -273,6 +274,24 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Realizados: inspeção estática de Sidebar/Header/rotas e estrutura de páginas; consulta documental GOV.UK, NHS, Carbon, USWDS, W3C, OWASP e repositório/documentação oficial `usestrix/strix`. Benchmark visual/prático, teste com usuários e redesign ainda não executados; o relato não foi convertido em medição fictícia.
 - Marco de 80% definido como proporção de unidades de aceite funcionais do escopo aprovado, com denominador congelado e evidência; percentual atual não calculado. Controles críticos e ambiente sintético isolado antecedem ensaio. Strix envolve teste ativo e diretório local com escrita; prevê cópia descartável, restrição externa de rede, revisão de provedor/artefatos, triagem e reteste humanos. Não instalado/executado, sem envio de código ou dados a provedor.
 - Validação: `git diff --check` sem erros; script `DOC_CHECK_OK` conferiu seis documentos, 35 referências locais e cercas de código balanceadas. Não repetidos testes/build: somente documentação foi alterada. Próximo item: UX-01 junto do diagnóstico OP-00/OP-01, depois benchmark/protótipos antes de alterações amplas. Segurança permanece contínua desde F0; versão estável depende dos aceites obrigatórios e gates, não da porcentagem ou de relatório vazio de ferramenta. Documento no commit `f5b3c52`, [PR #19 em rascunho](https://github.com/erik-hp/aelo-psi/pull/19), dependente do #18; sem merge/checks remotos confirmados. **G0 continua BLOQUEADO**.
+
+## Piloto Jev — cancelado — 06/11/2026
+
+- O usuário informou que não será possível utilizar Jev e solicitou a remoção de todas as preparações. O piloto local foi excluído, a referência na matriz removida e o PR #20 fechado sem merge. Nenhuma integração com a aplicação foi feita; G0 e demais gates não mudam.
+
+## Revisão transversal F0 — 06/11/2026 — EM REVISÃO
+
+- Solicitação explícita de análise e melhoria geral do projeto. Base `fe07b00`, branch `fix/f0-revisao-transversal`, commits `a66f890` e `48f0a4d`, [PR #21 em rascunho](https://github.com/erik-hp/aelo-psi/pull/21), dependente do #19, sem merge. Escopo F0-01/F0-02/F0-04/F0-05, RF-01/RNF-02/RNF-03/RNF-08. Sem funcionalidade nova, migração ou mudança de contrato de sucesso.
+- **Regressão comprovada:** a integração do PR #11 removeu de `settings.py` o bloqueio de senha fraca do banco e a ausência de origem local em produção, embora o registro de F0-04 os descrevesse como vigentes. A comparação `062efbe`→`HEAD` não apontou outra perda de controle de autorização no `settings.py`; o token do serviço de IA segue exigido. Restaurados com `DEBUG=False`; desenvolvimento com `DEBUG=True` mantém o comportamento local.
+- **Proxy TLS:** `settings.py` lia `DJANGO_TRUST_PROXY_SSL_HEADER`, enquanto overlay, `.env.example` e `OPERATIONS.md` usam `DJANGO_TRUST_PROXY_HEADERS`. Com `DJANGO_REQUIRE_HTTPS`, a API atrás do Caddy veria HTTP e redirecionaria indefinidamente. Nome alinhado; a pilha TLS real não foi executada.
+- **Coleta de testes:** `pytest.ini` e `pytest.postgres.ini` só coletavam `test_*.py`, deixando fora 48 testes de autorização/auditoria em `apps/`. A contagem "59 aprovados" registrada na auditoria funcional não incluía esses testes. Agora a coleta é completa.
+- **Erros reproduzidos antes da correção:** HTTP 500 em `grant-access`, `revoke-access`, `preview-ai` e `dashboard/longitudinal?patient=abc` com identificador malformado (agora 404/400); listagem de notas gerava dois eventos `LIST` (agora um, com `method` preservado em todos os módulos do mixin); pacientes e sessões paginavam sem ordem e auditoria sem desempate. Ordem total adotada, e `UnorderedObjectListWarning` agora é erro de teste.
+- **Frontend:** páginas autenticadas por `React.lazy`, com `Suspense` e `RouteErrorBoundary` no layout. Chunk principal de 934,26 kB para 499,59 kB (gzip 286,86 para 161,43 kB). Removidos dois imports sem uso.
+- **Executados:** antes das correções, 25 falhas pelo motivo esperado. Depois: backend SQLite **134 aprovados/2 ignorados**; PostgreSQL/pgvector via `docker-compose.test.yml` **136 aprovados/0 ignorados**; `manage.py test apps` 48 OK; Ruff sem erros; `manage.py check` e `makemigrations --check` sem alterações. Frontend **135 testes/25 arquivos**, build aprovado, lint 0 erros/9 avisos. `docker-compose.security.yml`: `LIVE_SECURITY_SMOKE_OK`; três chunks de páginas responderam 200 pelo Caddy com a CSP presente. Pilhas com projetos Compose próprios, removidas ao final.
+- **Limitações:** sem navegador, a execução real dos chunks sob CSP não foi observada; sem pentest, Ollama real ou TLS real. `search_fields` de pacientes/usuários segue sem efeito por não haver `SearchFilter` configurado (a busca da interface filtra no cliente). Corrida de cadastro duplicado e concorrência de agenda continuam pendentes. Avisos restantes: 9 de Fast Refresh, Zod e o chunk sob demanda do Cytoscape.
+- **CI remota:** no commit `7147574`, 8 de 9 jobs passaram e `Quality and security / frontend` falhou ([run #42232872182](https://github.com/erik-hp/aelo-psi/actions/runs/42232872182)). Causa: `clinicalService.agenda.test.tsx` fixava `10:30` e a CI roda em UTC; reproduzido com `TZ=UTC`. A mesma falha aparece na branch do PR #19 ([run #42170260935](https://github.com/erik-hp/aelo-psi/actions/runs/42170260935)), e o job também terminou em falha nas branches dos PRs #16 e #17, onde a causa não foi inspecionada; os registros desses PRs constavam como checks não confirmados. O teste foi corrigido em `48f0a4d`, sem alterar código de produção. Reexecução local aprovada em UTC e `America/Sao_Paulo`; `Asia/Tokyo` e `Pacific/Auckland` não contam como evidência, pois o Windows não aplicou esses fusos.
+- **Resultado remoto em `48f0a4d`:** os 9 jobs passaram: [baseline #42233876659](https://github.com/erik-hp/aelo-psi/actions/runs/42233876659), [qualidade e segurança #42233876837](https://github.com/erik-hp/aelo-psi/actions/runs/42233876837), [dependências #42233876831](https://github.com/erik-hp/aelo-psi/actions/runs/42233876831) e [segredos #42233876766](https://github.com/erik-hp/aelo-psi/actions/runs/42233876766). Os PRs #16–#19 só ficam verdes com esta correção ou uma equivalente.
+- **Atenção operacional:** implantações com `DEBUG=False` agora exigem `POSTGRES_PASSWORD` forte e `CORS_ALLOWED_ORIGINS`/`CSRF_TRUSTED_ORIGINS` explícitos. **G0 continua BLOQUEADO**.
 
 ## Pendências de decisão
 
