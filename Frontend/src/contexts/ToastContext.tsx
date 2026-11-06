@@ -19,17 +19,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed right-4 top-4 z-50 flex w-[min(92vw,380px)] flex-col gap-3" aria-live="polite">
+      <div className="fixed end-4 top-4 z-[120] flex w-[min(92vw,380px)] flex-col gap-3" aria-live="polite">
         {toasts.map((toast) => (
           <div key={toast.id} className="clinical-panel flex gap-3 p-4">
             {toast.type === "error" ? (
-              <XCircle className="mt-0.5 h-5 w-5 text-destructive" />
+              <XCircle className="mt-0.5 h-5 w-5 text-text-error-primary" />
             ) : (
-              <CheckCircle2 className={cn("mt-0.5 h-5 w-5", toast.type === "success" ? "text-accent" : "text-primary")} />
+              <CheckCircle2 className={cn("mt-0.5 h-5 w-5", toast.type === "success" ? "text-status-lime-text" : "text-status-blue-text")} />
             )}
             <div>
-              <p className="text-sm font-medium">{toast.title}</p>
-              {toast.description ? <p className="mt-1 text-sm text-muted-foreground">{toast.description}</p> : null}
+              <p className="text-body-medium">{toast.title}</p>
+              {toast.description ? <p className="mt-1 text-body-regular text-text-secondary">{toast.description}</p> : null}
             </div>
           </div>
         ))}

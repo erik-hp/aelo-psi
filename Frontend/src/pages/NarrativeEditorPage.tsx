@@ -41,7 +41,7 @@ export function NarrativeEditorPage() {
         description="Ambiente de redação clínica longa com foco em legibilidade, preservação contínua de rascunhos (autosave) e scaffolds estruturados (SOAP/DAP)."
       />
 
-      <Card className="border-border shadow-sm">
+      <Card className="border-border-button-default shadow-sm">
         <CardContent className="p-5 md:p-7">
           <NarrativeEditor
             isSubmitting={mutation.isPending}
@@ -50,23 +50,23 @@ export function NarrativeEditorPage() {
 
           {/* Feedback cognitivo imediato em estágios (<400ms - Limite de Doherty) */}
           {mutation.isPending ? (
-            <div className="mt-6 space-y-4 rounded-lg border border-primary/30 bg-primary/5 p-5 animate-pulse">
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-                <Sparkles className="h-4 w-4 animate-spin text-primary" />
+            <div className="mt-6 space-y-4 rounded-lg border border-border-focus-ring bg-status-blue-background p-5 animate-pulse">
+              <div className="flex items-center gap-2 text-body-semibold text-status-blue-text">
+                <Sparkles className="h-4 w-4 animate-spin text-status-blue-text" />
                 Processamento Cognitivo em Execução pela IA Consultiva
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 text-xs">
-                <div className="flex items-center gap-2 rounded border border-border/60 bg-background/80 p-2.5">
-                  <Brain className="h-4 w-4 text-primary shrink-0" />
+              <div className="grid gap-3 sm:grid-cols-3 text-caption-1-regular">
+                <div className="flex items-center gap-2 rounded border border-border-button-default bg-background-full p-2.5">
+                  <Brain className="h-4 w-4 text-status-blue-text shrink-0" />
                   <span>1. Indexando narrativa clínica e vocabulário afetivo</span>
                 </div>
-                <div className="flex items-center gap-2 rounded border border-border/60 bg-background/80 p-2.5">
-                  <Network className="h-4 w-4 text-accent shrink-0" />
+                <div className="flex items-center gap-2 rounded border border-border-button-default bg-background-full p-2.5">
+                  <Network className="h-4 w-4 text-status-lime-text shrink-0" />
                   <span>2. Mapeando entidades, sintomas e hipóteses</span>
                 </div>
-                <div className="flex items-center gap-2 rounded border border-border/60 bg-background/80 p-2.5">
-                  <Cpu className="h-4 w-4 text-amber-400 shrink-0" />
+                <div className="flex items-center gap-2 rounded border border-border-button-default bg-background-full p-2.5">
+                  <Cpu className="h-4 w-4 text-status-yellow-text shrink-0" />
                   <span>3. Estruturando proposições para supervisão humana</span>
                 </div>
               </div>

@@ -9,19 +9,19 @@ cytoscape.use(fcose);
 
 export function VaultCytoscapeSkeleton() {
   return (
-    <div className="flex h-[460px] w-full flex-col justify-between rounded-md border border-border bg-card/60 p-6 animate-pulse">
+    <div className="flex h-[460px] w-full flex-col justify-between rounded-md border border-border-button-default bg-background-primary-default p-6 animate-pulse">
       <div className="flex items-center justify-between">
-        <div className="h-4 w-44 rounded bg-muted/80" />
-        <div className="h-7 w-20 rounded bg-muted/60" />
+        <div className="h-4 w-44 rounded bg-background-tertiary-default" />
+        <div className="h-7 w-20 rounded bg-background-tertiary-default" />
       </div>
       <div className="flex flex-col items-center justify-center space-y-3">
-        <div className="h-12 w-12 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        <p className="text-xs text-muted-foreground">Renderizando topologia conceitual do grafo...</p>
+        <div className="h-12 w-12 rounded-full border-2 border-border-focus-ring border-t-border-focus-ring animate-spin" />
+        <p className="text-caption-1-regular text-text-secondary">Renderizando topologia conceitual do grafo...</p>
       </div>
       <div className="flex gap-4">
-        <div className="h-3 w-20 rounded bg-muted/50" />
-        <div className="h-3 w-20 rounded bg-muted/50" />
-        <div className="h-3 w-20 rounded bg-muted/50" />
+        <div className="h-3 w-20 rounded bg-background-tertiary-default" />
+        <div className="h-3 w-20 rounded bg-background-tertiary-default" />
+        <div className="h-3 w-20 rounded bg-background-tertiary-default" />
       </div>
     </div>
   );
@@ -39,6 +39,8 @@ export function VaultCytoscapeCanvas({
 
   useEffect(() => {
     if (!container.current) return;
+    const styles = getComputedStyle(container.current);
+    const color = (name: string) => styles.getPropertyValue(`--color-vault-${name}`).trim() || "CanvasText";
     const parent = new Map(
       graph.communities.flatMap((community, index) =>
         community.map((id) => [id, `community-${index}`] as const),
@@ -79,8 +81,8 @@ export function VaultCytoscapeCanvas({
             "font-size": "11px",
             "text-wrap": "wrap",
             "text-max-width": "90px",
-            "background-color": "#60a5fa",
-            color: "#0f172a",
+            "background-color": color("event"),
+            color: color("node-text"),
             "text-valign": "center",
             "text-halign": "center",
             width: "36px",
@@ -89,15 +91,15 @@ export function VaultCytoscapeCanvas({
         },
         {
           selector: 'node[kind = "symptom"]',
-          style: { "background-color": "#f87171", color: "#ffffff" },
+          style: { "background-color": color("symptom"), color: color("symptom-text") },
         },
         {
           selector: 'node[kind = "context"]',
-          style: { "background-color": "#fbbf24", color: "#0f172a" },
+          style: { "background-color": color("context"), color: color("node-text") },
         },
         {
           selector: 'node[kind = "intervention"]',
-          style: { "background-color": "#34d399", color: "#0f172a" },
+          style: { "background-color": color("intervention"), color: color("node-text") },
         },
         {
           selector: 'node[id ^= "community-"]',
@@ -105,19 +107,19 @@ export function VaultCytoscapeCanvas({
             "background-opacity": 0.06,
             "border-style": "dashed",
             "border-width": 2,
-            "border-color": "#64748b",
+            "border-color": color("community"),
             "text-valign": "top",
             "text-halign": "center",
             "font-size": "10px",
-            color: "#64748b",
+            color: color("community"),
           },
         },
         {
           selector: "edge",
           style: {
             width: 2,
-            "line-color": "#94a3b8",
-            "target-arrow-color": "#94a3b8",
+            "line-color": color("edge"),
+            "target-arrow-color": color("edge"),
             "target-arrow-shape": "triangle",
             "curve-style": "bezier",
           },
@@ -165,7 +167,7 @@ export function VaultCytoscapeCanvas({
   return (
     <div className="space-y-2">
       {/* Container relativo do Grafo com Controles Flutuantes */}
-      <div className="relative rounded-md border border-border bg-slate-950/20 overflow-hidden shadow-inner">
+      <div className="relative rounded-md border border-border-button-default bg-background-secondary-default overflow-hidden shadow-inner">
         <div
           ref={container}
           className="h-[460px] w-full"
@@ -174,7 +176,7 @@ export function VaultCytoscapeCanvas({
         />
 
         {/* Controles Flutuantes de Zoom (Lei de Fitts) */}
-        <div className="absolute right-3 top-3 z-10 flex flex-col gap-1 rounded-lg border border-border/80 bg-background/85 p-1 shadow-md backdrop-blur-sm">
+        <div className="absolute right-3 top-3 z-10 flex flex-col gap-1 rounded-lg border border-border-button-default bg-background-full p-1 shadow-md backdrop-blur-sm">
           <Button
             type="button"
             variant="ghost"
@@ -182,7 +184,7 @@ export function VaultCytoscapeCanvas({
             onClick={() => handleZoom("in")}
             title="Aumentar zoom (+)"
             aria-label="Aumentar zoom"
-            className="h-8 w-8 text-foreground hover:bg-secondary"
+            className="h-8 w-8 text-text-primary hover:bg-background-secondary-default"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -194,12 +196,12 @@ export function VaultCytoscapeCanvas({
             onClick={() => handleZoom("out")}
             title="Diminuir zoom (-)"
             aria-label="Diminuir zoom"
-            className="h-8 w-8 text-foreground hover:bg-secondary"
+            className="h-8 w-8 text-text-primary hover:bg-background-secondary-default"
           >
             <Minus className="h-4 w-4" />
           </Button>
 
-          <div className="my-0.5 border-t border-border/60" />
+          <div className="my-0.5 border-t border-border-button-default" />
 
           <Button
             type="button"
@@ -208,7 +210,7 @@ export function VaultCytoscapeCanvas({
             onClick={handleFit}
             title="Ajustar e centralizar grafo"
             aria-label="Ajustar e centralizar grafo"
-            className="h-8 w-8 text-foreground hover:bg-secondary"
+            className="h-8 w-8 text-text-primary hover:bg-background-secondary-default"
           >
             <Maximize2 className="h-3.5 w-3.5" />
           </Button>
@@ -216,27 +218,27 @@ export function VaultCytoscapeCanvas({
       </div>
 
       {/* Legenda Cromática Formal dos Tipos de Nós no DOM (Lei de Jakob e Estética-Usabilidade) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/70 bg-secondary/30 px-3 py-2 text-xs">
-        <span className="font-semibold text-muted-foreground">Legenda dos Nós:</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border-button-default bg-background-secondary-default px-3 py-2 text-caption-1-regular">
+        <span className="text-body-semibold text-text-secondary">Legenda dos Nós:</span>
         <div className="flex flex-wrap items-center gap-3">
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#60a5fa] ring-1 ring-white/20" />
+          <span className="flex items-center gap-1.5 text-text-secondary">
+            <span className="h-2.5 w-2.5 rounded-full bg-vault-event ring-1 ring-border-button-default" />
             <span>Conceito</span>
           </span>
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#f87171] ring-1 ring-white/20" />
+          <span className="flex items-center gap-1.5 text-text-secondary">
+            <span className="h-2.5 w-2.5 rounded-full bg-vault-symptom ring-1 ring-border-button-default" />
             <span>Sintoma</span>
           </span>
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#fbbf24] ring-1 ring-white/20" />
+          <span className="flex items-center gap-1.5 text-text-secondary">
+            <span className="h-2.5 w-2.5 rounded-full bg-vault-context ring-1 ring-border-button-default" />
             <span>Tema / Contexto</span>
           </span>
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#34d399] ring-1 ring-white/20" />
+          <span className="flex items-center gap-1.5 text-text-secondary">
+            <span className="h-2.5 w-2.5 rounded-full bg-vault-intervention ring-1 ring-border-button-default" />
             <span>Intervenção</span>
           </span>
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded border border-dashed border-slate-400 bg-slate-500/10" />
+          <span className="flex items-center gap-1.5 text-text-secondary">
+            <span className="h-2.5 w-2.5 rounded border border-dashed border-border-button-default bg-background-secondary-default" />
             <span>Comunidade (Leiden)</span>
           </span>
         </div>

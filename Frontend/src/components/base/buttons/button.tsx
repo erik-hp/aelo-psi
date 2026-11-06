@@ -109,8 +109,8 @@ const styles = sortCx({
   },
 
   label: {
-    medium: "inline-flex items-center justify-center px-1 shrink-0",    // px=4
-    small:  "inline-flex items-center justify-center px-0.5 shrink-0",  // px=2
+    medium: "inline-flex min-w-0 items-center justify-center px-1",    // px=4
+    small:  "inline-flex min-w-0 items-center justify-center px-0.5",  // px=2
     xs:     "inline-flex items-center justify-center px-0.5 shrink-0",  // px=2
   },
 

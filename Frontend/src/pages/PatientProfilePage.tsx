@@ -22,13 +22,14 @@ import { SessionCard } from "@/components/sessions/SessionCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabPanel, TabList, Tab } from "@/components/base/tabs/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/useToast";
 import { clinicalService } from "@/services/clinicalService";
 import { clinicalDraftService } from "@/services/clinicalDraftService";
 import { isApiMode } from "@/services/runtime";
 import type { TherapySession } from "@/types/clinical";
+import { PageLoading } from "@/components/ui/page-state";
 
 function SessionAnalysisBlock({
   patientId,
@@ -127,10 +128,10 @@ function SessionAnalysisBlock({
   });
 
   return (
-    <div className="rounded-lg border border-border/80 bg-secondary/20 p-3 transition-colors hover:border-primary/30">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-          <Brain className="h-4 w-4 text-primary" />
+    <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 transition-colors hover:border-border-focus-ring">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 text-caption-1-medium text-text-secondary">
+          <Brain className="h-4 w-4 text-status-blue-text" />
           <span>Análise Assistiva por IA (Sessão {session.id.slice(0, 8)})</span>
         </div>
         <Button
@@ -138,26 +139,26 @@ function SessionAnalysisBlock({
           variant="outline"
           size="sm"
           onClick={() => { setDraftReady(false); setPreview(null); setIsOpen((prev) => !prev); }}
-          className="h-7 text-xs font-medium text-foreground hover:bg-secondary"
+          className="h-7 text-caption-1-medium text-text-primary hover:bg-background-secondary-default"
         >
           {isOpen ? "Ocultar editor de análise" : "Analisar sessão com IA"}
         </Button>
       </div>
 
       {isOpen && (
-        <div className="mt-3 space-y-3 border-t border-border/60 pt-3">
-          <label className="text-xs font-medium text-muted-foreground" htmlFor={`analysis-text-${session.id}`}>
+        <div className="mt-3 space-y-3 border-t border-border-button-default pt-3">
+          <label className="text-caption-1-medium text-text-secondary" htmlFor={`analysis-text-${session.id}`}>
             Texto do prontuário para extração de entidades e síntese clínica
           </label>
           <Textarea
             id={`analysis-text-${session.id}`}
-            className="min-h-32 text-sm leading-relaxed"
+            className="min-h-32 text-body-regular"
             value={content}
             onChange={(event) => { setContent(event.target.value); setPreview(null); }}
             placeholder="Insira aqui o texto do prontuário que será analisado pela IA assistiva..."
           />
-          {preview !== null ? <div className="rounded border p-3 text-xs"><p>Texto preparado para a IA. Confira os identificadores antes de confirmar:</p><pre className="whitespace-pre-wrap break-words">{preview}</pre></div> : null}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+          {preview !== null ? <div className="rounded border p-3 text-caption-1-regular"><p>Texto preparado para a IA. Confira os identificadores antes de confirmar:</p><pre className="whitespace-pre-wrap break-words">{preview}</pre></div> : null}
+          <div className="flex flex-col gap-3 text-caption-1-regular text-text-secondary sm:flex-row sm:items-center sm:justify-between">
             <span>{draftError ? "Falha ao salvar o rascunho. Copie o texto antes de sair." : "Mínimo 30 caracteres para extração ontológica."}</span>
             <Button
               disabled={mutation.isPending || (isApiMode && !draftReady) || content.trim().length < 30}
@@ -181,7 +182,7 @@ function SessionAnalysisBlock({
 
 export function PatientProfilePage() {
   const { patientId = "" } = useParams();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["patient", patientId],
     queryFn: () => clinicalService.getPatient(patientId),
   });
@@ -211,15 +212,17 @@ export function PatientProfilePage() {
       const el = document.getElementById(`note-${noteId}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.classList.add("ring-2", "ring-primary");
-        setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 2500);
+        el.classList.add("ring-2", "ring-border-focus-ring");
+        setTimeout(() => el.classList.remove("ring-2", "ring-border-focus-ring"), 2500);
       }
     }, 120);
   };
 
+  if (isLoading) return <PageLoading label="Carregando perfil do paciente…" />;
+
   if (!data) {
     return (
-      <p role="alert" className="text-sm text-destructive">
+      <p role="alert" className="text-body-regular text-text-error-primary">
         Não foi possível carregar o perfil do paciente.
       </p>
     );
@@ -243,52 +246,52 @@ export function PatientProfilePage() {
       />
 
       {/* Particionamento em 4 Abas Clínicas com foco e teclado acessível (WAI-ARIA) */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4 space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1.5 bg-secondary/50 p-1.5 md:grid-cols-4">
-          <TabsTrigger value="overview" className="gap-2 py-2.5 text-xs md:text-sm font-medium">
+      <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(String(key))} className="mt-4 min-w-0 gap-6">
+        <TabList showIndicator={false} aria-label="Seções do prontuário" className="grid w-full grid-cols-1 gap-1 rounded-xl bg-background-secondary-default p-1 sm:grid-cols-2 xl:grid-cols-4">
+          <Tab id="overview" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <User className="h-4 w-4" />
             Resumo Clínico
-          </TabsTrigger>
-          <TabsTrigger value="sessions" className="gap-2 py-2.5 text-xs md:text-sm font-medium">
+          </Tab>
+          <Tab id="sessions" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <FileText className="h-4 w-4" />
             Prontuários e Sessões
-          </TabsTrigger>
-          <TabsTrigger value="longitudinal" className="gap-2 py-2.5 text-xs md:text-sm font-medium">
+          </Tab>
+          <Tab id="longitudinal" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <TrendingUp className="h-4 w-4" />
             Evolução Longitudinal
-          </TabsTrigger>
-          <TabsTrigger value="vault" className="gap-2 py-2.5 text-xs md:text-sm font-medium">
+          </Tab>
+          <Tab id="vault" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <Network className="h-4 w-4" />
             Cofre Cognitivo (Vault)
-          </TabsTrigger>
-        </TabsList>
+          </Tab>
+        </TabList>
 
         {/* ABA 1: RESUMO CLÍNICO */}
-        <TabsContent value="overview" className="space-y-6">
+        <TabPanel id="overview" className="min-w-0 space-y-6">
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card>
               <CardContent className="p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Idade</p>
-                <p className="mt-2 text-2xl font-semibold">
+                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Idade</p>
+                <p className="mt-2 text-title-2-semibold">
                   {data.patient.age === null ? "—" : `${data.patient.age} anos`}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tempo em tratamento</p>
-                <p className="mt-2 text-2xl font-semibold">{data.patient.treatmentDuration}</p>
+                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Tempo em tratamento</p>
+                <p className="mt-2 text-title-2-semibold">{data.patient.treatmentDuration}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Periodicidade</p>
-                <p className="mt-2 text-2xl font-semibold">{data.patient.sessionFrequency}</p>
+                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Periodicidade</p>
+                <p className="mt-2 text-title-2-semibold">{data.patient.sessionFrequency}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Risco clínico</p>
+                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Risco clínico</p>
                 <div className="mt-3">
                   <Badge
                     variant={
@@ -310,25 +313,25 @@ export function PatientProfilePage() {
             <Card>
               <CardContent className="grid gap-4 p-5 sm:grid-cols-2">
                 <div>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                  <p className="flex items-center gap-2 text-body-regular text-text-secondary">
+                    <CheckCircle2 className="h-4 w-4 text-status-lime-text" />
                     Sessões realizadas
                   </p>
-                  <p className="mt-2 text-2xl font-semibold">{completedSessions.length}</p>
+                  <p className="mt-2 text-title-2-semibold">{completedSessions.length}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CalendarClock className="h-4 w-4 text-primary" />
+                  <p className="flex items-center gap-2 text-body-regular text-text-secondary">
+                    <CalendarClock className="h-4 w-4 text-status-blue-text" />
                     Sessões agendadas
                   </p>
-                  <p className="mt-2 text-2xl font-semibold">{scheduledSessions.length}</p>
+                  <p className="mt-2 text-title-2-semibold">{scheduledSessions.length}</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-5">
-                <p className="text-sm font-medium text-muted-foreground">Próximas sessões</p>
+                <p className="text-body-medium text-text-secondary">Próximas sessões</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {scheduledSessions.length ? (
                     scheduledSessions.map((item) => (
@@ -349,41 +352,41 @@ export function PatientProfilePage() {
           </section>
 
           {/* Síntese Atual dos Prontuários */}
-          <Card className="border-border">
+          <Card className="border-border-button-default">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="h-4 w-4 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-headline-regular">
+                <Sparkles className="h-4 w-4 text-status-blue-text" />
                 Síntese Clínica Consolidada da IA Consultiva
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-md border border-border p-3">
-                  <p className="text-xs text-muted-foreground">Humor</p>
-                  <p className="mt-2 text-xl font-semibold">
+                <div className="rounded-md border border-border-button-default p-3">
+                  <p className="text-caption-1-regular text-text-secondary">Humor</p>
+                  <p className="mt-2 text-title-3-semibold">
                     {analysis?.moodScore == null ? "—" : `${analysis.moodScore}%`}
                   </p>
                 </div>
-                <div className="rounded-md border border-border p-3">
-                  <p className="text-xs text-muted-foreground">Estado emocional</p>
-                  <p className="mt-2 text-xl font-semibold">
+                <div className="rounded-md border border-border-button-default p-3">
+                  <p className="text-caption-1-regular text-text-secondary">Estado emocional</p>
+                  <p className="mt-2 text-title-3-semibold">
                     {analysis?.emotionalStateScore == null ? "—" : `${analysis.emotionalStateScore}%`}
                   </p>
                 </div>
-                <div className="rounded-md border border-border p-3">
-                  <p className="text-xs text-muted-foreground">Encargo psicológico</p>
-                  <p className="mt-2 text-xl font-semibold">
+                <div className="rounded-md border border-border-button-default p-3">
+                  <p className="text-caption-1-regular text-text-secondary">Encargo psicológico</p>
+                  <p className="mt-2 text-title-3-semibold">
                     {analysis?.psychologicalBurdenScore == null ? "—" : `${analysis.psychologicalBurdenScore}%`}
                   </p>
                 </div>
               </div>
 
               <section className="space-y-2">
-                <h3 className="flex items-center gap-2 text-sm font-medium">
-                  <AlertTriangle className="h-4 w-4 text-amber-300" />
+                <h3 className="flex items-center gap-2 text-body-medium">
+                  <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
                   Cenários de Risco Identificados
                 </h3>
-                <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                <ul className="list-inside list-disc space-y-1 text-body-regular text-text-secondary">
                   {riskScenarios.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
@@ -391,7 +394,7 @@ export function PatientProfilePage() {
               </section>
 
               <section className="space-y-2">
-                <h3 className="text-sm font-medium">Maiores Pontos a Considerar</h3>
+                <h3 className="text-body-medium">Maiores Pontos a Considerar</h3>
                 <div className="flex flex-wrap gap-2">
                   {considerations.map((item) => (
                     <Badge key={item} variant="default">
@@ -402,14 +405,14 @@ export function PatientProfilePage() {
               </section>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabPanel>
 
         {/* ABA 2: PRONTUÁRIOS E SESSÕES */}
-        <TabsContent value="sessions" className="space-y-4">
-          <div className="flex items-center justify-between border-b border-border/80 pb-3">
+        <TabPanel id="sessions" className="min-w-0 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-button-default pb-3">
             <div>
-              <h2 className="text-base font-semibold">Histórico de Atendimentos e Prontuários</h2>
-              <p className="text-xs text-muted-foreground">
+              <h2 className="text-headline-semibold">Histórico de Atendimentos e Prontuários</h2>
+              <p className="text-caption-1-regular text-text-secondary">
                 Evoluções documentais da psicoterapia com editor de análise colapsável sob demanda.
               </p>
             </div>
@@ -427,13 +430,13 @@ export function PatientProfilePage() {
               </div>
             ))}
           </div>
-        </TabsContent>
+        </TabPanel>
 
         {/* ABA 3: EVOLUÇÃO LONGITUDINAL */}
-        <TabsContent value="longitudinal" className="space-y-6">
-          <div className="border-b border-border/80 pb-3">
-            <h2 className="text-base font-semibold">Métricas e Evolução Longitudinal</h2>
-            <p className="text-xs text-muted-foreground">
+        <TabPanel id="longitudinal" className="min-w-0 space-y-6">
+          <div className="border-b border-border-button-default pb-3">
+            <h2 className="text-headline-semibold">Métricas e Evolução Longitudinal</h2>
+            <p className="text-caption-1-regular text-text-secondary">
               Variação dos indicadores clínicos estimada ao longo do acompanhamento psicoterapêutico.
             </p>
           </div>
@@ -458,12 +461,12 @@ export function PatientProfilePage() {
               dataKey="psychologicalBurden"
             />
           </div>
-        </TabsContent>
+        </TabPanel>
 
         {/* ABA 4: COFRE COGNITIVO (VAULT) */}
-        <TabsContent value="vault" className="space-y-4">
+        <TabPanel id="vault" className="min-w-0 space-y-4">
           <PatientVault patientId={patientId} analyses={data.analyses} onSelectNote={handleSelectNote} />
-        </TabsContent>
+        </TabPanel>
       </Tabs>
     </>
   );

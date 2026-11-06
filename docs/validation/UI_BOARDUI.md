@@ -36,6 +36,39 @@ Não executados: inspeção visual em navegador, dimensões móveis, leitor de t
 
 ## Revisão e próximo item
 
+### Revisão de todas as páginas — 06/11/2026
+
+Continuação solicitada de UI-01 no PR #15. Revisão do código e teste de renderização das 14 páginas, incluindo os componentes de layout e os blocos internos compartilhados:
+
+| Página | Revisão aplicada |
+| --- | --- |
+| Dashboard | Tokens, tipografia, ações de navegação BoardUI e colunas redimensionáveis |
+| Pacientes | Busca, filtros, cartões, carregamento e erro distintos de lista vazia |
+| Perfil do paciente | Abas oficiais com teclado, adaptação em grade, ações e textos com quebra de linha |
+| Agenda | Busca, filtros, calendário com rolagem local, ações e diálogo oficial de agendamento |
+| Editor narrativo | Tipografia, superfícies e feedback de processamento |
+| Financeiro | Tabela oficial, métricas e estado explícito de módulo indisponível |
+| Auditoria | Busca, filtros, tabela oficial e diálogo de inspeção |
+| Usuários | Tabela oficial; demonstração identificada e removida da apresentação em modo API |
+| Configurações | Cartões, tipografia e superfícies compartilhadas |
+| Login | Cores e superfícies consistentes com o restante da aplicação |
+| Página não encontrada | Tipografia e ação de retorno com o mesmo botão de navegação |
+| Sessões (legada) | Componentes compartilhados e estados de carregamento/falha |
+| IA assistiva (legada) | Componentes compartilhados e estados de carregamento/falha |
+| Longitudinal (legada) | Filtros, gráficos e estado sem paciente disponível |
+
+As rotas de sessões, IA e longitudinal continuam redirecionando conforme `AppRoutes.tsx`; suas páginas existentes foram revisadas e renderizadas isoladamente nos testes, sem reativar rotas.
+
+O shell recebe largura máxima, trilhas de grid que podem encolher, link para pular a navegação e estado expandido do menu. A navegação móvel fechada usa `display: none` abaixo de `lg`, evitando que seus links permaneçam apenas deslocados para fora da tela. Textos secundários escuros recebem tokens mais claros; isso não é comprovação de conformidade de contraste de toda a interface.
+
+Diálogos usam o Modal oficial (foco contido, Escape, restauração de foco e rolagem interna). Tabelas usam os primitivos oficiais. Select mantém o contrato nativo necessário aos formulários e filtros, estendendo o shell `inputFieldClassName` do BoardUI. As abas em grade usam superfície selecionada, sem o indicador horizontal de linha única. Esses ajustes locais devem ser preservados em atualizações pelo MCP.
+
+Markdown e listas de evidências usam rolagem com ScrollFade. Gráficos usam tokens de tema; grafo e legenda compartilham tokens categóricos explícitos. Toasts ficam acima dos diálogos. Não foram alterados endpoints, autorização, algoritmos clínicos, dados persistidos ou os redirecionamentos existentes.
+
+Verificação adicional: 14 testes de renderização com fixtures sintéticas e dois testes de teclado (abas/painéis; foco e Escape do modal). O ambiente DOM ganhou polyfills de `CSS.escape` e `ResizeObserver`, usados apenas nos testes. A execução integrada aprovou **108 testes em 20 arquivos**. Lint: 0 erros e 13 avisos. Build aprovado; continuam os avisos de comentários Zod e chunks grandes.
+
+**Limite de evidência:** a tentativa de abrir `iab` retornou `Browser is not available: iab`. Não houve inspeção visual real em desktop/móvel, zoom, leitor de tela ou medição completa de contraste. Os testes DOM e a revisão de breakpoints não equivalem a screenshots nem a certificação WCAG. Permanece **EM REVISÃO** até a conferência visual.
+
 Antes de mesclar, executar `npm.cmd run dev`, conferir login, pacientes, agenda, auditoria e editor em desktop/móvel, incluindo foco visível, busca, diálogos e estados de erro/carregamento. O PR #14 de identidade visual também altera o login: conciliar sua marca com os estilos desta branch durante a revisão.
 
 O escopo não inclui back-end, dados, autorização, assinatura, inferência ou indexação. Continuam pendentes os critérios de G0 descritos no registro. Nenhuma afirmação de conformidade clínica ou jurídica decorre desta integração.

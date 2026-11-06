@@ -6,6 +6,7 @@ import { usePatientVault } from "@/hooks/usePatientVault";
 import { clinicalService } from "@/services/clinicalService";
 import type { AIAnalysis } from "@/types/clinical";
 import { isApiMode } from "@/services/runtime";
+import { Tabs, TabList, Tab, TabPanel } from "@/components/base/tabs/tabs";
 import { VaultApprovalModal } from "@/components/patients/VaultApprovalModal";
 import { VaultNodeInspector } from "@/components/patients/VaultNodeInspector";
 import { VaultTimeline } from "@/components/patients/VaultTimeline";
@@ -52,15 +53,15 @@ export function PatientVault({
   const pendingCheckpoint = graph?.checkpoints.find((c) => c.analysis_id === approvalId);
 
   return (
-    <Card className="mt-6 border-border shadow-sm">
+    <Card className="mt-6 border-border-button-default shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Network className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-title-3-regular">
+              <Network className="h-5 w-5 text-status-blue-text" />
               Cofre Cognitivo (Vault)
             </CardTitle>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-caption-1-regular text-text-secondary">
               Estruturação longitudinal em grafo de conhecimento (GraphRAG) a partir de trechos literais do prontuário.
             </p>
           </div>
@@ -79,56 +80,42 @@ export function PatientVault({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Abas com modelos mentais canônicos (substituindo jargão de saves pela Lei de Jakob) */}
-        <div
-          className="flex gap-2 border-b border-border/80 pb-2"
-          role="tablist"
+        <Tabs selectedKey={tab} onSelectionChange={(key) => setTab(key as "graph" | "timeline")}>
+        <TabList
+          showIndicator={false}
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
           aria-label="Visões do Cofre Cognitivo"
         >
-          <Button
-            type="button"
-            variant={tab === "graph" ? "default" : "outline"}
-            role="tab"
-            aria-selected={tab === "graph"}
-            onClick={() => setTab("graph")}
-            className="gap-2 text-xs font-medium"
-          >
+          <Tab id="graph" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
             <GitBranch className="h-3.5 w-3.5" />
             Topologia do Grafo Cognitivo
-          </Button>
+          </Tab>
 
-          <Button
-            type="button"
-            variant={tab === "timeline" ? "default" : "outline"}
-            role="tab"
-            aria-selected={tab === "timeline"}
-            onClick={() => setTab("timeline")}
-            className="gap-2 text-xs font-medium"
-          >
+          <Tab id="timeline" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
             <History className="h-3.5 w-3.5" />
             Histórico de Checkpoints Clínicos
-          </Button>
-        </div>
+          </Tab>
+        </TabList>
 
-        {tab === "graph" ? (
-          <section role="tabpanel" aria-label="Grafo do Vault" className="space-y-3">
+          <TabPanel id="graph" aria-label="Grafo do Vault" className="min-w-0 space-y-3">
             {nodes.length ? (
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
                 <Suspense
                   fallback={
-                    <div className="flex h-[460px] w-full flex-col justify-between rounded-md border border-border bg-card/60 p-6 animate-pulse">
+                    <div className="flex h-[460px] w-full flex-col justify-between rounded-md border border-border-button-default bg-background-primary-default p-6 animate-pulse">
                       <div className="flex items-center justify-between">
-                        <div className="h-4 w-44 rounded bg-muted/80" />
-                        <div className="h-7 w-20 rounded bg-muted/60" />
+                        <div className="h-4 w-44 rounded bg-background-tertiary-default" />
+                        <div className="h-7 w-20 rounded bg-background-tertiary-default" />
                       </div>
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                        <p className="text-xs text-muted-foreground">
+                        <div className="h-10 w-10 rounded-full border-2 border-border-focus-ring border-t-border-focus-ring animate-spin" />
+                        <p className="text-caption-1-regular text-text-secondary">
                           Renderizando topologia conceitual do grafo...
                         </p>
                       </div>
                       <div className="flex gap-4">
-                        <div className="h-3 w-20 rounded bg-muted/50" />
-                        <div className="h-3 w-20 rounded bg-muted/50" />
+                        <div className="h-3 w-20 rounded bg-background-tertiary-default" />
+                        <div className="h-3 w-20 rounded bg-background-tertiary-default" />
                       </div>
                     </div>
                   }
@@ -139,22 +126,22 @@ export function PatientVault({
                 <VaultNodeInspector graph={graph!} nodeId={selectedNode} onSelectNote={onSelectNote} />
               </div>
             ) : (
-              <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                <Network className="mb-2 h-8 w-8 text-muted-foreground/50" />
-                <p className="font-medium text-foreground">O grafo ainda não possui entidades extraídas.</p>
-                <p className="mt-1 text-xs">
+              <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-border-button-default p-8 text-center text-body-regular text-text-secondary">
+                <Network className="mb-2 h-8 w-8 text-text-secondary" />
+                <p className="text-body-medium text-text-primary">O grafo ainda não possui entidades extraídas.</p>
+                <p className="mt-1 text-caption-1-regular">
                   Envie anotações clínicas na aba de Prontuários para gerar a análise assistiva e estruturar o cofre cognitivo.
                 </p>
               </div>
             )}
 
             {!!graph?.communities.length && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-caption-1-regular text-text-secondary">
                 {graph.communities.length} comunidades detectadas via algoritmo de Leiden. Agrupamentos algorítmicos possuem caráter estritamente consultivo e não configuram diagnóstico autônomo (CFP nº 009/2024).
               </p>
             )}
-          </section>
-        ) : (
+          </TabPanel>
+          <TabPanel id="timeline" className="min-w-0">
           <VaultTimeline
             checkpoints={graph?.checkpoints ?? []}
             markdown={markdown}
@@ -166,7 +153,8 @@ export function PatientVault({
               void clinicalService.downloadVaultCheckpoint(id);
             }}
           />
-        )}
+          </TabPanel>
+        </Tabs>
 
         <VaultApprovalModal
           open={approvalId !== null}

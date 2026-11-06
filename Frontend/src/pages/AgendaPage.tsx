@@ -14,12 +14,13 @@ import {
   Filter,
   Play,
   Plus,
-  Search,
   Sparkles,
-  UserCheck,
   X,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Dialog } from "@/components/ui/modal";
+import { RiSearchLine } from "@remixicon/react";
+import { ButtonLink } from "@/components/ui/button-link";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -296,13 +297,13 @@ export function AgendaPage() {
 
       {/* Alternância Dual Ergonômica (Linha do Tempo vs Matriz Mensal - Lei de Hick) */}
       <section className="mt-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-button-default bg-background-primary-default p-2">
           <div className="flex items-center gap-2">
             <Button
               variant={viewMode === "timeline" ? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("timeline")}
-              className="gap-2 font-medium"
+              className="gap-2 text-body-medium"
             >
               <Clock className="h-4 w-4" />
               Linha do Tempo Diária
@@ -311,7 +312,7 @@ export function AgendaPage() {
               variant={viewMode === "matrix" ? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("matrix")}
-              className="gap-2 font-medium"
+              className="gap-2 text-body-medium"
             >
               <Calendar className="h-4 w-4" />
               Matriz Mensal
@@ -355,7 +356,7 @@ export function AgendaPage() {
 
       {/* Sugestão acolhedora caso o dia de hoje não tenha sessões cadastradas no mock */}
       {filteredItems.length === 0 && availableDates.length > 0 && selectedDate === today ? (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3.5 text-xs text-primary">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-focus-ring bg-status-blue-background p-3.5 text-caption-1-regular text-status-blue-text">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 shrink-0" />
             <span>
@@ -365,7 +366,7 @@ export function AgendaPage() {
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-7 border-primary/40 text-primary hover:bg-primary/10"
+            className="text-caption-1-regular h-7 border-border-focus-ring text-status-blue-text hover:bg-status-blue-background"
             onClick={() => {
               const nextAvailable = availableDates[0];
               if (nextAvailable) {
@@ -380,21 +381,21 @@ export function AgendaPage() {
       ) : null}
 
       {/* Grade Principal da Agenda */}
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_360px]">
+      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,22.5rem)]">
         <div className="space-y-4">
           {/* Barra de Filtros e Busca */}
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                className="pl-9"
+                leadingIcon={RiSearchLine}
+                aria-label="Buscar paciente na agenda"
                 placeholder="Buscar paciente na agenda..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
+              <Filter className="h-4 w-4 text-text-secondary shrink-0 hidden sm:block" />
               <Select
                 className="w-full sm:w-56"
                 value={status}
@@ -414,12 +415,12 @@ export function AgendaPage() {
 
           {/* MODO MATRIZ MENSAL (quando ativado pelo usuário para planejamento macro) */}
           {viewMode === "matrix" ? (
-            <Card className="border-border">
+            <Card className="border-border-button-default">
               <CardContent className="p-4 md:p-5">
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold capitalize">{monthLabel}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <h2 className="text-title-3-semibold capitalize">{monthLabel}</h2>
+                    <p className="mt-1 text-body-regular text-text-secondary">
                       Clique em um dia para selecionar e inspecionar os atendimentos.
                     </p>
                   </div>
@@ -445,11 +446,12 @@ export function AgendaPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-2">
+                <div className="overflow-x-auto rounded-xl" tabIndex={0} aria-label="Calendário mensal, role horizontalmente em telas estreitas">
+                <div className="grid min-w-[560px] grid-cols-7 gap-2">
                   {weekdays.map((weekday) => (
                     <div
                       key={weekday}
-                      className="px-1 pb-1 text-center text-xs font-semibold text-muted-foreground"
+                      className="px-1 pb-1 text-center text-caption-1-semibold text-text-secondary"
                     >
                       {weekday}
                     </div>
@@ -457,11 +459,13 @@ export function AgendaPage() {
                   {calendarDays.map((day) => (
                     <button
                       key={day.key}
+                      aria-label={`Selecionar dia ${day.key}`}
+                      aria-pressed={day.isSelected}
                       className={cn(
-                        "focus-ring min-h-20 rounded-md border border-border bg-background p-2 text-left transition hover:border-primary/40 hover:bg-secondary/60",
+                        "focus-ring min-h-20 rounded-md border border-border-button-default bg-background-full p-2 text-left transition hover:border-border-focus-ring hover:bg-background-secondary-default",
                         !day.isCurrentMonth && "opacity-35",
-                        day.isSelected && "border-primary bg-primary/10 shadow-sm",
-                        day.highAttention && "border-amber-400/40",
+                        day.isSelected && "border-border-focus-ring bg-status-blue-background shadow-sm",
+                        day.highAttention && "border-status-yellow-text",
                       )}
                       type="button"
                       onClick={() => {
@@ -472,14 +476,14 @@ export function AgendaPage() {
                     >
                       <span
                         className={cn(
-                          "inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-medium",
-                          day.isToday && "bg-secondary text-foreground font-bold",
-                          day.isSelected && "bg-primary text-primary-foreground font-bold",
+                          "inline-flex h-6 w-6 items-center justify-center rounded-md text-caption-1-medium",
+                          day.isToday && "bg-background-secondary-default text-text-primary text-body-bold",
+                          day.isSelected && "bg-accent-600 text-text-white text-body-bold",
                         )}
                       >
                         {day.date.getDate()}
                       </span>
-                      <span className="mt-1.5 block min-h-4 text-[11px] text-muted-foreground">
+                      <span className="mt-1.5 block min-h-4 text-caption-1-regular text-text-secondary">
                         {day.sessionCount ? `${day.sessionCount} ${day.sessionCount === 1 ? "sessão" : "sessões"}` : ""}
                       </span>
                       {day.sessionCount ? (
@@ -489,7 +493,7 @@ export function AgendaPage() {
                               key={idx}
                               className={cn(
                                 "h-1 flex-1 rounded-full",
-                                day.highAttention ? "bg-amber-400" : "bg-primary",
+                                day.highAttention ? "bg-status-yellow-background" : "bg-accent-600",
                               )}
                             />
                           ))}
@@ -498,18 +502,19 @@ export function AgendaPage() {
                     </button>
                   ))}
                 </div>
+                </div>
               </CardContent>
             </Card>
           ) : null}
 
           {/* CABEÇALHO DO DIA SELECIONADO NA LINHA DO TEMPO */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/80 pb-3 pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-button-default pb-3 pt-1">
             <div>
-              <h2 className="text-lg font-bold capitalize text-foreground flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
+              <h2 className="text-title-3-bold capitalize text-text-primary flex items-center gap-2">
+                <Clock className="h-5 w-5 text-status-blue-text" />
                 {selectedDateLabel}
               </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-caption-1-regular text-text-secondary mt-0.5">
                 {filteredItems.length} {filteredItems.length === 1 ? "sessão agendada" : "sessões agendadas"} para este dia
               </p>
             </div>
@@ -526,18 +531,18 @@ export function AgendaPage() {
                     key={item.id}
                     className={cn(
                       "transition-all shadow-sm border",
-                      item.status === "in_progress" && "border-primary/60 bg-primary/5",
-                      isHighRisk && "border-destructive/40 bg-destructive/5",
-                      item.status === "needs_review" && !isHighRisk && "border-amber-400/40 bg-amber-400/5",
+                      item.status === "in_progress" && "border-border-focus-ring bg-status-blue-background",
+                      isHighRisk && "border-border-error-default bg-status-rose-background",
+                      item.status === "needs_review" && !isHighRisk && "border-status-yellow-text bg-status-yellow-background",
                     )}
                   >
                     <CardContent className="p-5">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         {/* Bloco de Horário */}
                         <div className="flex items-center gap-2.5 lg:w-32 shrink-0">
-                          <div className="rounded-md border border-border bg-secondary/40 p-2 text-center">
-                            <Clock className="h-4 w-4 text-primary mx-auto mb-0.5" />
-                            <span className="text-sm font-bold text-foreground">{item.time}</span>
+                          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-2 text-center">
+                            <Clock className="h-4 w-4 text-status-blue-text mx-auto mb-0.5" />
+                            <span className="text-body-bold text-text-primary">{item.time}</span>
                           </div>
                         </div>
 
@@ -545,13 +550,13 @@ export function AgendaPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
-                              className="text-base font-bold text-foreground hover:text-primary transition"
+                              className="text-headline-bold text-text-primary hover:text-status-blue-text transition"
                               to={`/patients/${item.patientId}`}
                             >
                               {item.patientName}
                             </Link>
 
-                            <Badge variant={conf.badgeVariant} className="text-xs">
+                            <Badge variant={conf.badgeVariant} className="text-caption-1-regular">
                               {conf.label}
                             </Badge>
 
@@ -562,24 +567,24 @@ export function AgendaPage() {
                             ) : null}
                           </div>
 
-                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          <p className="mt-2 text-body-regular text-text-secondary">
                             {item.complement || "Sessão de psicoterapia • Sem observações preliminares"}
                           </p>
 
-                          <p className="mt-1 text-xs text-muted-foreground/80 italic">
+                          <p className="mt-1 text-caption-1-regular text-text-secondary italic">
                             {conf.description}
                           </p>
 
                           {/* Ações de Transição Rápida do Ciclo de Vida Clínico */}
-                          <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-border/50">
+                          <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-border-button-default">
                             {item.status === "draft" ? (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 text-xs gap-1.5"
+                                className="h-8 text-caption-1-regular gap-1.5"
                                 onClick={() => handleUpdateStatus(item.id, "in_progress")}
                               >
-                                <Play className="h-3.5 w-3.5 text-primary" />
+                                <Play className="h-3.5 w-3.5 text-status-blue-text" />
                                 Iniciar Consulta
                               </Button>
                             ) : null}
@@ -588,7 +593,7 @@ export function AgendaPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 text-xs gap-1.5 border-amber-400/40 text-amber-300 hover:bg-amber-400/10"
+                                className="h-8 text-caption-1-regular gap-1.5 border-status-yellow-text text-status-yellow-text hover:bg-status-yellow-background"
                                 onClick={() => handleUpdateStatus(item.id, "needs_review")}
                               >
                                 <ClipboardPenLine className="h-3.5 w-3.5" />
@@ -600,7 +605,7 @@ export function AgendaPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 text-xs gap-1.5 border-accent/40 text-accent hover:bg-accent/10"
+                                className="h-8 text-caption-1-regular gap-1.5 border-status-lime-text text-status-lime-text hover:bg-status-lime-background"
                                 onClick={() => handleUpdateStatus(item.id, "completed")}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -608,13 +613,13 @@ export function AgendaPage() {
                               </Button>
                             ) : null}
 
-                            <Link
+                            <ButtonLink
                               to={`/patients/${item.patientId}`}
-                              className="focus-ring inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
+                              size="small"
                             >
                               <span>Acessar Prontuário</span>
                               <ArrowRight className="h-3.5 w-3.5" />
-                            </Link>
+                            </ButtonLink>
                           </div>
                         </div>
                       </div>
@@ -633,23 +638,23 @@ export function AgendaPage() {
 
         {/* Coluna Lateral: Prioridades e Alertas Clínicos do Período */}
         <aside className="space-y-4">
-          <h2 className="text-base font-semibold flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
+          <h2 className="text-headline-semibold flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
             Prioridades do Período
           </h2>
           {attentionItems.length > 0 ? (
             attentionItems.map((item, index) => {
               const isSevere = (item.attentionIndex ?? 0) >= 80;
               return (
-                <Card key={item.id} className={isSevere ? "border-destructive/40" : undefined}>
+                <Card key={item.id} className={isSevere ? "border-border-error-default" : undefined}>
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        <span className="text-caption-1-semibold text-text-secondary uppercase tracking-wider">
                           Prioridade {index + 1}
                         </span>
                         <Link
-                          className="mt-0.5 block font-semibold text-sm hover:text-primary transition"
+                          className="mt-0.5 block text-body-semibold hover:text-status-blue-text transition"
                           to={`/patients/${item.patientId}`}
                         >
                           {item.patientName}
@@ -662,15 +667,15 @@ export function AgendaPage() {
                       ) : null}
                     </div>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="text-caption-1-regular text-text-secondary line-clamp-2">
                       {item.complement || "Acompanhamento longitudinal prioritário."}
                     </p>
 
-                    <div className="flex items-center justify-between pt-1 text-[11px] text-muted-foreground">
+                    <div className="flex items-center justify-between pt-1 text-caption-1-regular text-text-secondary">
                       <span>{item.date} às {item.time}</span>
                       <Link
                         to={`/patients/${item.patientId}`}
-                        className="text-primary hover:underline font-medium"
+                        className="text-status-blue-text hover:underline text-body-medium"
                       >
                         Prontuário
                       </Link>
@@ -680,7 +685,7 @@ export function AgendaPage() {
               );
             })
           ) : (
-            <div className="rounded-lg border border-border p-4 text-center text-xs text-muted-foreground">
+            <div className="rounded-lg border border-border-button-default p-4 text-center text-caption-1-regular text-text-secondary">
               Nenhuma sessão prioritária pendente no período.
             </div>
           )}
@@ -689,19 +694,13 @@ export function AgendaPage() {
 
       {/* MODAL FUNCIONAL DE NOVA SESSÃO (LEI DE FITTS: CAMPOS GENEROSOS E FOCO ACESSÍVEL) */}
       {isNewSessionOpen ? (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="new-session-title"
-        >
-          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+        <Dialog open onClose={() => setIsNewSessionOpen(false)} title="Agendar Nova Sessão Clínica">
             <div className="flex items-start justify-between">
               <div>
-                <h2 id="new-session-title" className="text-lg font-bold text-foreground">
+                <h2 id="new-session-title" className="text-title-3-bold text-text-primary">
                   Agendar Nova Sessão Clínica
                 </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-caption-1-regular text-text-secondary mt-0.5">
                   Preencha os dados do paciente e o horário para reserva na agenda.
                 </p>
               </div>
@@ -717,7 +716,7 @@ export function AgendaPage() {
 
             <form onSubmit={handleCreateSession} className="space-y-4">
               <div className="space-y-1.5">
-                <label htmlFor="patient-name-input" className="text-xs font-semibold text-foreground">
+                <label htmlFor="patient-name-input" className="text-caption-1-semibold text-text-primary">
                   Nome do Paciente *
                 </label>
                 <Input
@@ -732,7 +731,7 @@ export function AgendaPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label htmlFor="session-date-input" className="text-xs font-semibold text-foreground">
+                  <label htmlFor="session-date-input" className="text-caption-1-semibold text-text-primary">
                     Data da Consulta *
                   </label>
                   <Input
@@ -744,7 +743,7 @@ export function AgendaPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="session-time-input" className="text-xs font-semibold text-foreground">
+                  <label htmlFor="session-time-input" className="text-caption-1-semibold text-text-primary">
                     Horário *
                   </label>
                   <Input
@@ -758,7 +757,7 @@ export function AgendaPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="modality-select" className="text-xs font-semibold text-foreground">
+                <label htmlFor="modality-select" className="text-caption-1-semibold text-text-primary">
                   Modalidade do Atendimento
                 </label>
                 <Select
@@ -775,7 +774,7 @@ export function AgendaPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="complement-textarea" className="text-xs font-semibold text-foreground">
+                <label htmlFor="complement-textarea" className="text-caption-1-semibold text-text-primary">
                   Objetivo Clínico ou Observações
                 </label>
                 <Textarea
@@ -787,7 +786,7 @@ export function AgendaPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-border">
+              <div className="flex justify-end gap-3 pt-3 border-t border-border-button-default">
                 <Button
                   type="button"
                   variant="outline"
@@ -800,8 +799,7 @@ export function AgendaPage() {
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
+        </Dialog>
       ) : null}
     </>
   );

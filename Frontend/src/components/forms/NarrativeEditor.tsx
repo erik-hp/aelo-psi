@@ -199,10 +199,10 @@ export function NarrativeEditor({
   return (
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
       {/* Barra de utilitários clínicos: Scaffolds estruturados e status de autosave */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/80 bg-secondary/30 p-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-button-default bg-background-secondary-default p-2.5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mr-1">
-            <FileEdit className="h-3.5 w-3.5 text-primary" />
+          <span className="text-caption-1-semibold text-text-secondary flex items-center gap-1.5 mr-1">
+            <FileEdit className="h-3.5 w-3.5 text-status-blue-text" />
             Modelos Clínicos (CFP 01/2009):
           </span>
           <Button
@@ -210,7 +210,7 @@ export function NarrativeEditor({
             variant="outline"
             size="sm"
             onClick={() => applyTemplate(TEMPLATE_SOAP)}
-            className="h-7 text-xs font-medium"
+            className="h-7 text-caption-1-medium"
             title="Preencher com estrutura Subjetivo, Objetivo, Avaliação e Plano"
           >
             Template SOAP
@@ -220,7 +220,7 @@ export function NarrativeEditor({
             variant="outline"
             size="sm"
             onClick={() => applyTemplate(TEMPLATE_DAP)}
-            className="h-7 text-xs font-medium"
+            className="h-7 text-caption-1-medium"
             title="Preencher com estrutura Dados, Avaliação e Plano"
           >
             Template DAP
@@ -228,9 +228,9 @@ export function NarrativeEditor({
         </div>
 
         {/* Indicador de Salvamento Automático e Limpar Rascunho */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-3 text-caption-1-regular text-text-secondary">
           {lastSavedTime ? (
-            <span className="flex items-center gap-1 text-accent font-medium">
+            <span className="flex items-center gap-1 text-status-lime-text text-body-medium">
               <Check className="h-3.5 w-3.5" />
             Rascunho salvo no servidor às {lastSavedTime}
             </span>
@@ -245,7 +245,7 @@ export function NarrativeEditor({
             variant="ghost"
             size="sm"
             onClick={() => { void handleClearDraft(); }}
-            className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+            className="h-7 px-2 text-caption-1-regular text-text-secondary hover:text-text-error-primary"
             title="Descartar rascunho clínico"
           >
             <Trash2 className="h-3 w-3 mr-1" />
@@ -256,17 +256,17 @@ export function NarrativeEditor({
 
       {/* Título da Nota */}
       <div>
-        <label className="text-sm font-medium text-foreground" htmlFor="title">
+        <label className="text-body-medium text-text-primary" htmlFor="title">
           Título da nota clínica
         </label>
         <input
           id="title"
-          className="focus-ring mt-2 w-full border-0 border-b border-border bg-transparent pb-2 text-xl font-semibold outline-none transition-colors focus:border-primary placeholder:text-muted-foreground/60"
+          className="focus-ring mt-2 w-full border-0 border-b border-border-button-default bg-transparent pb-2 text-title-3-semibold outline-none transition-colors focus:border-border-focus-ring placeholder:text-text-secondary"
           placeholder="Ex: Sessão 12 - Regulação emocional e autorregistro"
           {...form.register("title")}
         />
         {formState.errors.title ? (
-          <p className="mt-1 text-xs text-destructive">{formState.errors.title.message}</p>
+          <p className="mt-1 text-caption-1-regular text-text-error-primary">{formState.errors.title.message}</p>
         ) : null}
       </div>
 
@@ -277,20 +277,20 @@ export function NarrativeEditor({
         </label>
         <Textarea
           id="content"
-          className="min-h-[380px] font-sans text-base leading-7 placeholder:text-muted-foreground/50 resize-y"
+          className="min-h-[380px] font-sans text-headline-regular placeholder:text-text-secondary resize-y"
           placeholder="Descreva a evolução da sessão, falas do paciente, intervenções aplicadas e desfechos..."
           onKeyDown={handleKeyDown}
           {...form.register("content")}
         />
         {formState.errors.content ? (
-          <p className="mt-1 text-xs text-destructive">{formState.errors.content.message}</p>
+          <p className="mt-1 text-caption-1-regular text-text-error-primary">{formState.errors.content.message}</p>
         ) : null}
       </div>
 
       {/* Barra de Rodapé: Contadores, Atalhos e Botão de Submissão (Fitts e Doherty) */}
-      <div className="flex flex-col-reverse justify-between gap-4 border-t border-border/80 pt-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col-reverse justify-between gap-4 border-t border-border-button-default pt-4 sm:flex-row sm:items-center">
         {/* Contadores e Ergonomia Cognitiva */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-4 text-caption-1-regular text-text-secondary">
           <span className="flex items-center gap-1">
             <FileText className="h-3.5 w-3.5" />
             {charCount.toLocaleString("pt-BR")} caracteres · {wordCount} palavras
@@ -299,8 +299,8 @@ export function NarrativeEditor({
             <Clock className="h-3.5 w-3.5" />
             ~{readingTimeMin} min de leitura
           </span>
-          <span className="hidden lg:inline text-muted-foreground/70">
-            Atalho: <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">Ctrl+Enter</kbd> para enviar
+          <span className="hidden lg:inline text-text-secondary">
+            Atalho: <kbd className="rounded bg-background-tertiary-default px-1.5 py-0.5 font-mono text-caption-2-regular">Ctrl+Enter</kbd> para enviar
           </span>
         </div>
 
@@ -308,7 +308,7 @@ export function NarrativeEditor({
         <Button
           type="submit"
           disabled={isSubmitting || (isApiMode && !!patientId && !draftReady) || !formState.isValid}
-          className="gap-2 px-6 font-semibold shadow-md"
+          className="gap-2 px-6 text-body-semibold shadow-md"
         >
           <Sparkles className="h-4 w-4" />
           {isSubmitting ? "Enviando análise..." : "Solicitar análise assistiva"}

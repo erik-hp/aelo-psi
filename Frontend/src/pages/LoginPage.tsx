@@ -4,11 +4,12 @@ import { LoginForm } from "@/components/forms/LoginForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { isApiMode } from "@/services/runtime";
+import { LoadingScreen } from "@/components/ui/loading-skeleton";
 
 export function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) return <LoadingScreen />;
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
@@ -17,7 +18,7 @@ export function LoginPage() {
       <section className="flex items-center px-6 py-10 lg:px-16">
         <div className="max-w-2xl">
           <div className="mb-8 flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-md bg-primary text-primary-foreground">
+            <div className="grid h-11 w-11 place-items-center rounded-md bg-accent-600 text-text-white">
               <Brain className="h-5 w-5" />
             </div>
             <div>
@@ -36,7 +37,7 @@ export function LoginPage() {
       <section className="flex items-center justify-center border-t border-separator-border bg-background-secondary-default px-6 py-10 lg:border-s lg:border-t-0">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-accent/10 text-accent">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-status-lime-background text-status-lime-text">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <CardTitle>Acesso profissional</CardTitle>

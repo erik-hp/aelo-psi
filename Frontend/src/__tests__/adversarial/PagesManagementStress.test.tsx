@@ -266,9 +266,7 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
     expect(await screen.findByText(/Clique em um dia para selecionar e inspecionar/i)).toBeDefined();
 
     // In matrix view, find the selected/today day button and click it to auto-switch back to timeline
-    const allDayButtons = screen.getAllByRole("button").filter((btn) => {
-      return btn.classList.contains("min-h-20") || btn.querySelector(".inline-flex");
-    });
+    const allDayButtons = screen.getAllByRole("button", { name: /Selecionar dia/ });
     expect(allDayButtons.length).toBeGreaterThan(0);
 
     fireEvent.click(allDayButtons[0]);

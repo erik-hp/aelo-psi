@@ -78,8 +78,8 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
 
     // Initial state: Sidebar should have -translate-x-full (hidden on mobile, visible on desktop via lg:translate-x-0)
     const aside = screen.getByRole("complementary");
-    expect(aside.className).toContain("-translate-x-full");
-    expect(aside.className).toContain("lg:translate-x-0");
+    expect(aside.getAttribute("data-state")).toBe("closed");
+    expect(aside.className).toContain("lg:flex");
 
     // Backdrop should not be present initially
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
@@ -91,16 +91,16 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
     fireEvent.click(openMenuBtn);
 
     // After clicking open: aside should have translate-x-0 and backdrop should be mounted
-    expect(aside.className).toContain("translate-x-0");
+    expect(aside.getAttribute("data-state")).toBe("open");
     const backdrop = screen.getByLabelText("Fechar navegação móvel");
     expect(backdrop).toBeDefined();
-    expect(backdrop.className).toContain("bg-black/60");
+    expect(backdrop.className).toContain("bg-overlay");
 
     // Click backdrop to close
     fireEvent.click(backdrop);
 
     // Sidebar should transition back to closed
-    expect(aside.className).toContain("-translate-x-full");
+    expect(aside.getAttribute("data-state")).toBe("closed");
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
   });
 
@@ -119,7 +119,7 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
     // Backdrop should be dismissed
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
     const aside = screen.getByRole("complementary");
-    expect(aside.className).toContain("-translate-x-full");
+    expect(aside.getAttribute("data-state")).toBe("closed");
   });
 
   it("closes mobile drawer when clicking the close button inside Sidebar", async () => {
@@ -135,7 +135,7 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
 
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
     const aside = screen.getByRole("complementary");
-    expect(aside.className).toContain("-translate-x-full");
+    expect(aside.getAttribute("data-state")).toBe("closed");
   });
 
   it("automatically closes mobile drawer when a NavLink is clicked", async () => {

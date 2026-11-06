@@ -217,6 +217,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Limitação: nenhum navegador conectado; inspeção visual responsiva/leitor de tela e checks remotos não comprovados. Detalhes, comandos, decisão e revisão em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
 - Commit/PR: implementação `0a6830a`, [PR #15 em rascunho](https://github.com/erik-hp/aelo-psi/pull/15). Próximo item: revisão visual com dados sintéticos e conciliação com o PR #14 de identidade visual antes do merge. **G0 continua BLOQUEADO**.
 
+## UI-01 — Revisão de layout de todas as páginas — 06/11/2026 — EM REVISÃO
+
+- Continuação explicitamente solicitada no [PR #15](https://github.com/erik-hp/aelo-psi/pull/15), branch `feat/boardui-interface`, a partir de `32f523f`. RNF-06/RNF-08 e regressão F0-05.
+- Revisadas as 14 páginas existentes, sem reativar rotas legadas. Tokens e tipografia uniformizados; shell, cabeçalhos, cartões, buscas, ações, tabelas, abas e diálogos alinhados ao BoardUI. Ajustados breakpoints, quebras de texto, largura de colunas, rolagem de calendário/evidências/Markdown e camadas dos toasts. Usuários sintéticos aparecem só na demonstração, explicitamente identificada; em modo API a tela declara a integração pendente.
+- Evidência: 108 testes aprovados em 20 arquivos, incluindo renderização das 14 páginas e testes de teclado/associação de abas e foco/Escape dos diálogos; build de produção aprovado com avisos de Zod/chunks; lint com 0 erros e 13 avisos. A identificação do commit é registrada na entrega desta branch.
+- A tentativa de navegador retornou `Browser is not available: iab`; não declarar inspeção visual responsiva, leitor de tela ou conformidade WCAG executados. Inventário, decisões e limitações em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
+- Próximo item: inspeção visual com dados sintéticos, conciliação do PR #14 e verificação dos checks remotos antes do merge. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

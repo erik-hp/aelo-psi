@@ -4,9 +4,10 @@ import { AIAnalysisCard } from "@/components/analysis/AIAnalysisCard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { clinicalService } from "@/services/clinicalService";
+import { PageError, PageLoading } from "@/components/ui/page-state";
 
 export function AIAnalysisPage() {
-  const { data } = useQuery({ queryKey: ["dashboard"], queryFn: clinicalService.getDashboard });
+  const { data, isLoading, isError } = useQuery({ queryKey: ["dashboard"], queryFn: clinicalService.getDashboard });
   const analyses = data?.analyses ?? [];
 
   return (
@@ -15,7 +16,7 @@ export function AIAnalysisPage() {
         title="IA assistiva"
         description="Sugestões auxiliares para revisão profissional. A interface não executa diagnóstico automático nem substitui decisão clínica."
       />
-      {analyses.length ? (
+      {isLoading ? <PageLoading label="Carregando análises…" /> : isError ? <PageError description="Não foi possível consultar as análises. Tente novamente." /> : analyses.length ? (
         <div className="space-y-5">
           {analyses.map((analysis) => <AIAnalysisCard key={analysis.id} analysis={analysis} />)}
         </div>

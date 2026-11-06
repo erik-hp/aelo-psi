@@ -13,8 +13,8 @@ export interface ButtonProps
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", children, ...props }, ref) => (
     <BoardButton {...props} buttonRef={ref} variant={variants[variant]} size={size === "sm" ? "small" : "medium"}
-      className={cx("gap-2", size === "icon" && "size-9 p-0", className)}>
-      <span className="inline-flex items-center justify-center gap-2">{children}</span>
+      className={cx("h-auto min-h-10 gap-2 whitespace-normal", size === "icon" && "size-10 shrink-0 p-0", className)}>
+      <span className="inline-flex min-w-0 items-center justify-center gap-2 text-center">{children}</span>
     </BoardButton>
   ),
 );

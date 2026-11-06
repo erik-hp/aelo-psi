@@ -1,5 +1,6 @@
 import { Calendar, ExternalLink, FileText, MousePointerClick, Quote } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { VaultGraph, VaultNodeKind, VaultRelationType } from "@/types/vault";
 
 const KIND_LABELS: Record<VaultNodeKind, { label: string; variant: "default" | "success" | "warning" | "critical" }> = {
@@ -28,10 +29,10 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
 
   if (!selected) {
     return (
-      <div className="flex min-h-[380px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-        <MousePointerClick className="mb-2 h-8 w-8 text-muted-foreground/60" />
-        <p className="font-medium text-foreground">Nenhum nó selecionado</p>
-        <p className="mt-1 max-w-xs text-xs">
+      <div className="flex min-h-[380px] flex-col items-center justify-center rounded-lg border border-dashed border-border-button-default p-6 text-center text-body-regular text-text-secondary">
+        <MousePointerClick className="mb-2 h-8 w-8 text-text-secondary" />
+        <p className="text-body-medium text-text-primary">Nenhum nó selecionado</p>
+        <p className="mt-1 max-w-xs text-caption-1-regular">
           Clique em qualquer entidade no grafo para inspecionar as evidências literais citadas pelo paciente e sua rastreabilidade no prontuário.
         </p>
       </div>
@@ -41,18 +42,18 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
   const kindInfo = KIND_LABELS[selected.kind] ?? { label: selected.kind, variant: "default" };
 
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-card p-4 text-sm shadow-sm">
+    <div className="space-y-4 rounded-lg border border-border-button-default bg-background-primary-default p-4 text-body-regular shadow-sm">
       {/* Cabeçalho do Nó Selecionado */}
-      <div className="border-b border-border pb-3">
+      <div className="border-b border-border-button-default pb-3">
         <div className="flex items-center justify-between gap-2">
           <Badge variant={kindInfo.variant}>{kindInfo.label}</Badge>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-caption-1-regular text-text-secondary">
             {selected.mention_count} {selected.mention_count === 1 ? "menção" : "menções"} · peso {selected.weight}
           </span>
         </div>
-        <h3 className="mt-2 text-base font-semibold text-foreground">{selected.label}</h3>
+        <h3 className="mt-2 text-headline-semibold text-text-primary">{selected.label}</h3>
         {selected.first_seen_at && (
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <p className="mt-1 flex items-center gap-1.5 text-caption-1-regular text-text-secondary">
             <Calendar className="h-3.5 w-3.5" />
             Primeira menção em {new Date(selected.first_seen_at).toLocaleDateString("pt-BR")}
             {selected.last_seen_at && selected.last_seen_at !== selected.first_seen_at
@@ -64,15 +65,15 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
 
       {/* Lista de Relações e Evidências Literais (Lei da Proximidade da Gestalt) */}
       <div className="space-y-3">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          <Quote className="h-3.5 w-3.5 text-primary" />
+        <h4 className="flex items-center gap-1.5 text-caption-1-semibold uppercase tracking-wider text-text-secondary">
+          <Quote className="h-3.5 w-3.5 text-status-blue-text" />
           Evidências Literais no Prontuário ({edges.length})
         </h4>
 
         {edges.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Nenhuma relação direta registrada para este nó.</p>
+          <p className="text-caption-1-regular text-text-secondary">Nenhuma relação direta registrada para este nó.</p>
         ) : (
-          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
+          <ScrollArea className="max-h-[360px] space-y-3 pe-1" aria-label="Evidências da entidade selecionada">
             {edges.map((edge) => {
               const otherNodeId = edge.source === nodeId ? edge.target : edge.source;
               const otherNode = graph.nodes.find((n) => n.id === otherNodeId);
@@ -81,24 +82,24 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
               return (
                 <div
                   key={edge.id}
-                  className="rounded-md border border-border/80 bg-secondary/30 p-3 transition-colors hover:border-primary/40 hover:bg-secondary/50"
+                  className="rounded-md border border-border-button-default bg-background-secondary-default p-3 transition-colors hover:border-border-focus-ring hover:bg-background-secondary-default"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs">
-                    <span className="font-medium text-foreground">
+                  <div className="flex flex-wrap items-center justify-between gap-1.5 text-caption-1-regular">
+                    <span className="text-body-medium text-text-primary">
                       {relationName} {otherNode ? `→ ${otherNode.label}` : ""}
                     </span>
-                    <Badge variant="muted" className="text-[10px]">
+                    <Badge variant="muted" className="text-caption-2-regular">
                       peso {edge.weight}
                     </Badge>
                   </div>
 
                   {/* Citação literal destacada com proximidade visual imediata */}
-                  <blockquote className="my-2 rounded-r border-l-2 border-primary/60 bg-background/60 py-2 pl-3 pr-2 text-xs italic leading-relaxed text-foreground font-serif">
+                  <blockquote className="my-2 rounded-r border-l-2 border-border-focus-ring bg-background-full py-2 pl-3 pr-2 text-caption-1-regular italic text-text-primary font-serif">
                     “{edge.evidence}”
                   </blockquote>
 
                   {/* Conexão navegável contígua com a nota original de referência */}
-                  <div className="mt-2 flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-[11px] text-muted-foreground">
+                  <div className="mt-2 flex items-center justify-between gap-2 pt-1 border-t border-border-button-default text-caption-1-regular text-text-secondary">
                     <button
                       type="button"
                       onClick={() => {
@@ -106,11 +107,11 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
                         const el = document.getElementById(`note-${edge.note_id}`);
                         if (el) {
                           el.scrollIntoView({ behavior: "smooth", block: "center" });
-                          el.classList.add("ring-2", "ring-primary");
-                          setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 2500);
+                          el.classList.add("ring-2", "ring-border-focus-ring");
+                          setTimeout(() => el.classList.remove("ring-2", "ring-border-focus-ring"), 2500);
                         }
                       }}
-                      className="inline-flex items-center gap-1 font-medium text-primary hover:underline hover:text-primary/80 transition-colors"
+                      className="inline-flex items-center gap-1 text-body-medium text-status-blue-text hover:underline hover:text-status-blue-text transition-colors"
                       title={`Ver contexto completo na nota nº ${edge.note_id}`}
                     >
                       <FileText className="h-3 w-3" />
@@ -122,7 +123,7 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
                 </div>
               );
             })}
-          </div>
+          </ScrollArea>
         )}
       </div>
     </div>
