@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** conciliar a pilha de PRs em rascunho #15–#19 e o PR #21, confirmando checks remotos; em seguida OP-00/UX-01. Ver a entrada "Revisão transversal F0" abaixo. G0 permanece bloqueado.
+- **Próxima tarefa:** revisar e integrar a pilha de PRs em rascunho #15–#19, #21 e #22, na ordem; medir a extração com `llama3.1` real em conjunto sintético de referência; depois OP-00/UX-01. G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -321,6 +321,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **Executados:** backend SQLite 181 aprovados/2 ignorados, Ruff sem erros, `makemigrations --check` sem alterações. Mutação manual: 10 de 10 proteções quebradas de propósito foram detectadas pelos testes. Os testes foram escritos depois do código, por falha de ferramenta, sem a etapa de falha prévia; a mutação compensa parcialmente isso.
 - **CI:** `security-smoke` falhou uma vez em `d9ff41c`, no login pelo proxy após a carga ([run #42245540956](https://github.com/erik-hp/aelo-psi/actions/runs/42245540956)). A hipótese de limite de login não se confirmou: sem nenhum 429 em três rodadas seguidas, e a sequência exata da CI passou duas vezes localmente. O assert agora mostra o status. Em `5398b7d`, mesmo código com essa mensagem, os 9 jobs passaram e o workflow de qualidade passou novamente em segunda execução ([run #42246508413](https://github.com/erik-hp/aelo-psi/actions/runs/42246508413)). **Falha intermitente sem causa identificada; observar.**
 - **Limitações:** extração real com `llama3.1` não medida; relevância ainda não classificada; peso acumulado não é recalculado após edição. **G0 continua BLOQUEADO**.
+
+## Fechamento da sessão — 06/11/2026
+
+- **PRs em rascunho, sem merge, nesta ordem:** #15 → #16 → #17 → #18 → #19 → #21 → #22. Checks do #16 ao #21 confirmados com 9 de 9; o último commit de código do #22 também.
+- **Decisões do autor:** TCC1 é somente consulta, e o projeto atual prevalece sobre ele. Desenho da ADR-003 escolhido. Leitura automática autorizada apenas em ambiente sintético. ADR-004 segue proposta, sem envio externo.
+- **Cérebro:** auditoria e pesquisa em `tcc-cofre`, branch `docs/auditoria-2026-11-06`, sem merge em `main`.
+- **Em aberto:** falha intermitente do `security-smoke` sem causa identificada; extração real não medida; classificação de relevância; paráfrase; parecer jurídico e profissional; varredura de resoluções CFP de 2026.
 
 ## Pendências de decisão
 
