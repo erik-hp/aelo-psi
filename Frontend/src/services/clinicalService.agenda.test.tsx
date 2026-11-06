@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { MemoryRouter } from "react-router-dom";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { clinicalService } from "./clinicalService";
@@ -20,15 +21,18 @@ function loadAsQueryCallback() {
   return client.fetchQuery({ queryKey: ["agenda"], queryFn: clinicalService.getAgenda });
 }
 
+// The agenda shows the browser timezone, so the expectation must follow the machine running the test.
+const scheduledAt = "2026-11-06T10:30:00-03:00";
+
 describe("Agenda in API mode through React Query", () => {
   it("loads patients and sessions when the query calls the method without its object context", async () => {
     http.get.mockImplementation(async (url: string) => ({ data: { results: url === "/patients/" ? [{
       id: "synthetic-patient", internal_code: "SYN-01", display_name: "Paciente sintético", status: "ACTIVE",
       created_at: "2026-11-06T08:00:00Z", updated_at: "2026-11-06T08:00:00Z",
-    }] : [{ id: "synthetic-session", patient: "synthetic-patient", scheduled_at: "2026-11-06T10:30:00-03:00", status: "SCHEDULED", summary: "Registro sintético" }] } }));
+    }] : [{ id: "synthetic-session", patient: "synthetic-patient", scheduled_at: scheduledAt, status: "SCHEDULED", summary: "Registro sintético" }] } }));
     await expect(loadAsQueryCallback()).resolves.toEqual([{
       id: "synthetic-session", patientId: "synthetic-patient", patientName: "Paciente sintético",
-      date: "2026-11-06", time: "10:30", status: "draft", complement: "Registro sintético", attentionIndex: null,
+      date: format(new Date(scheduledAt), "yyyy-MM-dd"), time: format(new Date(scheduledAt), "HH:mm"), status: "draft", complement: "Registro sintético", attentionIndex: null,
     }]);
     expect(http.get).toHaveBeenCalledWith("/patients/");
     expect(http.get).toHaveBeenCalledWith("/sessions/");
