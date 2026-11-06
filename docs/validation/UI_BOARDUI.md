@@ -2,6 +2,8 @@
 
 Estado: **EM REVISÃO**. Solicitação explícita de atualização visual em 06/11/2026. Base: `cf8fb9a`; branch: `feat/boardui-interface`.
 
+Implementação: commit `0a6830a`, [PR #15 em rascunho](https://github.com/erik-hp/aelo-psi/pull/15).
+
 ## Decisão e rastreabilidade
 
 Integrar os componentes gratuitos fornecidos pelo MCP BoardUI às telas existentes. Requisitos relacionados: RNF-06 (usabilidade e acessibilidade) e RNF-08 (qualidade e evidências); verificação de regressão vinculada a F0-05. É uma manutenção visual solicitada, sem liberação de F1/F6 nem conclusão desses requisitos. G0 continua bloqueado.

@@ -215,7 +215,7 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Instalados componentes gratuitos oficiais e adaptados os controles compartilhados, cartões, cabeçalhos, buscas e login. Tailwind 4/PostCSS e tailwind-merge 3, mantendo React 18/Vite/TypeScript. Referências dos campos adaptadas para React 18 e react-hook-form; sem alteração de back-end ou uso de dados reais.
 - Executados: 92 testes em 18 arquivos aprovados; lint com 0 erros/13 avisos; build aprovado com avisos de Zod/chunks. Instalação npm reportou 0 vulnerabilidades em 451 pacotes. `git diff --check` sem erros.
 - Limitação: nenhum navegador conectado; inspeção visual responsiva/leitor de tela e checks remotos não comprovados. Detalhes, comandos, decisão e revisão em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
-- Commit/PR: entrega nesta branch, identificação no histórico Git; PR a abrir após o commit. Próximo item: revisão visual com dados sintéticos e conciliação com o PR #14 de identidade visual antes do merge. **G0 continua BLOQUEADO**.
+- Commit/PR: implementação `0a6830a`, [PR #15 em rascunho](https://github.com/erik-hp/aelo-psi/pull/15). Próximo item: revisão visual com dados sintéticos e conciliação com o PR #14 de identidade visual antes do merge. **G0 continua BLOQUEADO**.
 
 ## Pendências de decisão
 
