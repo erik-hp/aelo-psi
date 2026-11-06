@@ -1,0 +1,13 @@
+{
+  "name": "aelo-jev-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test integration.test.mjs",
+    "live": "node live-check.mjs"
+  },
+  "devDependencies": {
+    "jev-gateway": "0.5.1"
+  }
+}
