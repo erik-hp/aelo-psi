@@ -27,6 +27,7 @@ class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return accessible_patients(self.request.user, write=self.request.method not in ('GET', 'HEAD', 'OPTIONS'))
 
+    @transaction.atomic
     def perform_create(self, serializer):
         if not self.request.user.clinic_id or not self.request.user.clinic.is_active or self.request.user.clinic.deleted_at is not None:
             raise PermissionDenied('A clínica ativa é obrigatória.')

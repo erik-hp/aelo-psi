@@ -1,4 +1,5 @@
 import { apiClient } from "@/api/client";
+import { getCollection } from "@/api/collections";
 import {
   agendaItems,
   auditEvents,
@@ -14,8 +15,8 @@ import { isApiMode } from "@/services/runtime";
 import { vaultGraphSchema, vaultCheckpointDetailSchema } from "@/schemas/vault";
 import type { VaultGraph } from "@/types/vault";
 import { mockVaultGraph } from "@/services/mockVault";
-import { mapAnalysis, mapPatient, mapSession, unwrap } from "@/services/clinicalMappers";
-import type { ApiAnalysis, ApiAuditEvent, ApiPatient, ApiSession, PaginatedResponse } from "@/services/clinicalMappers";
+import { mapAnalysis, mapPatient, mapSession } from "@/services/clinicalMappers";
+import type { ApiAnalysis, ApiAuditEvent, ApiPatient, ApiSession } from "@/services/clinicalMappers";
 import type {
   AgendaItem,
   AIAnalysis,
@@ -81,14 +82,14 @@ export const clinicalService = {
   async getDashboard(): Promise<DashboardData> {
     if (isApiMode) {
       const [patientsResponse, sessionsResponse, analysesResponse] = await Promise.all([
-        apiClient.get<ApiPatient[] | PaginatedResponse<ApiPatient>>("/patients/"),
-        apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/"),
-        apiClient.get<ApiAnalysis[] | PaginatedResponse<ApiAnalysis>>("/analysis/"),
+        getCollection<ApiPatient>("/patients/"),
+        getCollection<ApiSession>("/sessions/"),
+        getCollection<ApiAnalysis>("/analysis/"),
       ]);
       return {
-        patients: unwrap(patientsResponse.data).map(mapPatient),
-        sessions: unwrap(sessionsResponse.data).map(mapSession),
-        analyses: unwrap(analysesResponse.data).map(mapAnalysis),
+        patients: patientsResponse.map(mapPatient),
+        sessions: sessionsResponse.map(mapSession),
+        analyses: analysesResponse.map(mapAnalysis),
         longitudinalData: [],
         auditEvents: [],
       };
@@ -97,8 +98,7 @@ export const clinicalService = {
   },
   async getPatients(): Promise<Patient[]> {
     if (isApiMode) {
-      const { data } = await apiClient.get<ApiPatient[] | PaginatedResponse<ApiPatient>>("/patients/");
-      return unwrap(data).map(mapPatient);
+      return (await getCollection<ApiPatient>("/patients/")).map(mapPatient);
     }
     return patients;
   },
@@ -106,13 +106,13 @@ export const clinicalService = {
     if (isApiMode) {
       const [patientResponse, sessionsResponse, analysesResponse] = await Promise.all([
         apiClient.get<ApiPatient>(`/patients/${id}/`),
-        apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/", { params: { patient: id } }),
-        apiClient.get<ApiAnalysis[] | PaginatedResponse<ApiAnalysis>>("/analysis/", { params: { patient: id } }),
+        getCollection<ApiSession>("/sessions/", { patient: id }),
+        getCollection<ApiAnalysis>("/analysis/", { patient: id }),
       ]);
       return {
         patient: mapPatient(patientResponse.data),
-        sessions: unwrap(sessionsResponse.data).map(mapSession),
-        analyses: unwrap(analysesResponse.data).map(mapAnalysis),
+        sessions: sessionsResponse.map(mapSession),
+        analyses: analysesResponse.map(mapAnalysis),
       };
     }
     const patient = patients.find((item) => item.id === id) ?? patients[0];
@@ -158,29 +158,21 @@ export const clinicalService = {
   },
   async getPatientNotes(patientId: string): Promise<PatientNote[]> {
     if (isApiMode) {
-      const { data } = await apiClient.get<Array<{
+      const data = await getCollection<{
         id: string;
         patient: string;
         session?: string | null;
         raw_text: string;
         anonymized_text: string;
         created_at: string;
-      }> | PaginatedResponse<{
-        id: string;
-        patient: string;
-        session?: string | null;
-        raw_text: string;
-        anonymized_text: string;
-        created_at: string;
-      }>>("/clinical-notes/", { params: { patient: patientId } });
-      return unwrap(data).map((note) => ({
+      }>("/clinical-notes/", { patient: patientId });
+      return data.map((note) => ({
         id: note.id,
         patientId: note.patient,
         sessionId: note.session ?? undefined,
         date: new Date(note.created_at).toLocaleDateString("pt-BR"),
         title: "Prontuário da sessão",
-        content: note.anonymized_text || note.raw_text,
-        complement: "Complemento pendente de revisão clínica.",
+        content: note.raw_text,
         attentionIndex: null,
       }));
     }
@@ -196,19 +188,20 @@ export const clinicalService = {
     if (isApiMode) {
       const [patientsData, sessionsData] = await Promise.all([
         clinicalService.getPatients(),
-        apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/"),
+        getCollection<ApiSession>("/sessions/"),
       ]);
-      const apiSessions = unwrap(sessionsData.data);
+      const apiSessions = sessionsData;
       const mappedSessions = apiSessions.map(mapSession);
       return mappedSessions.map((session, index) => {
-        const scheduledAt = apiSessions[index]?.scheduled_at ?? "";
+        const scheduledAt = new Date(apiSessions[index]?.scheduled_at ?? "");
         const patient = patientsData.find((item) => item.id === session.patientId);
         return {
           id: session.id,
           patientId: session.patientId,
+          ...(session.professionalId ? { professionalId: session.professionalId } : {}),
           patientName: patient?.name ?? "Paciente",
-          date: scheduledAt.slice(0, 10) || session.date,
-          time: scheduledAt.slice(11, 16) || "08:00",
+          date: `${scheduledAt.getFullYear()}-${String(scheduledAt.getMonth() + 1).padStart(2, "0")}-${String(scheduledAt.getDate()).padStart(2, "0")}`,
+          time: scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
           status: session.status,
           complement: session.complement || session.summary,
           attentionIndex: null,
@@ -222,8 +215,8 @@ export const clinicalService = {
   },
   async getAuditEvents() {
     if (!isApiMode) return auditEvents;
-    const { data } = await apiClient.get<ApiAuditEvent[] | PaginatedResponse<ApiAuditEvent>>("/audit-logs/");
-    return unwrap(data).map((event) => {
+    const data = await getCollection<ApiAuditEvent>("/audit-logs/");
+    return data.map((event) => {
       const anyEvent = event as unknown as Record<string, unknown>;
       return {
         id: event.id,

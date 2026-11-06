@@ -241,6 +241,15 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Verificação local HTTP com a conta sintética: `/patients/`, `/sessions/` e `/analysis/` retornaram 200 com contagem zero. O módulo servido pelo Vite em `localhost:5173` retornou 200 e contém a referência corrigida, sem `this.getPatients()`. Nenhum conteúdo clínico ou token foi registrado.
 - Limitação: sem inspeção de navegador; a regressão do dashboard foi validada em DOM e a API foi consultada em execução. Próximo item: recarregar a página e revisar os checks do PR. **G0 continua BLOQUEADO**.
 
+## Auditoria funcional de pacientes, agenda e editor — 06/11/2026 — EM REVISÃO
+
+- Solicitação explícita de auditoria; branch `fix/auditoria-fluxos-operacionais`, base `e53ed94` do PR #15. Escopo F0-01/F0-02/F0-03/F0-05 e correções parciais F1-01/F1-02/F1-03/F1-06; RF-01–RF-04, RNF-02/RNF-03/RNF-06/RNF-08. Sem liberação de gate ou funcionalidade científica nova.
+- Cadastro real de paciente e grant inicial atômico; agenda com paciente persistido e POST/PATCH; editor visível no modo API, com paciente/sessão/grant, texto original e salvamento independente de IA. Acrescentadas validação de código/horário e proteção opcional de versão da nota (409). Conclusão de atendimento não assina nota.
+- Corrigidos paginação truncada, cache entre identidades, busca inerte, revisão de análises no perfil e estados de erro do cofre. Diretório de usuários passou a consultar a API; permissões e textos de métricas/configurações foram alinhados ao comportamento efetivo.
+- Executados: frontend **132 testes/24 arquivos**, build aprovado, lint 0 erros/11 avisos; backend **59 aprovados/2 ignorados/1 aviso**, Ruff sem erros nos arquivos alterados. API Docker reconstruída; check e ausência de migrações verificados. Smoke HTTP real com PostgreSQL confirmou persistência, duplicados 400, conflito 409, negação 401/404 e ausência de assinatura ao concluir sessão. Dados exclusivamente sintéticos, preservados para inspeção; nenhum segredo registrado.
+- Achados, causas, soluções, contratos, evidências e pendências em [AUDITORIA_FUNCIONAL_2026-11-06.md](validation/AUDITORIA_FUNCIONAL_2026-11-06.md). Sem navegador disponível: não houve inspeção visual, leitor de tela ou validação integral worker/Ollama. Financeiro, notificações, edição de preferências/contas, autosave, concorrência e workflow integral de assinatura continuam pendentes.
+- Implementação `f0f7a5e`, [PR #16 em rascunho](https://github.com/erik-hp/aelo-psi/pull/16), dependente do PR #15; sem merge. Checks remotos ainda não confirmados nesta entrada. Próximo item: revisar CI e os achados residuais F0; validar visualmente os fluxos com dados sintéticos. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

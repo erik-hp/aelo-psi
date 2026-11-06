@@ -32,7 +32,7 @@ const pages = [
   [DashboardPage, "Dashboard Clínico"], [PatientsPage, "Pacientes"],
   [PatientProfilePage, patients[0].name], [AgendaPage, "Agenda Clínica"],
   [NarrativeEditorPage, "Editor Narrativo de Prontuário"], [FinancePage, "Financeiro"],
-  [AuditPage, "Trilha de Auditoria & Conformidade LGPD"], [UsersPage, "Usuários"],
+  [AuditPage, "Trilha de Auditoria"], [UsersPage, "Usuários"],
   [SettingsPage, "Configurações"], [LoginPage, "AELO"],
   [NotFoundPage, "Página não encontrada"], [SessionsPage, "Sessões terapêuticas"],
   [AIAnalysisPage, "IA assistiva"], [LongitudinalDashboardPage, "Longitudinal por paciente"],

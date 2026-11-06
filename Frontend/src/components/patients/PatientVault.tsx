@@ -7,6 +7,8 @@ import { clinicalService } from "@/services/clinicalService";
 import type { AIAnalysis } from "@/types/clinical";
 import { isApiMode } from "@/services/runtime";
 import { Tabs, TabList, Tab, TabPanel } from "@/components/base/tabs/tabs";
+import { PageError, PageLoading } from "@/components/ui/page-state";
+import { useToast } from "@/hooks/useToast";
 import { VaultApprovalModal } from "@/components/patients/VaultApprovalModal";
 import { VaultNodeInspector } from "@/components/patients/VaultNodeInspector";
 import { VaultTimeline } from "@/components/patients/VaultTimeline";
@@ -28,9 +30,12 @@ export function PatientVault({
   analyses,
   onSelectNote,
 }: PatientVaultProps) {
+  const { notify } = useToast();
   const {
     user,
     graph,
+    isLoading,
+    isError,
     tab,
     setTab,
     selectedNode,
@@ -98,7 +103,7 @@ export function PatientVault({
         </TabList>
 
           <TabPanel id="graph" aria-label="Grafo do Vault" className="min-w-0 space-y-3">
-            {nodes.length ? (
+            {isLoading ? <PageLoading label="Carregando cofre…" /> : isError ? <PageError description="Não foi possível carregar o cofre. Nenhum dado de demonstração foi usado." /> : nodes.length ? (
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
                 <Suspense
                   fallback={
@@ -150,7 +155,7 @@ export function PatientVault({
             onPreview={(id) => preview.mutate(id)}
             onApprove={setApprovalId}
             onDownload={(id) => {
-              void clinicalService.downloadVaultCheckpoint(id);
+              void clinicalService.downloadVaultCheckpoint(id).catch(() => notify({ type: "error", title: "Falha na exportação", description: "O servidor não confirmou a disponibilidade do arquivo." }));
             }}
           />
           </TabPanel>

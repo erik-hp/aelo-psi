@@ -30,6 +30,10 @@ import { clinicalDraftService } from "@/services/clinicalDraftService";
 import { isApiMode } from "@/services/runtime";
 import type { TherapySession } from "@/types/clinical";
 import { PageLoading } from "@/components/ui/page-state";
+import { ButtonLink } from "@/components/ui/button-link";
+import { useAuth } from "@/hooks/useAuth";
+import { AIAnalysisCard } from "@/components/analysis/AIAnalysisCard";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function SessionAnalysisBlock({
   patientId,
@@ -181,6 +185,7 @@ function SessionAnalysisBlock({
 }
 
 export function PatientProfilePage() {
+  const { user } = useAuth();
   const { patientId = "" } = useParams();
   const { data, isLoading } = useQuery({
     queryKey: ["patient", patientId],
@@ -242,7 +247,7 @@ export function PatientProfilePage() {
     <>
       <PageHeader
         title={data.patient.name}
-        description="Prontuário eletrônico psicológico estruturado em abas canônicas de acordo com as Leis de Miller e Jakob."
+        description="Histórico de sessões, notas e análises assistivas deste paciente."
       />
 
       {/* Particionamento em 4 Abas Clínicas com foco e teclado acessível (WAI-ARIA) */}
@@ -352,7 +357,7 @@ export function PatientProfilePage() {
           </section>
 
           {/* Síntese Atual dos Prontuários */}
-          <Card className="border-border-button-default">
+          {isApiMode ? <section className="space-y-4"><h2 className="text-headline-semibold">Análises assistivas registradas</h2>{data.analyses.length ? data.analyses.map((item) => <AIAnalysisCard key={item.id} analysis={item} />) : <EmptyState title="Nenhuma análise registrada" description="A ausência de análise não representa ausência de risco. A avaliação clínica pertence ao profissional." />}</section> : <Card className="border-border-button-default">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-headline-regular">
                 <Sparkles className="h-4 w-4 text-status-blue-text" />
@@ -404,7 +409,7 @@ export function PatientProfilePage() {
                 </div>
               </section>
             </CardContent>
-          </Card>
+          </Card>}
         </TabPanel>
 
         {/* ABA 2: PRONTUÁRIOS E SESSÕES */}
@@ -426,7 +431,7 @@ export function PatientProfilePage() {
                   session={session}
                   notes={notes.filter((note) => note.sessionId === session.id)}
                 />
-                <SessionAnalysisBlock patientId={data.patient.id} session={session} />
+                {isApiMode ? (user?.role === "PSYCHOLOGIST" && session.professionalId === user.id ? <ButtonLink to={`/editor?patient=${encodeURIComponent(patientId)}&session=${encodeURIComponent(session.id)}`}>Abrir editor desta sessão</ButtonLink> : <p className="text-caption-1-regular text-text-secondary">A edição desta sessão é restrita ao profissional responsável.</p>) : <SessionAnalysisBlock patientId={data.patient.id} session={session} />}
               </div>
             ))}
           </div>
@@ -441,7 +446,7 @@ export function PatientProfilePage() {
             </p>
           </div>
 
-          <div className="space-y-5">
+          {isApiMode ? <EmptyState title="Indicadores longitudinais indisponíveis" description="Esta visualização ainda não possui um pipeline validado conectado à API. Nenhum escore clínico foi estimado." /> : <div className="space-y-5">
             <ChartCard
               title="Indicador de Humor"
               description="Indicador estimado a partir dos prontuários analisados nas sessões."
@@ -460,7 +465,7 @@ export function PatientProfilePage() {
               data={metrics}
               dataKey="psychologicalBurden"
             />
-          </div>
+          </div>}
         </TabPanel>
 
         {/* ABA 4: COFRE COGNITIVO (VAULT) */}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useSearchParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowRight,
@@ -33,6 +33,11 @@ import { useToast } from "@/hooks/useToast";
 import { cn } from "@/lib/utils";
 import { clinicalService } from "@/services/clinicalService";
 import type { AgendaItem, SessionStatus } from "@/types/clinical";
+import { isApiMode } from "@/services/runtime";
+import { recordService } from "@/services/recordService";
+import { apiErrorMessage } from "@/services/apiError";
+import { useAuth } from "@/hooks/useAuth";
+import { PageError, PageLoading } from "@/components/ui/page-state";
 
 interface StatusConfigItem {
   label: string;
@@ -89,8 +94,11 @@ function parseLocalDate(value: string) {
 export function AgendaPage() {
   const { notify } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const [params] = useSearchParams();
+  const canSchedule = !isApiMode || user?.role === "PSYCHOLOGIST";
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = dateKey(new Date());
   const [selectedDate, setSelectedDate] = useState(today);
   const [visibleMonth, setVisibleMonth] = useState(() => parseLocalDate(today));
   const [search, setSearch] = useState("");
@@ -102,16 +110,23 @@ export function AgendaPage() {
   // Estado do modal funcional de nova sessão
   const [isNewSessionOpen, setIsNewSessionOpen] = useState(false);
   const [newPatientName, setNewPatientName] = useState("");
+  const [newPatientId, setNewPatientId] = useState(params.get("patient") ?? "");
   const [newDate, setNewDate] = useState(today);
   const [newTime, setNewTime] = useState("10:00");
   const [newModality, setNewModality] = useState("Psicoterapia Individual (50 min)");
   const [newComplement, setNewComplement] = useState("");
 
-  const { data: rawAgenda = [] } = useQuery({
+  const { data: rawAgenda = [], isLoading, isError } = useQuery({
     queryKey: ["agenda"],
     queryFn: clinicalService.getAgenda,
     staleTime: 30_000,
   });
+  const patientsQuery = useQuery({ queryKey: ["patients"], queryFn: clinicalService.getPatients, enabled: isApiMode });
+  const refreshRecords = async () => {
+    await Promise.all([queryClient.invalidateQueries({ queryKey: ["agenda"] }), queryClient.invalidateQueries({ queryKey: ["dashboard"] }), queryClient.invalidateQueries({ queryKey: ["patient"] }), queryClient.invalidateQueries({ queryKey: ["editor-sessions"] })]);
+  };
+  const createSession = useMutation({ mutationFn: recordService.createSession, onSuccess: refreshRecords });
+  const changeStatus = useMutation({ mutationFn: ({ id, status }: { id: string; status: "COMPLETED" | "CANCELLED" | "MISSED" }) => recordService.updateSessionStatus(id, status), onSuccess: refreshRecords });
 
   // Estado local para sessões criadas ou com status alterado nesta sessão do navegador
   const [localSessions, setLocalSessions] = useState<AgendaItem[]>([]);
@@ -161,7 +176,7 @@ export function AgendaPage() {
         highAttention: items.some((item) => (item.attentionIndex ?? 0) >= 80 || item.status === "needs_review"),
       };
     });
-  }, [agenda, selectedDate, sessionsByDate, today, visibleMonth]);
+  }, [selectedDate, sessionsByDate, today, visibleMonth]);
 
   const monthLabel = visibleMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
@@ -202,7 +217,16 @@ export function AgendaPage() {
   }
 
   // Transição do ciclo de vida clínico
-  const handleUpdateStatus = (sessionId: string, newStatus: SessionStatus) => {
+  const handleUpdateStatus = async (sessionId: string, newStatus: SessionStatus) => {
+    if (isApiMode) {
+      const statuses = { completed: "COMPLETED", cancelled: "CANCELLED", missed: "MISSED" } as const;
+      if (!canSchedule || !(newStatus in statuses)) return;
+      try {
+        await changeStatus.mutateAsync({ id: sessionId, status: statuses[newStatus as keyof typeof statuses] });
+        notify({ type: "success", title: "Atendimento atualizado", description: "O status foi registrado no servidor. Isso não assina a nota clínica." });
+      } catch (error) { notify({ type: "error", title: "Falha ao atualizar sessão", description: apiErrorMessage(error, "O servidor não confirmou a alteração.") }); }
+      return;
+    }
     setLocalSessions((prev) => {
       const exists = prev.find((item) => item.id === sessionId);
       if (exists) {
@@ -223,8 +247,17 @@ export function AgendaPage() {
   };
 
   // Criação de nova sessão
-  const handleCreateSession = (event: React.FormEvent) => {
+  const handleCreateSession = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (isApiMode) {
+      if (!canSchedule || !newPatientId) return;
+      try {
+        await createSession.mutateAsync({ patientId: newPatientId, date: newDate, time: newTime, summary: newComplement });
+        setIsNewSessionOpen(false); setSelectedDate(newDate); setVisibleMonth(parseLocalDate(newDate)); setNewComplement("");
+        notify({ type: "success", title: "Sessão agendada", description: "O agendamento foi salvo no servidor." });
+      } catch (error) { notify({ type: "error", title: "Falha no agendamento", description: apiErrorMessage(error, "O agendamento não foi salvo. Tente novamente.") }); }
+      return;
+    }
     if (!newPatientName.trim()) {
       notify({
         type: "error",
@@ -262,14 +295,15 @@ export function AgendaPage() {
     <>
       <PageHeader
         title="Agenda Clínica"
-        description="Linha do tempo diária cronológica de atendimentos, ciclo de vida das consultas e gestão de prioridades éticas."
+        description="Agendamentos e registro do status dos atendimentos. Os horários seguem o fuso deste navegador."
         action={
-          <Button onClick={() => setIsNewSessionOpen(true)} className="gap-2">
+          canSchedule ? <Button onClick={() => setIsNewSessionOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Nova sessão
-          </Button>
+          </Button> : null
         }
       />
+      {!isApiMode && <p className="mb-4 text-body-regular text-status-yellow-text">Demonstração: alterações de agenda nesta tela são temporárias e não são salvas no servidor.</p>}
 
       {/* Indicadores do Turno Clínico */}
       <section className="grid gap-4 md:grid-cols-3">
@@ -280,16 +314,16 @@ export function AgendaPage() {
           icon={CalendarDays}
         />
         <MetricCard
-          label="Em atendimento agora"
-          value={String(inProgressCount)}
-          delta={inProgressCount > 0 ? "Sessão em curso no consultório" : "Nenhuma consulta ativa neste minuto"}
+          label={isApiMode ? "Atendimentos concluídos" : "Em atendimento agora"}
+          value={String(isApiMode ? agenda.filter((item) => item.status === "completed").length : inProgressCount)}
+          delta={isApiMode ? "Conclusão não equivale à assinatura da nota" : inProgressCount > 0 ? "Sessão em curso no consultório" : "Nenhuma consulta ativa neste minuto"}
           icon={Clock}
           tone="cyan"
         />
         <MetricCard
-          label="Pendências de evolução"
-          value={String(reviewCount)}
-          delta="Aguardando notas ou atenção imediata"
+          label={isApiMode ? "Agendamentos pendentes" : "Pendências de evolução"}
+          value={String(isApiMode ? agenda.filter((item) => item.status === "draft").length : reviewCount)}
+          delta={isApiMode ? "Atendimentos com status agendado" : "Aguardando notas ou atenção imediata"}
           icon={AlertTriangle}
           tone="amber"
         />
@@ -404,9 +438,9 @@ export function AgendaPage() {
               >
                 <option value="all">Todos os status</option>
                 <option value="draft">Aguardando</option>
-                <option value="in_progress">Em atendimento</option>
-                <option value="needs_review">Evolução pendente</option>
-                <option value="completed">Finalizada e assinada</option>
+                {!isApiMode && <option value="in_progress">Em atendimento</option>}
+                {!isApiMode && <option value="needs_review">Evolução pendente</option>}
+                <option value="completed">{isApiMode ? "Atendimento concluído" : "Finalizada e assinada"}</option>
                 <option value="cancelled">Cancelada</option>
                 <option value="missed">Não compareceu</option>
               </Select>
@@ -521,10 +555,10 @@ export function AgendaPage() {
           </div>
 
           {/* LISTA DA LINHA DO TEMPO CRONOLÓGICA (LEI DE JAKOB & FITTS) */}
-          {filteredItems.length ? (
+          {isLoading ? <PageLoading label="Carregando agenda…" /> : isError ? <PageError description="Não foi possível carregar a agenda. Tente novamente." /> : filteredItems.length ? (
             <div className="space-y-4">
               {filteredItems.map((item) => {
-                const conf = statusConfig[item.status] || statusConfig.draft;
+                const conf = isApiMode && item.status === "completed" ? { ...statusConfig.completed, label: "Atendimento concluído", description: "Status do atendimento registrado. A assinatura da nota é uma ação separada." } : statusConfig[item.status] || statusConfig.draft;
                 const isHighRisk = (item.attentionIndex ?? 0) >= 80;
                 return (
                   <Card
@@ -577,7 +611,7 @@ export function AgendaPage() {
 
                           {/* Ações de Transição Rápida do Ciclo de Vida Clínico */}
                           <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-border-button-default">
-                            {item.status === "draft" ? (
+                            {!isApiMode && item.status === "draft" ? (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -589,7 +623,7 @@ export function AgendaPage() {
                               </Button>
                             ) : null}
 
-                            {item.status === "in_progress" ? (
+                            {!isApiMode && item.status === "in_progress" ? (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -601,7 +635,7 @@ export function AgendaPage() {
                               </Button>
                             ) : null}
 
-                            {item.status === "needs_review" ? (
+                            {!isApiMode && item.status === "needs_review" ? (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -613,6 +647,14 @@ export function AgendaPage() {
                               </Button>
                             ) : null}
 
+                            {isApiMode && canSchedule && item.professionalId === user?.id && <>
+                              <ButtonLink to={`/editor?patient=${encodeURIComponent(item.patientId)}&session=${encodeURIComponent(item.id)}`} size="small">Abrir editor</ButtonLink>
+                              {item.status === "draft" && <>
+                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "completed")}>Concluir atendimento</Button>
+                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "cancelled")}>Cancelar sessão</Button>
+                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "missed")}>Registrar falta</Button>
+                              </>}
+                            </>}
                             <ButtonLink
                               to={`/patients/${item.patientId}`}
                               size="small"
@@ -694,7 +736,7 @@ export function AgendaPage() {
 
       {/* MODAL FUNCIONAL DE NOVA SESSÃO (LEI DE FITTS: CAMPOS GENEROSOS E FOCO ACESSÍVEL) */}
       {isNewSessionOpen ? (
-        <Dialog open onClose={() => setIsNewSessionOpen(false)} title="Agendar Nova Sessão Clínica">
+        <Dialog open onClose={() => setIsNewSessionOpen(false)} busy={createSession.isPending} title="Agendar Nova Sessão Clínica">
             <div className="flex items-start justify-between">
               <div>
                 <h2 id="new-session-title" className="text-title-3-bold text-text-primary">
@@ -715,7 +757,7 @@ export function AgendaPage() {
             </div>
 
             <form onSubmit={handleCreateSession} className="space-y-4">
-              <div className="space-y-1.5">
+              {isApiMode ? <div className="space-y-2"><label htmlFor="agenda-patient">Paciente cadastrado</label><Select id="agenda-patient" required value={newPatientId} onChange={(event) => setNewPatientId(event.target.value)} disabled={patientsQuery.isLoading || createSession.isPending}><option value="">Selecione um paciente</option>{patientsQuery.data?.map((patient) => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</Select>{patientsQuery.isError ? <p role="alert">Não foi possível carregar os pacientes.</p> : !patientsQuery.isLoading && !patientsQuery.data?.length ? <ButtonLink to="/patients">Cadastrar paciente</ButtonLink> : null}</div> : <div className="space-y-1.5">
                 <label htmlFor="patient-name-input" className="text-caption-1-semibold text-text-primary">
                   Nome do Paciente *
                 </label>
@@ -727,7 +769,7 @@ export function AgendaPage() {
                   required
                   autoFocus
                 />
-              </div>
+              </div>}
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -756,7 +798,7 @@ export function AgendaPage() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              {!isApiMode && <div className="space-y-1.5">
                 <label htmlFor="modality-select" className="text-caption-1-semibold text-text-primary">
                   Modalidade do Atendimento
                 </label>
@@ -771,7 +813,7 @@ export function AgendaPage() {
                   <option value="Sessão de Devolutiva">Sessão de Devolutiva</option>
                   <option value="Supervisão Clínica">Supervisão Clínica</option>
                 </Select>
-              </div>
+              </div>}
 
               <div className="space-y-1.5">
                 <label htmlFor="complement-textarea" className="text-caption-1-semibold text-text-primary">
@@ -794,7 +836,7 @@ export function AgendaPage() {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={createSession.isPending || (isApiMode && (!newPatientId || patientsQuery.isError || patientsQuery.isLoading))}>
                   Confirmar Agendamento
                 </Button>
               </div>

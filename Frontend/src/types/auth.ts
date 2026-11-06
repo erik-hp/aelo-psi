@@ -6,6 +6,7 @@ export type Permission =
   | "patients:write"
   | "sessions:read"
   | "sessions:write"
+  | "notes:write"
   | "analysis:validate"
   | "audit:read"
   | "finance:read"

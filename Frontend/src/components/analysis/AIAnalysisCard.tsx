@@ -23,7 +23,7 @@ export function AIAnalysisCard({ analysis }: { analysis: AIAnalysis }) {
       return signingService.review(analysis.id, decision, comment.trim(), user.id);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      await Promise.all(["dashboard", "patient", "patient-notes", "editor-notes", "vault"].map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
       notify({ type: "success", title: "Revisão assinada", description: "A decisão foi registrada com assinatura criptográfica." });
     },
     onError: (error) => notify({ type: "error", title: "Falha ao assinar revisão", description: error.message }),
@@ -45,7 +45,7 @@ export function AIAnalysisCard({ analysis }: { analysis: AIAnalysis }) {
           <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
             <Gauge className="h-4 w-4 text-status-blue-text" />
             <p className="mt-2 text-caption-1-regular text-text-secondary">Score de relevância</p>
-            <p className="text-title-3-semibold">{analysis.relevanceScore}%</p>
+            <p className="text-title-3-semibold">{analysis.relevanceScore === null ? "—" : `${analysis.relevanceScore}%`}</p>
           </div>
           <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
             <CheckCircle2 className="h-4 w-4 text-status-lime-text" />

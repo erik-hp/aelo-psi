@@ -19,6 +19,7 @@ export interface Patient {
 export interface TherapySession {
   id: string;
   patientId: string;
+  professionalId?: string;
   patientName?: string;
   date: string;
   duration: number | null;
@@ -33,7 +34,7 @@ export interface AIAnalysis {
   id: string;
   patientId: string;
   status: AnalysisStatus;
-  relevanceScore: number;
+  relevanceScore: number | null;
   moodScore: number | null;
   emotionalStateScore: number | null;
   psychologicalBurdenScore: number | null;
@@ -86,6 +87,7 @@ export interface PatientLongitudinalMetric {
 export interface AgendaItem {
   id: string;
   patientId: string;
+  professionalId?: string;
   patientName: string;
   date: string;
   time: string;

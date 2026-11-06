@@ -7,6 +7,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useToast } from "@/hooks/useToast";
 import { clinicalService } from "@/services/clinicalService";
 import { isApiMode } from "@/services/runtime";
+import { ClinicalEditorPage } from "./ClinicalEditorPage";
 
 export function NarrativeEditorPage() {
   const { notify } = useToast();
@@ -31,7 +32,7 @@ export function NarrativeEditorPage() {
   });
 
   if (isApiMode) {
-    return <PageHeader title="Editor Narrativo de Prontuário" description="Selecione uma sessão no perfil do paciente para editar e salvar o rascunho clínico no servidor protegido." />;
+    return <ClinicalEditorPage />;
   }
 
   return (

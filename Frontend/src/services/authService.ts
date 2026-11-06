@@ -1,6 +1,7 @@
 import { apiClient, refreshAccessToken } from "@/api/client";
 import type { AuthTokens, User } from "@/types/auth";
 import { isApiMode } from "@/services/runtime";
+import { authStorage } from "@/services/authStorage";
 
 export interface LoginPayload {
   email: string;
@@ -89,7 +90,8 @@ export const authService = {
   async logout(): Promise<void> {
     if (!isApiMode) return;
     try {
-      await apiClient.post("/auth/logout/", {}, { headers: { "X-AELO-Session": "1" } });
+      const access = authStorage.getAccessToken();
+      await apiClient.post("/auth/logout/", {}, { headers: { "X-AELO-Session": "1", ...(access ? { Authorization: `Bearer ${access}` } : {}) } });
     } catch {
       // Local credentials are cleared even when the API is unavailable.
     }

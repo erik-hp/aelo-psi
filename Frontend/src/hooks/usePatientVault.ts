@@ -13,7 +13,7 @@ export function usePatientVault(patientId: string) {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [markdown, setMarkdown] = useState("");
   const [approvalId, setApprovalId] = useState<string | null>(null);
-  const { data: graph } = useQuery({ queryKey: ["vault", patientId], queryFn: () => clinicalService.getPatientVault(patientId) });
+  const { data: graph, isLoading, isError } = useQuery({ queryKey: ["vault", patientId], queryFn: () => clinicalService.getPatientVault(patientId) });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["vault", patientId] });
   const create = useMutation({
     mutationFn: clinicalService.createVaultCheckpoint,
@@ -22,9 +22,9 @@ export function usePatientVault(patientId: string) {
   });
   const approve = useMutation({
     mutationFn: async ({ analysisId, justification }: { analysisId: string; justification: string }) => { if (!user) throw new Error("Usuário não autenticado"); await signingService.review(analysisId, "VALIDATED", justification, user.id); },
-    onSuccess: () => { setApprovalId(null); refresh(); queryClient.invalidateQueries({ queryKey: ["patient", patientId] }); },
+    onSuccess: () => { setApprovalId(null); refresh(); queryClient.invalidateQueries({ queryKey: ["patient", patientId] }); queryClient.invalidateQueries({ queryKey: ["editor-notes", patientId] }); queryClient.invalidateQueries({ queryKey: ["patient-notes", patientId] }); },
     onError: () => notify({ type: "error", title: "Falha na aprovação", description: "Confira sua permissão e chave de assinatura." }),
   });
-  const preview = useMutation({ mutationFn: clinicalService.getVaultCheckpoint, onSuccess: setMarkdown });
-  return { user, graph, tab, setTab, selectedNode, setSelectedNode, markdown, approvalId, setApprovalId, create, approve, preview };
+  const preview = useMutation({ mutationFn: clinicalService.getVaultCheckpoint, onSuccess: setMarkdown, onError: () => notify({ type: "error", title: "Falha ao abrir checkpoint", description: "Não foi possível carregar o registro solicitado." }) });
+  return { user, graph, isLoading, isError, tab, setTab, selectedNode, setSelectedNode, markdown, approvalId, setApprovalId, create, approve, preview };
 }

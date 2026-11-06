@@ -24,7 +24,9 @@ export function AppRoutes() {
           <Route path="/patients" element={<PatientsPage />} />
           <Route path="/patients/:patientId" element={<PatientProfilePage />} />
           <Route path="/agenda" element={<AgendaPage />} />
-          <Route path="/editor" element={<NarrativeEditorPage />} />
+          <Route path="/editor" element={<ProtectedRoute permission="notes:write" />}>
+            <Route index element={<NarrativeEditorPage />} />
+          </Route>
           <Route path="/sessions" element={<Navigate to="/agenda" replace />} />
           <Route path="/notes" element={<Navigate to="/editor" replace />} />
           <Route path="/analysis" element={<Navigate to="/patients" replace />} />

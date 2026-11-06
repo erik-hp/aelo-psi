@@ -23,6 +23,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { clinicalService } from "@/services/clinicalService";
 import { isApiMode } from "@/services/runtime";
 import { ButtonLink } from "@/components/ui/button-link";
+import { localDateKey } from "@/lib/dates";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -58,18 +59,19 @@ export function DashboardPage() {
   const agenda = agendaQuery.data ?? [];
   const finance = financeQuery.data ?? [];
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
 
   // Busca inteligente de sessões (acolhimento rico mesmo com dados de mock)
   const actualTodaySessions = agenda
     .filter((item) => item.date === today)
     .sort((a, b) => a.time.localeCompare(b.time));
 
-  const isUsingUpcomingFallback = actualTodaySessions.length === 0 && agenda.length > 0;
-  const displayedSessions = actualTodaySessions.length > 0 ? actualTodaySessions : agenda.slice(0, 4);
+  const upcoming = agenda.filter((item) => item.status === "draft" && item.date >= today).sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+  const isUsingUpcomingFallback = actualTodaySessions.length === 0 && (isApiMode ? upcoming.length > 0 : agenda.length > 0);
+  const displayedSessions = actualTodaySessions.length > 0 ? actualTodaySessions : (isApiMode ? upcoming : agenda).slice(0, 4);
 
   // Próxima sessão do dia (Hero Card)
-  const nextSession = actualTodaySessions.find((item) => item.status === "draft" || item.status === "needs_review") || displayedSessions[0];
+  const nextSession = actualTodaySessions.find((item) => item.status === "draft" || item.status === "needs_review") || (isApiMode ? upcoming[0] : displayedSessions[0]);
 
   // Efeito Von Restorff: Segregação visual de alertas críticos vs avisos administrativos
   const criticalRiskAlerts = agenda.filter((item) => (item.attentionIndex ?? 0) >= 80);
@@ -100,7 +102,7 @@ export function DashboardPage() {
     <>
       <PageHeader
         title="Dashboard Clínico"
-        description="Acompanhamento ergonômico dos atendimentos, alertas prioritários de saúde mental e gestão ética do consultório."
+        description="Acompanhe pacientes autorizados, agendamentos e registros do consultório."
         action={
           <div className="flex flex-col gap-2 sm:flex-row">
             <ButtonLink to="/editor">
@@ -205,9 +207,9 @@ export function DashboardPage() {
               tone="cyan"
             />
             <MetricCard
-              label="Alertas clínicos severos"
-              value={String(criticalRiskAlerts.length)}
-              delta={criticalRiskAlerts.length > 0 ? "Ideação / Risco imediato" : "Sem alertas críticos ativos"}
+              label={isApiMode ? "Análises registradas" : "Alertas clínicos severos"}
+              value={String(isApiMode ? dashboard?.analyses.length ?? 0 : criticalRiskAlerts.length)}
+              delta={isApiMode ? "Sugestões assistivas para revisão" : criticalRiskAlerts.length > 0 ? "Ideação / Risco imediato" : "Sem alertas críticos ativos"}
               icon={AlertTriangle}
               tone={criticalRiskAlerts.length > 0 ? "amber" : undefined}
             />
@@ -319,8 +321,8 @@ export function DashboardPage() {
 
       {/* Grid Inferior: Segregação de Alertas (Von Restorff), Pendências Zeigarnik e Módulo Financeiro */}
       <section className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Bloco 1: Alertas Clínicos Críticos Segregados (Von Restorff) */}
-        <Card className="border-border-button-default">
+        {/* Indicadores indisponíveis não equivalem à ausência de risco. */}
+        {isApiMode ? <Card><CardHeader><CardTitle>Avaliação clínica</CardTitle></CardHeader><CardContent><p className="text-body-regular text-text-secondary">A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.</p></CardContent></Card> : <Card className="border-border-button-default">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-headline-regular flex items-center gap-2 text-text-primary">
@@ -368,10 +370,10 @@ export function DashboardPage() {
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card>}
 
         {/* Bloco 2: Pendências Clínicas e Prontuários em Aberto (Efeito Zeigarnik) */}
-        <Card className="border-border-button-default">
+        {isApiMode ? <Card><CardHeader><CardTitle>Registros das sessões</CardTitle></CardHeader><CardContent><p className="text-body-regular text-text-secondary">Consulte e salve as notas no Editor Clínico. Concluir um atendimento não assina sua nota.</p><ButtonLink to="/editor" className="mt-4">Abrir editor clínico</ButtonLink></CardContent></Card> : <Card className="border-border-button-default">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-headline-regular flex items-center gap-2 text-text-primary">
@@ -432,7 +434,7 @@ export function DashboardPage() {
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card>}
 
         {/* Bloco 3: Módulo Financeiro (Desacoplado) */}
         <Card className="border-border-button-default">
