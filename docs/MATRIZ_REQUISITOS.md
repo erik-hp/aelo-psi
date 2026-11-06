@@ -47,6 +47,8 @@ Ver [Plano Mestre](PLANO_MESTRE_IMPLEMENTACAO.md) e [registro](REGISTRO_EXECUCAO
 
 ## Regras de atualização
 
+Adendo de estabilização (06/11/2026): RNF-06/RNF-08 recebem o [plano de investigação de UX/navegação](validation/PLANO_REVISAO_UX_NAVEGACAO.md), e RF-01/RNF-02/RNF-03/RNF-08 o [plano de avaliação do Strix](security/PLANO_AVALIACAO_STRIX.md). Somente pesquisa inicial e planejamento; testes ativos, benchmark prático e redesign pendentes. O marco funcional de 80% não indica cobertura de segurança nem muda o estado de nenhum requisito/gate.
+
 Proposta operacional SC-OP-01 (06/11/2026): [PLANO_OPERACIONAL_CLINICA.md](PLANO_OPERACIONAL_CLINICA.md) relaciona OP-00–OP-11 aos requisitos existentes e distingue refinamentos F0/F1 de ampliações ainda não aprovadas. Pesquisa documental, sem nova implementação, resultado quantitativo ou mudança dos estados de aceite. Requisitos de financeiro/comunicação/portal não foram adicionados como aprovados.
 
 Evidência incremental da auditoria funcional (06/11/2026): RF-01–RF-04 e RNF-02/RNF-03/RNF-06/RNF-08 recebem correções e testes parciais em [AUDITORIA_FUNCIONAL_2026-11-06.md](validation/AUDITORIA_FUNCIONAL_2026-11-06.md). **EM REVISÃO**: cadastro/agendamento/nota persistidos e negações verificadas nos cenários descritos; assinatura/retificação completas, acessibilidade manual, concorrência e IA integral continuam pendentes. Não altera os estados completos dos requisitos ou os gates.

@@ -14,6 +14,8 @@ As recomendações de telas, contratos de API, entidades e backlog abaixo são *
 
 **Decisão de trabalho desta rodada:** documentar o núcleo sem IA e as ampliações em backlog. Nenhuma integração, papel, tabela ou automação nova foi implementada. Retomar IA depois de validar as tarefas operacionais e os gates aplicáveis; não renumerar F0–F7.
 
+**Adendo de estabilização solicitado em 06/11/2026:** a estrutura de navegação e a clareza de várias telas ainda são consideradas insatisfatórias pelo autor. A padronização de componentes não encerra esse problema. Será realizada uma [análise de UX/navegação e pesquisa comparativa de frontends](validation/PLANO_REVISAO_UX_NAVEGACAO.md), vinculada a OP-01/OP-06/OP-10, com inventário, evidências, protótipos e validação antes/depois. A [avaliação do Strix](security/PLANO_AVALIACAO_STRIX.md) fica planejada para o marco verificável de aproximadamente 80% do escopo funcional aprovado pronto/auditável, com controles críticos completos e ambiente sintético isolado. O marco não adia a segurança F0 nem libera uma versão estável automaticamente.
+
 ## 2. Base normativa e suas consequências
 
 | Tema | Constatação verificada e consequência para o planejamento |
@@ -156,6 +158,8 @@ Toda consulta deve aplicar clínica + paciente quando pertinente + usuário/aç�
 | OP-11 / P2 | Repasses avançados, convênios/TISS, portal, múltiplas unidades e automações fiscais. | **Backlog condicional**, fora do mínimo até decisão. Contrato externo e aceite específicos; nenhuma dependência artificial para salvar nota. |
 
 **Próxima tarefa recomendada:** OP-00, começando pela conciliação das evidências e pendências F0-02/F0-04/F0-05/F0-06 no registro. Em seguida, especificação OP-01 e OP-02; não começar pela integração fiscal ou dashboard. Planejamento de F1 pode ser refinado, mas implementação segue os gates vigentes.
+
+Incorporar UX-01 (inventário e baseline de navegação) ao diagnóstico imediato, antes de refazer telas; depois UX-02–UX-05 detalham benchmark, protótipos e implementação incremental. Registrar SEC-STRIX como avaliação futura, sem instalação/varredura nesta etapa. Ver documentos vinculados no adendo para critérios e evidências; nenhuma dessas atividades substitui aceites OP/F0–F7.
 
 ## 9. Homologação e definição de operação mínima
 
