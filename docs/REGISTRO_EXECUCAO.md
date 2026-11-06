@@ -258,6 +258,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Executados: `npm.cmd test -- --run` (**132 aprovados/24 arquivos**), `npm.cmd run build` (aprovado; avisos conhecidos Zod/chunks), `npm.cmd run lint` (**0 erros/11 avisos**), `git diff --check` sem erros. Testes DOM comprovam regressão funcional, não aparência do popup do sistema. Conferência visual em navegador claro/escuro/alto contraste continua pendente.
 - Implementação `aabda1e`, [PR #17 em rascunho](https://github.com/erik-hp/aelo-psi/pull/17), dependente do #16, sem merge. Próximo item: revisar o menu aberto em navegador e os checks remotos, ainda não confirmados. **G0 continua BLOQUEADO**.
 
+## Pesquisa e plano operacional digital — 06/11/2026 — EM REVISÃO
+
+- Solicitação explícita: pesquisar/documentar a operação digital da clínica antes de voltar à análise por IA. Base `568868a`, branch `docs/plano-operacional-clinica`; PR #17 confirmado aberto/em rascunho. Escopo documental F0-01/F0-06 e refinamento proposto F1, RF-01–RF-04/RNF-01–RNF-06/RNF-08, sem implementação ou liberação de gate.
+- Criado [PLANO_OPERACIONAL_CLINICA.md](PLANO_OPERACIONAL_CLINICA.md): premissas, fontes oficiais, jornada, capacidades, responsabilidades/permissões, inventário real do código, arquitetura candidata, OP-00–OP-11 com dependências/aceite, homologação, procedimentos e solicitação de mudança SC-OP-01. Plano Mestre/matriz/README apontam a proposta sem aprovar ampliações.
+- Consultados CFP/CRPs, legislação federal, ANPD, Receita Federal, Ministério da Saúde e ANS. Destacadas diferenças de guarda por categoria (sem descarte automático em cinco anos), Receita Saúde PF versus emissão PJ, e-Psi sem exigência na orientação atual, acesso administrativo sem prontuário e representação legal separada do pagador. Regras locais e consolidação normativa/contratual exigem validação antes de implantação; sem alegação de conformidade.
+- Cenário inicial assumido e marcado como não confirmado: clínica particular brasileira com equipe e atendimento híbrido; município, PF/PJ, convênios e recorte financeiro permanecem decisões pendentes. Ampliações propostas permanecem em backlog, sem criar tabelas, integrações, contas ou requisitos aprovados.
+- Verificações desta rodada: leitura dos modelos/rotas/serviços pertinentes, conferência de fontes e `git diff --check` sem erros; script local validou cinco documentos, 46 referências locais e cercas de código balanceadas (`DOC_CHECK_OK`). Nenhum teste/build da aplicação foi repetido: não houve alteração de código executável. Commit/PR a registrar após publicação. Próxima tarefa recomendada: OP-00, conciliar evidências F0 antes de avançar a implementação; **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

@@ -47,6 +47,8 @@ flowchart TD
 
 ## 3. O que existe hoje e o que está planejado?
 
+O [plano operacional digital da clínica](docs/PLANO_OPERACIONAL_CLINICA.md), pesquisado em 06/11/2026, descreve jornada, necessidades, base normativa, permissões, lacunas e sequência proposta para estabilizar a operação antes da IA. É planejamento em revisão; funcionalidades novas e integrações não estão implementadas por constarem nele.
+
 **Atualização operacional de 06/11/2026 (em revisão):** em modo API, o profissional autorizado pode seguir **Pacientes → Adicionar paciente → Agenda → agendar → Abrir editor → Salvar nota**. Cadastro, agendamento e nota foram verificados com dados sintéticos na API local; salvar não depende da IA e concluir atendimento não assina a nota. Achados, correções, testes e funcionalidades ainda pendentes estão na [auditoria funcional](docs/validation/AUDITORIA_FUNCIONAL_2026-11-06.md). Essa evidência incremental não libera uso clínico ou os gates do Plano Mestre.
 
 O inventário abaixo resulta de **leitura estática do repositório**; não houve neste registro comprovação de compilação, testes em runtime ou validação clínica. A matriz de requisitos descreve exatamente o que falta.
