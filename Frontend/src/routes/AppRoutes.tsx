@@ -1,17 +1,19 @@
+import { lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
-import { AuditPage } from "@/pages/AuditPage";
-import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
-import { PatientProfilePage } from "@/pages/PatientProfilePage";
-import { PatientsPage } from "@/pages/PatientsPage";
-import { AgendaPage } from "@/pages/AgendaPage";
-import { FinancePage } from "@/pages/FinancePage";
-import { UsersPage } from "@/pages/UsersPage";
-import { SettingsPage } from "@/pages/SettingsPage";
-import { NarrativeEditorPage } from "@/pages/NarrativeEditorPage";
+
+const AuditPage = lazy(() => import("@/pages/AuditPage").then((module) => ({ default: module.AuditPage })));
+const DashboardPage = lazy(() => import("@/pages/DashboardPage").then((module) => ({ default: module.DashboardPage })));
+const PatientProfilePage = lazy(() => import("@/pages/PatientProfilePage").then((module) => ({ default: module.PatientProfilePage })));
+const PatientsPage = lazy(() => import("@/pages/PatientsPage").then((module) => ({ default: module.PatientsPage })));
+const AgendaPage = lazy(() => import("@/pages/AgendaPage").then((module) => ({ default: module.AgendaPage })));
+const FinancePage = lazy(() => import("@/pages/FinancePage").then((module) => ({ default: module.FinancePage })));
+const UsersPage = lazy(() => import("@/pages/UsersPage").then((module) => ({ default: module.UsersPage })));
+const SettingsPage = lazy(() => import("@/pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
+const NarrativeEditorPage = lazy(() => import("@/pages/NarrativeEditorPage").then((module) => ({ default: module.NarrativeEditorPage })));
 
 export function AppRoutes() {
   return (

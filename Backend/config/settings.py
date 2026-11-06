@@ -18,6 +18,17 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 AELO_ENABLE_DJANGO_ADMIN = DEBUG and os.getenv("AELO_ENABLE_DJANGO_ADMIN", "False").lower() == "true"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
+if not DEBUG and (len(POSTGRES_PASSWORD) < 12 or POSTGRES_PASSWORD.startswith(("replace-with", "change-me", "CHANGE_ME"))):
+    raise ImproperlyConfigured("Set a strong POSTGRES_PASSWORD outside development.")
+
+
+def origins_from_env(name):
+    """Local browser origins are a development convenience, never a production default."""
+    configured = os.getenv(name, "http://localhost:3000" if DEBUG else "")
+    return [origin.strip() for origin in configured.split(",") if origin.strip()]
+
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -77,7 +88,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("POSTGRES_DB", "aelo"),
         "USER": os.getenv("POSTGRES_USER", "aelo"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "PASSWORD": POSTGRES_PASSWORD,
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 60,
@@ -127,14 +138,10 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    origin for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",") if origin
-]
+CORS_ALLOWED_ORIGINS = origins_from_env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = (*default_headers, "x-aelo-session")
-CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000").split(",") if origin
-]
+CSRF_TRUSTED_ORIGINS = origins_from_env("CSRF_TRUSTED_ORIGINS")
 
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "America/Sao_Paulo"
@@ -148,7 +155,8 @@ AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://ai-service:8001")
 AI_SERVICE_TIMEOUT = float(os.getenv("AI_SERVICE_TIMEOUT", "90"))
 AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 
-TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_SSL_HEADER", "False").lower() == "true"
+# Enable only behind a reverse proxy that overwrites client-supplied scheme headers.
+TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_HEADERS", "False").lower() == "true"
 if TRUST_PROXY_HEADERS:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 REQUIRE_HTTPS = os.getenv("DJANGO_REQUIRE_HTTPS", "False").lower() == "true"
@@ -163,8 +171,8 @@ CSRF_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 X_FRAME_OPTIONS = "DENY"
 
 if REQUIRE_HTTPS:
-    if DEBUG or os.getenv("POSTGRES_PASSWORD", "") in ("", "aelo", "replace-with-a-random-database-password"):
-        raise ImproperlyConfigured("HTTPS deployment requires DEBUG=False and a rotated database password.")
+    if DEBUG:
+        raise ImproperlyConfigured("HTTPS deployment requires DEBUG=False.")
     if (not CLINICAL_DATA_KEYS or len(AUDIT_LOG_HMAC_KEY) < 32 or AUDIT_LOG_HMAC_KEY.startswith("replace-with")
             or len(AI_SERVICE_TOKEN) < 32 or AI_SERVICE_TOKEN.startswith("replace-with")):
         raise ImproperlyConfigured("HTTPS deployment requires independent clinical, audit, and AI service keys.")

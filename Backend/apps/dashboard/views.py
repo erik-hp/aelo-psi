@@ -1,5 +1,8 @@
+from uuid import UUID
+
 from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from apps.audit_logs.services import audit
@@ -15,7 +18,10 @@ def longitudinal_dashboard(request):
     patient_id = request.query_params.get("patient")
     patient_qs = accessible_patients(request.user, clinical=True)
     if patient_id:
-        patient_qs = patient_qs.filter(id=patient_id)
+        try:
+            patient_qs = patient_qs.filter(id=UUID(patient_id))
+        except ValueError:
+            raise ValidationError({"patient": "Invalid patient identifier."}) from None
     patient_ids = patient_qs.values("id")
     response = Response(
         {

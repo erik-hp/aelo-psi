@@ -1,9 +1,9 @@
 from rest_framework import viewsets, status
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from django.http import JsonResponse
 from apps.audit_logs.mixins import AuditReadMixin
@@ -25,7 +25,8 @@ class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
     search_fields = ("internal_code", "display_name")
 
     def get_queryset(self):
-        return accessible_patients(self.request.user, write=self.request.method not in ('GET', 'HEAD', 'OPTIONS'))
+        write = self.request.method not in ('GET', 'HEAD', 'OPTIONS')
+        return accessible_patients(self.request.user, write=write).order_by("display_name", "id")
 
     @transaction.atomic
     def perform_create(self, serializer):

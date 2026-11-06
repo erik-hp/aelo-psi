@@ -1,10 +1,10 @@
 from datetime import timedelta
 from django.db import IntegrityError, transaction
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from apps.audit_logs.mixins import AuditReadMixin
 from apps.audit_logs.services import audit
@@ -36,16 +36,6 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
         if write:
             qs = qs.filter(author=self.request.user)
         return qs.order_by("-created_at", "-id")
-
-    def list(self, request, *args, **kwargs):
-        result = super().list(request, *args, **kwargs)
-        audit(request, 'LIST', self, {'module': 'clinical_notes', 'method': 'GET'})
-        return result
-
-    def retrieve(self, request, *args, **kwargs):
-        note = self.get_object()
-        audit(request, 'READ', note, {'module': 'clinical_notes', 'method': 'GET'})
-        return Response(self.get_serializer(note).data)
 
     @transaction.atomic
     def perform_create(self, serializer):

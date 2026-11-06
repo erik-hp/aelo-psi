@@ -3,6 +3,11 @@ from rest_framework.test import APIClient
 from apps.audit_logs.models import AuditLog
 
 
+@pytest.fixture(autouse=True)
+def trusted_frontend_origin(settings):
+    settings.CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+
+
 @pytest.mark.django_db
 def test_refresh_token_is_http_only_cookie_and_requires_session_header(records):
     client = APIClient()

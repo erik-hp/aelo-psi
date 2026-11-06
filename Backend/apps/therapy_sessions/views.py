@@ -20,7 +20,7 @@ class TherapySessionViewSet(AuditReadMixin, viewsets.ModelViewSet):
         # another psychologist's session or changing their schedule/summary.
         if write:
             qs = qs.filter(professional=self.request.user)
-        return qs
+        return qs.order_by("-scheduled_at", "-id")
 
     def perform_create(self, serializer):
         session = serializer.save(professional=self.request.user)
