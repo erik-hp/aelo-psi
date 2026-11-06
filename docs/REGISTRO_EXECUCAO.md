@@ -248,7 +248,7 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Corrigidos paginação truncada, cache entre identidades, busca inerte, revisão de análises no perfil e estados de erro do cofre. Diretório de usuários passou a consultar a API; permissões e textos de métricas/configurações foram alinhados ao comportamento efetivo.
 - Executados: frontend **132 testes/24 arquivos**, build aprovado, lint 0 erros/11 avisos; backend **59 aprovados/2 ignorados/1 aviso**, Ruff sem erros nos arquivos alterados. API Docker reconstruída; check e ausência de migrações verificados. Smoke HTTP real com PostgreSQL confirmou persistência, duplicados 400, conflito 409, negação 401/404 e ausência de assinatura ao concluir sessão. Dados exclusivamente sintéticos, preservados para inspeção; nenhum segredo registrado.
 - Achados, causas, soluções, contratos, evidências e pendências em [AUDITORIA_FUNCIONAL_2026-11-06.md](validation/AUDITORIA_FUNCIONAL_2026-11-06.md). Sem navegador disponível: não houve inspeção visual, leitor de tela ou validação integral worker/Ollama. Financeiro, notificações, edição de preferências/contas, autosave, concorrência e workflow integral de assinatura continuam pendentes.
-- Commit/PR: a registrar após publicação. Próximo item: revisar CI e os achados residuais F0; validar visualmente os fluxos com dados sintéticos. **G0 continua BLOQUEADO**.
+- Implementação `f0f7a5e`, [PR #16 em rascunho](https://github.com/erik-hp/aelo-psi/pull/16), dependente do PR #15; sem merge. Checks remotos ainda não confirmados nesta entrada. Próximo item: revisar CI e os achados residuais F0; validar visualmente os fluxos com dados sintéticos. **G0 continua BLOQUEADO**.
 
 ## Pendências de decisão
 
