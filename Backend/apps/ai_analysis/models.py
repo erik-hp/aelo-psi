@@ -117,6 +117,21 @@ class VaultJob(TimestampedModel):
         indexes = [models.Index(fields=["status", "created_at"])]
 
 
+class NoteExtractionJob(TimestampedModel):
+    """One automatic reading of one note version; see ADR-003."""
+
+    note = models.ForeignKey("clinical_notes.ClinicalNote", on_delete=models.PROTECT, related_name="extraction_jobs")
+    note_version = models.PositiveIntegerField()
+    status = models.CharField(max_length=16, choices=VaultJob.Status.choices, default=VaultJob.Status.PENDING, db_index=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    started_at = models.DateTimeField(null=True, blank=True)
+    error_code = models.CharField(max_length=64, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["note", "note_version"], name="uniq_extraction_note_version")]
+        indexes = [models.Index(fields=["status", "created_at"])]
+
+
 class AnalysisJob(TimestampedModel):
     patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT)
     note = models.ForeignKey("clinical_notes.ClinicalNote", null=True, on_delete=models.PROTECT)

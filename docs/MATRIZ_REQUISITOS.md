@@ -57,6 +57,8 @@ Evidência incremental UI-01 (06/11/2026): RNF-06/RNF-08 recebem a integração 
 
 Evidência incremental da revisão transversal F0 (06/11/2026): RF-01/RNF-02/RNF-03/RNF-08 recebem correções e testes em `Backend/tests/test_api_robustness.py` e `Backend/tests/test_runtime_settings.py`, detalhados no [registro](REGISTRO_EXECUCAO.md). **EM REVISÃO**; estados dos requisitos e gates não mudam.
 
+Proposta de mudança (06/11/2026): [ADR-003](architecture/ADR-003-recuperacao-em-camadas.md) e [ADR-004](architecture/ADR-004-ia-externa.md) relacionam RF-05/RF-06/RNF-03/RNF-07 à recuperação em camadas e à manutenção da inferência local. Correção de contexto do Ollama é evidência incremental de RNF-03. **EM REVISÃO**; estados e gates não mudam.
+
 1. Cada PR cita ID(s) F0–F7 + requisito(s) RF/RNF/VAL.
 2. Mudar estado somente com commit/PR e teste/evidência no `REGISTRO_EXECUCAO.md`.
 3. Não usar “compliant LGPD”/“FHIR-certified” como estado; registrar controles e riscos residuais.

@@ -14,7 +14,7 @@ from apps.audit_logs.services import audit
 from apps.clinical_notes.models import ClinicalNote
 from apps.patients.access import accessible_patients, can_edit_patient
 from apps.users.models import UserRole, UserSigningKey
-from .models import AIAnalysis, AnalysisStatus, HumanValidation, VaultCheckpoint, VaultEdge, VaultNode, VaultJob, AnalysisJob
+from .models import AIAnalysis, AnalysisStatus, HumanValidation, NoteExtractionJob, VaultCheckpoint, VaultEdge, VaultNode, VaultJob, AnalysisJob
 from .permissions import CanRequestAI, CanReviewAI
 from .serializers import AIAnalysisSerializer, AnalysisRequestSerializer, ReviewSerializer, SigningPayloadSerializer, VaultNodeSerializer, VaultEdgeSerializer, VaultCheckpointSummarySerializer, VaultCheckpointDetailSerializer
 from .vault import detect_communities
@@ -67,12 +67,17 @@ def patient_vault(request, patient_id):
     edges = list(VaultEdge.objects.filter(patient=patient, source_id__in=node_ids, target_id__in=node_ids).order_by("observed_at", "id")[:400])
     communities = detect_communities(nodes, edges)
     checkpoints = VaultCheckpoint.objects.filter(patient=patient).select_related("analysis", "analysis__human_validation").order_by("-created_at")[:30]
+    readings = NoteExtractionJob.objects.filter(note__patient=patient, note__deleted_at__isnull=True)
     audit(request, "VAULT_READ", patient, {"nodes": len(nodes)})
     response = Response({
         "nodes": VaultNodeSerializer(nodes, many=True).data,
         "edges": VaultEdgeSerializer(edges, many=True).data,
         "communities": communities,
         "checkpoints": VaultCheckpointSummarySerializer(checkpoints, many=True).data,
+        "extraction": {
+            "pending": readings.filter(status__in=[VaultJob.Status.PENDING, VaultJob.Status.RUNNING]).count(),
+            "failed": readings.filter(status=VaultJob.Status.FAILED).count(),
+        },
     })
     response["Cache-Control"] = "no-store"
     return response

@@ -74,3 +74,22 @@ def test_proxy_variable_matches_the_tls_overlay_and_env_example():
     # Without this header Django sees plain HTTP behind Caddy and redirects forever.
     assert 'DJANGO_TRUST_PROXY_HEADERS: "True"' in (BACKEND / "docker-compose.tls.yml").read_text(encoding="utf-8")
     assert "DJANGO_TRUST_PROXY_HEADERS=" in (BACKEND / ".env.example").read_text(encoding="utf-8")
+
+
+def test_automatic_reading_refuses_an_environment_not_declared_synthetic():
+    result = load_settings(AI_AUTO_EXTRACTION="True")
+    assert result.returncode != 0
+    assert "AELO_SYNTHETIC_DATA_ONLY" in result.stderr
+
+
+def test_automatic_reading_runs_only_when_declared_synthetic():
+    assert load_settings(AI_AUTO_EXTRACTION="True", AELO_SYNTHETIC_DATA_ONLY="True").returncode == 0
+
+
+def test_automatic_reading_never_starts_in_https_deployment():
+    result = load_settings(
+        AI_AUTO_EXTRACTION="True", AELO_SYNTHETIC_DATA_ONLY="True", DJANGO_REQUIRE_HTTPS="True",
+        CLINICAL_DATA_KEYS="MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=", AUDIT_LOG_HMAC_KEY="a" * 40, AI_SERVICE_TOKEN="b" * 40,
+    )
+    assert result.returncode != 0
+    assert "AELO_SYNTHETIC_DATA_ONLY" in result.stderr

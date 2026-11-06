@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from apps.ai_analysis.retrieval import queue_note_extraction
 from apps.audit_logs.mixins import AuditReadMixin
 from apps.audit_logs.services import audit
 from apps.patients.access import accessible_patients, can_edit_patient
@@ -44,6 +45,7 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
         if not allowed.exists():
             raise PermissionDenied("Patient is not accessible by this user.")
         note = serializer.save(author=self.request.user)
+        queue_note_extraction(note)
         audit(self.request, "CREATE", note, {"module": "clinical_notes"})
 
     @transaction.atomic
@@ -71,6 +73,7 @@ class ClinicalNoteViewSet(AuditReadMixin, viewsets.ModelViewSet):
                 internal_code=note.patient.internal_code,
             ),
         )
+        queue_note_extraction(updated)
         audit(self.request, "UPDATE", updated, {"module": "clinical_notes", "version": updated.version})
 
     @transaction.atomic

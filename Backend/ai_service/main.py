@@ -39,6 +39,10 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "embeddinggemma")
 RAG_TOP_K = max(1, min(20, int(os.getenv("RAG_TOP_K", "5"))))
+# Ollama silently drops the start of an oversized prompt, where the rules live.
+OLLAMA_NUM_CTX = max(2048, int(os.getenv("OLLAMA_NUM_CTX", "8192")))
+RESPONSE_TOKEN_RESERVE = 1024
+CHARS_PER_TOKEN_ESTIMATE = 3  # Deliberately conservative; tokenizers vary by model.
 AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 _circuit_failures = 0
 _circuit_open_until = 0.0
@@ -52,6 +56,10 @@ def require_service_token(token: str | None) -> None:
 
 class CircuitOpenError(Exception):
     pass
+
+
+class PromptTooLargeError(ValueError):
+    """The prompt would not fit the model context; never let Ollama truncate it."""
 
 
 @retry(reraise=True, stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=2), retry=retry_if_exception_type((httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout)))
@@ -83,6 +91,20 @@ async def _ollama_post(path: str, payload: dict) -> dict:
     return result
 
 
+async def generate_json(prompt: dict) -> str:
+    text = json.dumps(prompt, ensure_ascii=False)
+    if len(text) / CHARS_PER_TOKEN_ESTIMATE + RESPONSE_TOKEN_RESERVE > OLLAMA_NUM_CTX:
+        raise PromptTooLargeError("Prompt exceeds the configured model context.")
+    data = await _ollama_post("/api/generate", {
+        "model": OLLAMA_MODEL, "prompt": text, "stream": False, "format": "json",
+        # shift=False makes Ollama answer HTTP 400 instead of truncating an underestimated prompt.
+        "shift": False, "options": {"num_ctx": OLLAMA_NUM_CTX},
+    })
+    if not isinstance(data, dict) or not isinstance(data.get("response"), str):
+        raise ValueError("Ollama returned an invalid generation response.")
+    return data["response"]
+
+
 async def embed_texts(texts: list[str]) -> list[list[float]]:
     body = await _ollama_post("/api/embed", {"model": OLLAMA_EMBED_MODEL, "input": texts, "truncate": False})
     if not isinstance(body, dict):
@@ -106,15 +128,20 @@ async def retrieve_context(payload: AnalysisRequest) -> AnalysisRequest:
         return payload.model_copy(update={"context": candidates})
     anchor = next((item for item in candidates if item.note_id == payload.note_id), candidates[0])
     others = [item for item in candidates if item.note_id != anchor.note_id]
-    vectors = await embed_texts([anchor.text] + [item.text for item in others])
+    # Remote notes were already chosen by the graph; re-ranking could hide them again.
+    far = [item for item in others if item.tier == "far"][: RAG_TOP_K - 1]
+    near = [item for item in others if item.tier == "near"]
+    slots = RAG_TOP_K - 1 - len(far)
+    if slots == 0 or not near:
+        return payload.model_copy(update={"context": [anchor, *far]})
+    vectors = await embed_texts([anchor.text] + [item.text for item in near])
     query = vectors[0]
     ranked = sorted(
-        zip(others, vectors[1:]),
+        zip(near, vectors[1:]),
         key=lambda pair: sum(a * b for a, b in zip(query, pair[1])),
         reverse=True,
     )
-    selected = [anchor] + [item for item, _ in ranked[: RAG_TOP_K - 1]]
-    return payload.model_copy(update={"context": selected})
+    return payload.model_copy(update={"context": [anchor, *far, *[item for item, _ in ranked[:slots]]]})
 
 
 async def retrieve_graph_context(payload: AnalysisRequest) -> AnalysisRequest:
@@ -159,13 +186,10 @@ async def ollama_analysis(payload: AnalysisRequest) -> dict:
             "sentiment_metrics",
             "relevance_score",
         ],
-        "context": [item.model_dump() for item in payload.context],
+        "context": [item.model_dump(exclude={"tier"}) for item in payload.context],
         "graph_context": [fact.model_dump() for fact in payload.graph_context],
     }
-    data = await _ollama_post("/api/generate", {"model": OLLAMA_MODEL, "prompt": json.dumps(prompt, ensure_ascii=False), "stream": False, "format": "json"})
-    if not isinstance(data, dict) or not isinstance(data.get("response"), str):
-        raise ValueError("Ollama returned an invalid analysis response.")
-    result = AnalysisResult.model_validate(json.loads(data["response"]))
+    result = AnalysisResult.model_validate(json.loads(await generate_json(prompt)))
     if not (result.patterns or result.longitudinal_evolution or result.attention_points):
         raise ValueError("Ollama returned an empty analysis.")
     notes = {item.note_id: item for item in payload.context}
@@ -192,10 +216,7 @@ async def ollama_vault(note: ContextItem) -> VaultExtraction:
         "schema": {"nodes": [{"kind": "symptom|event|context|intervention", "label": "short concept", "evidence": "exact quote"}], "edges": [{"source": 0, "target": 1, "relation": "co_occurs|precedes|reports|associated", "evidence": "exact quote", "confidence": 0.0}]},
         "note": note.model_dump(),
     }
-    data = await _ollama_post("/api/generate", {"model": OLLAMA_MODEL, "prompt": json.dumps(prompt, ensure_ascii=False), "stream": False, "format": "json"})
-    if not isinstance(data, dict) or not isinstance(data.get("response"), str):
-        raise ValueError("Ollama returned an invalid vault response.")
-    return VaultExtraction.model_validate(json.loads(data["response"]))
+    return VaultExtraction.model_validate(json.loads(await generate_json(prompt)))
 
 
 async def ollama_vault_synthesis(payload: VaultSynthesisRequest) -> VaultSynthesis:
@@ -205,10 +226,7 @@ async def ollama_vault_synthesis(payload: VaultSynthesisRequest) -> VaultSynthes
         "current": [item.model_dump() for item in payload.current],
         "history": [item.model_dump() for item in payload.history],
     }
-    data = await _ollama_post("/api/generate", {"model": OLLAMA_MODEL, "prompt": json.dumps(prompt, ensure_ascii=False), "stream": False, "format": "json"})
-    if not isinstance(data, dict) or not isinstance(data.get("response"), str):
-        raise ValueError("Ollama returned an invalid vault synthesis response.")
-    return VaultSynthesis.model_validate(json.loads(data["response"]))
+    return VaultSynthesis.model_validate(json.loads(await generate_json(prompt)))
 
 
 @app.get("/health")

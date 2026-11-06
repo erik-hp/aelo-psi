@@ -1,8 +1,10 @@
 from decimal import Decimal
+from django.conf import settings
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from apps.clinical_notes.models import ClinicalNote
 from .models import AIAnalysis, AISource, SentimentMetric, VaultEdge
+from .retrieval import related_remote_notes
 from services.ai.client import AIClient
 from services.security.anonymization import UnsafeClinicalText, prepare_ai_text, residual_identifier_codes
 
@@ -15,21 +17,64 @@ SYSTEM_GUARDRAILS = [
 ]
 
 
-def build_context(patient, limit: int) -> list[dict]:
-    notes = ClinicalNote.objects.filter(patient=patient, deleted_at__isnull=True).order_by("-created_at")[:limit]
+MAX_CONTEXT_NOTES = 20  # Mirrors AnalysisRequest.context in the AI service contract.
+MAX_GRAPH_FACTS = 40
+MAX_REMOTE_GRAPH_FACTS = 10
+
+
+def note_context(note, patient, tier: str) -> dict:
+    return {
+        "note_id": str(note.id),
+        "session_id": str(note.session_id) if note.session_id else None,
+        "created_at": note.created_at.isoformat(),
+        "text": prepare_ai_text(note.raw_text, display_name=patient.display_name, internal_code=patient.internal_code),
+        "tier": tier,
+    }
+
+
+def build_context(patient, limit: int, anchor=None) -> list[dict]:
+    """Select the analyzed note, recent notes and, when enabled, related remote notes."""
+    notes = ClinicalNote.objects.filter(patient=patient, deleted_at__isnull=True).order_by("-created_at", "-id")
+    recent = list(notes[:limit])
+    anchor = anchor or (recent[0] if recent else None)
+    if anchor is None:
+        return []
+    near = [anchor, *[note for note in recent if note.pk != anchor.pk]][:limit]
+    anchor_item = note_context(anchor, patient, "near")
+    far = []
+    if settings.AI_LOD_RETRIEVAL:
+        far = related_remote_notes(
+            patient, anchor_item["text"], exclude=[note.pk for note in near], limit=settings.AI_LOD_MAX_REMOTE_NOTES,
+        )
+        near = near[:MAX_CONTEXT_NOTES - len(far)]
+    return [
+        anchor_item,
+        *[note_context(note, patient, "far") for note in far],
+        *[note_context(note, patient, "near") for note in near[1:]],
+    ]
+
+
+def build_graph_context(patient, context: list[dict]) -> list[dict]:
+    """Recent graph facts, preceded by the facts of the recovered remote notes."""
+    remote_ids = [item["note_id"] for item in context if item["tier"] == "far"]
+    edges = VaultEdge.objects.filter(patient=patient, note__deleted_at__isnull=True).select_related("source", "target").order_by("-observed_at", "-id")
+    remote = list(edges.filter(note_id__in=remote_ids)[:MAX_REMOTE_GRAPH_FACTS]) if remote_ids else []
+    recent = edges.exclude(pk__in=[edge.pk for edge in remote])[:MAX_GRAPH_FACTS - len(remote)]
     return [
         {
-            "note_id": str(note.id),
-            "session_id": str(note.session_id) if note.session_id else None,
-            "created_at": note.created_at.isoformat(),
-            "text": prepare_ai_text(note.raw_text, display_name=patient.display_name, internal_code=patient.internal_code),
+            "source": edge.source.label,
+            "relation": edge.relation,
+            "target": edge.target.label,
+            "evidence": edge.evidence,
+            "note_id": str(edge.note_id),
+            "observed_at": edge.observed_at.isoformat(),
         }
-        for note in notes
+        for edge in [*remote, *recent]
     ]
 
 
 def request_ai_analysis(*, patient, note, user, context_limit: int, job=None) -> AIAnalysis:
-    context = build_context(patient, context_limit)
+    context = build_context(patient, context_limit, anchor=note)
     if not any(item["text"].strip() for item in context):
         raise ValidationError("At least one anonymized clinical note is required for analysis.")
     payload = {
@@ -37,18 +82,7 @@ def request_ai_analysis(*, patient, note, user, context_limit: int, job=None) ->
         "note_id": str(note.id) if note else None,
         "guardrails": SYSTEM_GUARDRAILS,
         "context": context,
-        "graph_context": [
-            {
-                "source": edge.source.label,
-                "relation": edge.relation,
-                "target": edge.target.label,
-                "evidence": edge.evidence,
-                "note_id": str(edge.note_id),
-                "observed_at": edge.observed_at.isoformat(),
-            }
-            for edge in VaultEdge.objects.filter(patient=patient, note__deleted_at__isnull=True)
-            .select_related("source", "target").order_by("-observed_at", "-id")[:40]
-        ],
+        "graph_context": build_graph_context(patient, context),
     }
     if any(residual_identifier_codes(str(edge[field])) for edge in payload["graph_context"] for field in ("source", "target", "evidence")):
         raise UnsafeClinicalText("Historical graph contains an identifier; AI request blocked.")

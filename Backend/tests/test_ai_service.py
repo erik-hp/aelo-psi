@@ -82,6 +82,43 @@ def test_retrieval_keeps_target_and_ranks_other_notes(monkeypatch):
     assert [item.note_id for item in selected.context] == ["target", "related"]
 
 
+def test_remote_notes_chosen_by_the_graph_survive_reranking(monkeypatch):
+    monkeypatch.setattr(ai_module, "RAG_TOP_K", 3)
+
+    async def vectors(_texts):
+        return [[1.0, 0.0], [0.1, 0.9], [0.9, 0.1]]
+
+    monkeypatch.setattr(ai_module, "embed_texts", vectors)
+    payload = ai_module.AnalysisRequest(
+        patient_id="patient", note_id="target",
+        context=[
+            ai_module.ContextItem(note_id="target", created_at="2026-01-01", text="target"),
+            ai_module.ContextItem(note_id="remote", created_at="2024-01-01", text="remote", tier="far"),
+            ai_module.ContextItem(note_id="unrelated", created_at="2026-01-02", text="unrelated"),
+            ai_module.ContextItem(note_id="related", created_at="2026-01-03", text="related"),
+        ],
+    )
+    selected = asyncio.run(ai_module.retrieve_context(payload))
+    assert [item.note_id for item in selected.context] == ["target", "remote", "related"]
+
+
+def test_retrieval_tier_is_not_sent_to_the_model(monkeypatch):
+    captured = {}
+
+    async def fake_post(_path, payload):
+        captured["prompt"] = payload["prompt"]
+        raise ValueError("stop after capture")
+
+    monkeypatch.setattr(ai_module, "_ollama_post", fake_post)
+    payload = ai_module.AnalysisRequest(
+        patient_id="patient", note_id="target",
+        context=[ai_module.ContextItem(note_id="target", created_at="2026-01-01", text="target", tier="far")],
+    )
+    with pytest.raises(ValueError):
+        asyncio.run(ai_module.ollama_analysis(payload))
+    assert '"tier"' not in captured["prompt"]
+
+
 def test_sources_outside_retrieved_context_are_rejected(monkeypatch):
     monkeypatch.setattr(ai_module, "AI_SERVICE_TOKEN", "test-service-token")
 

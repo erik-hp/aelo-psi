@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** conciliar a pilha de PRs em rascunho #15–#19 e o PR #21, confirmando checks remotos; em seguida OP-00/UX-01. Ver a entrada "Revisão transversal F0" abaixo. G0 permanece bloqueado.
+- **Próxima tarefa:** revisar e integrar a pilha de PRs em rascunho #15–#19, #21 e #22, na ordem; medir a extração com `llama3.1` real em conjunto sintético de referência; depois OP-00/UX-01. G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -292,6 +292,42 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **CI remota:** no commit `7147574`, 8 de 9 jobs passaram e `Quality and security / frontend` falhou ([run #42232872182](https://github.com/erik-hp/aelo-psi/actions/runs/42232872182)). Causa: `clinicalService.agenda.test.tsx` fixava `10:30` e a CI roda em UTC; reproduzido com `TZ=UTC`. A mesma falha aparece na branch do PR #19 ([run #42170260935](https://github.com/erik-hp/aelo-psi/actions/runs/42170260935)), e o job também terminou em falha nas branches dos PRs #16 e #17, onde a causa não foi inspecionada; os registros desses PRs constavam como checks não confirmados. O teste foi corrigido em `48f0a4d`, sem alterar código de produção. Reexecução local aprovada em UTC e `America/Sao_Paulo`; `Asia/Tokyo` e `Pacific/Auckland` não contam como evidência, pois o Windows não aplicou esses fusos.
 - **Resultado remoto em `48f0a4d`:** os 9 jobs passaram: [baseline #42233876659](https://github.com/erik-hp/aelo-psi/actions/runs/42233876659), [qualidade e segurança #42233876837](https://github.com/erik-hp/aelo-psi/actions/runs/42233876837), [dependências #42233876831](https://github.com/erik-hp/aelo-psi/actions/runs/42233876831) e [segredos #42233876766](https://github.com/erik-hp/aelo-psi/actions/runs/42233876766). Os PRs #16–#19 só ficam verdes com esta correção ou uma equivalente.
 - **Atenção operacional:** implantações com `DEBUG=False` agora exigem `POSTGRES_PASSWORD` forte e `CORS_ALLOWED_ORIGINS`/`CSRF_TRUSTED_ORIGINS` explícitos. **G0 continua BLOQUEADO**.
+
+## Recuperação, contexto do Ollama e IA externa — 06/11/2026 — EM REVISÃO
+
+- Solicitação explícita de pesquisar, avaliar e implementar as ideias de recuperação por nível de detalhe e de IA não local. Branch `feat/recuperacao-camadas-lod`, commit `94f1ed2`, [PR #22 em rascunho](https://github.com/erik-hp/aelo-psi/pull/22), dependente do #21, sem merge. Escopo F0-03 (contexto), RNF-03/RNF-07 e proposta F2-04. Tratado como mudança de escopo: [ADR-003](architecture/ADR-003-recuperacao-em-camadas.md) e [ADR-004](architecture/ADR-004-ia-externa.md), ambas **propostas**. Pesquisa em [relatório](research/recuperacao-lod-e-ia-em-nuvem.md), com [notas de fontes](research/notas/).
+- **Pilha:** teste de fuso aplicado no PR #16 e propagado por merge, sem force-push. Checks confirmados: #16, #17, #18, #19 e #21 com 9 de 9 aprovados.
+- **Janela de recência:** com 31 notas, a sessão 1 ficava fora do contexto mesmo com `context_limit=20`, e a nota analisada podia ficar de fora. Nota analisada agora sempre incluída. Seleção em camadas pronta e **desligada por padrão** (`AI_LOD_RETRIEVAL=False`), pois F2 depende de G0/G1. Sem tabela, migração ou indexação nova.
+- **Truncamento do Ollama:** sem `num_ctx`, o padrão é 4.096 em CPU ou abaixo de cerca de 23 GiB de VRAM, e o excedente perde o início do prompt com HTTP 200. Em Ollama 0.40.15, com `smollm:135m`, container descartável e texto sintético, 18.025 tokens viraram 258 com HTTP 200, e `shift: false` retornou HTTP 400. Geração agora define `num_ctx` (padrão 8192), `shift: false` e bloqueio prévio. Prompt grande resulta em falha explícita (503). `llama3.1` não foi executado.
+- **Executados:** backend SQLite 150 aprovados/2 ignorados, Ruff sem erros. Os 10 testes de camadas falharam antes da implementação; os testes de contexto foram escritos junto da correção.
+- **Avaliações sintéticas:** `tests/evaluate_lod_retrieval.py` e `tests/evaluate_deidentification.py`. Janela 0/20 por construção; camadas de 17/20 a 5/20, acompanhando extração e vocabulário assumidos: comprova mecanismo, não taxa real. Filtro de identificadores: diretos 7 de 7 tratados, e 19 de 28 vazaram no total, em fixture que não estima taxa real.
+- **Decisão proposta:** Ollama segue como único destino de conteúdo clínico. Nenhum código de envio externo foi criado. Nuvem somente com dados sintéticos, como braço científico, após ADR aprovada. Interpretações normativas exigem parecer; varredura de resoluções CFP de 2026 ficou incompleta.
+- **CI remota em `ec0f06d`:** os 9 jobs passaram, incluindo PostgreSQL/pgvector e smoke HTTP: [baseline #42239357957](https://github.com/erik-hp/aelo-psi/actions/runs/42239357957), [qualidade e segurança #42239358067](https://github.com/erik-hp/aelo-psi/actions/runs/42239358067), [dependências #42239358199](https://github.com/erik-hp/aelo-psi/actions/runs/42239358199) e [segredos #42239358006](https://github.com/erik-hp/aelo-psi/actions/runs/42239358006).
+- **Limitações:** seleção busca só em rótulos do grafo; paráfrase não é reconhecida; decifração de rótulos sem tempo medido; `embeddinggemma` aceita 2.048 tokens, então nota longa pode falhar explicitamente no embed; imagem `ollama/ollama:latest` segue sem versão fixa. **G0 continua BLOQUEADO**. Próximo item: decisão das ADRs com o orientador, depois medir extração real em conjunto sintético de referência.
+
+## Recuperação em camadas, desenho do autor — 06/11/2026 — EM REVISÃO
+
+- Decisão do autor: a IA lê cada nota inteira e a estrutura; relevância ordena sem descartar; busca por estrutura e texto original em notas de qualquer idade; nota escolhida vai inteira ao modelo. TCC1 fica somente como consulta. [ADR-003](architecture/ADR-003-recuperacao-em-camadas.md) atualizada; PR #22.
+- Implementada a rota do texto original com BM25 em memória, sem persistência, com `AI_LOD_SOURCE_SEARCH` para comparar rotas. A seleção segue desligada por padrão (`AI_LOD_RETRIEVAL=False`).
+- **Erro encontrado e corrigido:** a primeira versão somava as rotas por RRF e deu resultado idêntico a "só estrutura". O diagnóstico mostrou a nota certa em 1º lugar na busca textual, expulsa por notas presentes nas duas listas. Rotas agora têm vagas próprias. Termos de 3 letras, como "pai" e "avô", passaram a contar.
+- **Executados:** backend SQLite 157 aprovados/2 ignorados, Ruff sem erros. Simulador: só estrutura de 17/20 a 5/20; estrutura + texto de 20/20 a 9/20. Compara rotas, não mede taxa real, e o desenho foi ajustado após ver o simulador.
+- **Pendente:** extração automática por nota (hoje presa ao checkpoint manual, que trava a nota), classificação de relevância, paráfrase e tempo em histórico longo. **G0 continua BLOQUEADO**.
+
+## Leitura automática de notas em ambiente sintético — 06/11/2026 — EM REVISÃO
+
+- Autorização explícita do autor: seguir com a automação **somente em ambiente sintético**, mantendo o bloqueio para dados reais. G0 não foi alterado. Branch `feat/recuperacao-camadas-lod`, PR #22.
+- Extração separada do checkpoint e da trava da nota. Fila `NoteExtractionJob` por versão (migração `ai_analysis.0013`), processada pelo worker, nunca na requisição HTTP. Gravação idempotente: reler não duplica, e editar substitui o que veio do texto antigo. Comando `queue_note_extractions` para notas existentes. Rota do Vault informa leituras pendentes e com falha. Retenção remove a fila.
+- **Trava:** `AI_AUTO_EXTRACTION=True` exige `AELO_SYNTHETIC_DATA_ONLY=True`, e a aplicação recusa iniciar em modo HTTPS. Isso é declaração de ambiente: não verifica se os dados são de fato sintéticos.
+- **Executados:** backend SQLite 181 aprovados/2 ignorados, Ruff sem erros, `makemigrations --check` sem alterações. Mutação manual: 10 de 10 proteções quebradas de propósito foram detectadas pelos testes. Os testes foram escritos depois do código, por falha de ferramenta, sem a etapa de falha prévia; a mutação compensa parcialmente isso.
+- **CI:** `security-smoke` falhou uma vez em `d9ff41c`, no login pelo proxy após a carga ([run #42245540956](https://github.com/erik-hp/aelo-psi/actions/runs/42245540956)). A hipótese de limite de login não se confirmou: sem nenhum 429 em três rodadas seguidas, e a sequência exata da CI passou duas vezes localmente. O assert agora mostra o status. Em `5398b7d`, mesmo código com essa mensagem, os 9 jobs passaram e o workflow de qualidade passou novamente em segunda execução ([run #42246508413](https://github.com/erik-hp/aelo-psi/actions/runs/42246508413)). **Falha intermitente sem causa identificada; observar.**
+- **Limitações:** extração real com `llama3.1` não medida; relevância ainda não classificada; peso acumulado não é recalculado após edição. **G0 continua BLOQUEADO**.
+
+## Fechamento da sessão — 06/11/2026
+
+- **PRs em rascunho, sem merge, nesta ordem:** #15 → #16 → #17 → #18 → #19 → #21 → #22. Checks do #16 ao #21 confirmados com 9 de 9; o último commit de código do #22 também.
+- **Decisões do autor:** TCC1 é somente consulta, e o projeto atual prevalece sobre ele. Desenho da ADR-003 escolhido. Leitura automática autorizada apenas em ambiente sintético. ADR-004 segue proposta, sem envio externo.
+- **Cérebro:** auditoria e pesquisa em `tcc-cofre`, branch `docs/auditoria-2026-11-06`, sem merge em `main`.
+- **Em aberto:** falha intermitente do `security-smoke` sem causa identificada; extração real não medida; classificação de relevância; paráfrase; parecer jurídico e profissional; varredura de resoluções CFP de 2026.
 
 ## Pendências de decisão
 
