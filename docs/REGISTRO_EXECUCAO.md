@@ -232,6 +232,15 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Verificado no ambiente em execução: `manage.py check` sem problemas; login, `/auth/me/` e refresh por cookie retornaram HTTP 200, com origem autorizada do front-end (`http://localhost:5173`). A verificação não removeu a proteção de origem nem alterou permissões.
 - Nenhum código da aplicação foi alterado. A disponibilidade de Ollama/IA não foi validada neste restabelecimento. **G0 continua BLOQUEADO**; acesso local sintético não libera uso clínico real.
 
+## Correção da sincronização da agenda no modo API — 06/11/2026
+
+- Base `45b9ac1`, branch `feat/boardui-interface`, [PR #15](https://github.com/erik-hp/aelo-psi/pull/15). Escopo F0-01/F0-05, RNF-06/RNF-08: corrigir o carregamento da agenda sem alterar autorização, contratos HTTP ou dados.
+- Causa reproduzida: `clinicalService.getAgenda` era passada diretamente como `queryFn`; a chamada perdia o contexto e `this.getPatients()` lançava `TypeError` antes de consultar a API. A referência agora é explícita: `clinicalService.getPatients()`.
+- Evidência anterior à correção: os nove novos testes falharam, reproduzindo o `TypeError`. Após a correção: 117 testes aprovados em 21 arquivos; build TypeScript/Vite aprovado; lint com 0 erros/13 avisos. Permanecem os avisos conhecidos de Zod/chunks.
+- Casos cobertos: execução real pelo QueryClient, dados sintéticos paginados, resposta vazia válida, erros 401/403/500 em ambos os endpoints e dashboard com o serviço real sem alerta indevido quando a agenda está vazia. Falhas de API continuam explícitas, sem fallback demonstrativo.
+- Verificação local HTTP com a conta sintética: `/patients/`, `/sessions/` e `/analysis/` retornaram 200 com contagem zero. O módulo servido pelo Vite em `localhost:5173` retornou 200 e contém a referência corrigida, sem `this.getPatients()`. Nenhum conteúdo clínico ou token foi registrado.
+- Limitação: sem inspeção de navegador; a regressão do dashboard foi validada em DOM e a API foi consultada em execução. Próximo item: recarregar a página e revisar os checks do PR. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
