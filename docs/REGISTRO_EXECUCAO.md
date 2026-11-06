@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** revisar e integrar a pilha de PRs em rascunho #15–#19, #21 e #22, na ordem; medir a extração com `llama3.1` real em conjunto sintético de referência; depois OP-00/UX-01. G0 permanece bloqueado.
+- **Próxima tarefa:** medir a extração com `llama3.1` real em conjunto sintético de referência; depois OP-00/UX-01. G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -328,6 +328,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **Decisões do autor:** TCC1 é somente consulta, e o projeto atual prevalece sobre ele. Desenho da ADR-003 escolhido. Leitura automática autorizada apenas em ambiente sintético. ADR-004 segue proposta, sem envio externo.
 - **Cérebro:** auditoria e pesquisa em `tcc-cofre`, branch `docs/auditoria-2026-11-06`, sem merge em `main`.
 - **Em aberto:** falha intermitente do `security-smoke` sem causa identificada; extração real não medida; classificação de relevância; paráfrase; parecer jurídico e profissional; varredura de resoluções CFP de 2026.
+
+## Integração em `main` — 06/11/2026
+
+- A pedido do autor, os PRs #15, #16, #17, #18, #19, #21 e #22 foram integrados em ordem. Merge final `5c3fdec`; `main` ficou idêntica ao resultado do #22.
+- Incidente: apagar a branch do #15 no merge fechou o #16, que a usava como base. A branch foi restaurada, o #16 reaberto e redirecionado, sem perda de conteúdo.
+- Daqui em diante, branch nova só quando realmente necessária; ajuste pequeno de documentação vai direto em `main`, a pedido do autor.
+- A integração não altera o gate: **G0 continua BLOQUEADO**. Ambientes existentes precisam aplicar a migração `ai_analysis.0013`. Com `DEBUG=False`, senha forte do banco e origens explícitas passam a ser exigidas.
 
 ## Pendências de decisão
 
