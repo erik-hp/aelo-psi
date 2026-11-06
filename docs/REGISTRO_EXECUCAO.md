@@ -225,6 +225,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - A tentativa de navegador retornou `Browser is not available: iab`; não declarar inspeção visual responsiva, leitor de tela ou conformidade WCAG executados. Inventário, decisões e limitações em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
 - Próximo item: inspeção visual com dados sintéticos, conciliação do PR #14 e verificação dos checks remotos antes do merge. **G0 continua BLOQUEADO**.
 
+## Restabelecimento do acesso local — 06/11/2026
+
+- Diagnóstico F0-01/F0-04: o front-end em modo API apontava para `localhost:8000`, mas os containers existentes `backend-db-1` e `backend-api-1` estavam parados. Ambos foram iniciados; a API está publicada somente em `127.0.0.1:8000` e o banco não possui porta Docker publicada.
+- Criada uma conta profissional sintética local, não administrativa, sem grants de prontuários. A conta anterior foi preservada. A senha aleatória foi entregue fora do repositório; nenhum segredo ou token foi versionado.
+- Verificado no ambiente em execução: `manage.py check` sem problemas; login, `/auth/me/` e refresh por cookie retornaram HTTP 200, com origem autorizada do front-end (`http://localhost:5173`). A verificação não removeu a proteção de origem nem alterou permissões.
+- Nenhum código da aplicação foi alterado. A disponibilidade de Ollama/IA não foi validada neste restabelecimento. **G0 continua BLOQUEADO**; acesso local sintético não libera uso clínico real.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
