@@ -3,9 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   FileText,
   KeyRound,
-  Search,
   ShieldAlert,
-  ShieldCheck,
 } from "lucide-react";
 import { AuditTable, getEventCategory } from "@/components/audit/AuditTable";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Select } from "@/components/ui/select";
 import { clinicalService } from "@/services/clinicalService";
+import { RiSearchLine } from "@remixicon/react";
 
 export function AuditPage() {
   const [search, setSearch] = useState("");
@@ -81,9 +80,8 @@ export function AuditPage() {
       {/* Barra de Filtros */}
       <div className="mb-5 flex flex-col gap-3 md:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            className="pl-9"
+            leadingIcon={RiSearchLine}
             placeholder="Pesquisar ação, usuário, entidade ou endereço IP..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -127,7 +125,7 @@ export function AuditPage() {
           <LoadingSkeleton className="h-16 w-full" />
         </div>
       ) : isError ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-body-regular text-text-error-primary">
           Não foi possível carregar a trilha de auditoria.
         </p>
       ) : filteredEvents.length > 0 ? (

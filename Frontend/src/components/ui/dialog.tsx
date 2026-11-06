@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/modal";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -13,12 +14,11 @@ export function ConfirmDialog({ open, title, description, onConfirm, onClose }: 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40 grid place-items-center bg-black/70 p-4" role="dialog" aria-modal="true">
-      <div className="clinical-panel w-full max-w-md p-5">
+    <Dialog open={open} onClose={onClose} title={title} size="md">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+            <h2 className="text-title-3-semibold">{title}</h2>
+            <p className="mt-2 text-body-regular text-text-secondary">{description}</p>
           </div>
           <Button aria-label="Fechar" size="icon" variant="ghost" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -28,7 +28,6 @@ export function ConfirmDialog({ open, title, description, onConfirm, onClose }: 
           <Button variant="ghost" onClick={onClose}>Cancelar</Button>
           <Button onClick={onConfirm}>Confirmar</Button>
         </div>
-      </div>
-    </div>
+    </Dialog>
   );
 }

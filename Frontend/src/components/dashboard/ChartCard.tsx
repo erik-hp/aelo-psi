@@ -1,5 +1,6 @@
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface ChartCardProps {
   title: string;
@@ -17,27 +18,27 @@ export function ChartCard({ title, description, data, type = "area", dataKey }: 
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-72">
+        {data.length === 0 ? <EmptyState title="Sem dados no período" description="Nenhum indicador está disponível para esta visualização." /> : <div className="h-64 min-w-0 sm:h-72">
           <ResponsiveContainer width="100%" height="100%">
             {type === "area" ? (
               <AreaChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <Tooltip contentStyle={{ background: "#101722", border: "1px solid #263241", borderRadius: 8 }} />
-                <Area type="monotone" dataKey={dataKey} stroke="#29aeea" fill="#29aeea" fillOpacity={0.16} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-table)" />
+                <XAxis dataKey="month" stroke="var(--color-text-secondary)" fontSize={12} />
+                <YAxis stroke="var(--color-text-secondary)" fontSize={12} />
+                <Tooltip contentStyle={{ background: "var(--color-background-primary-default)", color: "var(--color-text-primary)", border: "1px solid var(--color-border-button-default)", borderRadius: 12 }} />
+                <Area type="monotone" dataKey={dataKey} stroke="var(--color-chart-1)" fill="var(--color-chart-1)" fillOpacity={0.16} />
               </AreaChart>
             ) : (
               <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <Tooltip contentStyle={{ background: "#101722", border: "1px solid #263241", borderRadius: 8 }} />
-                <Bar dataKey={dataKey} fill="#39c6c8" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-table)" />
+                <XAxis dataKey="month" stroke="var(--color-text-secondary)" fontSize={12} />
+                <YAxis stroke="var(--color-text-secondary)" fontSize={12} />
+                <Tooltip contentStyle={{ background: "var(--color-background-primary-default)", color: "var(--color-text-primary)", border: "1px solid var(--color-border-button-default)", borderRadius: 12 }} />
+                <Bar dataKey={dataKey} fill="var(--color-chart-2)" radius={[4, 4, 0, 0]} />
               </BarChart>
             )}
           </ResponsiveContainer>
-        </div>
+        </div>}
       </CardContent>
     </Card>
   );

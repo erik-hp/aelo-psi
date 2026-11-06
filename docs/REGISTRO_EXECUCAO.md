@@ -209,6 +209,38 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - O Cérebro `tcc-cofre` integrou o branch documental em `main` por fast-forward até `10ca78624deeb8fb35ef712b242d59e1a9d1a9d1`, com push confirmado. Preferências locais do Obsidian e arquivos pessoais não integraram o commit.
 - O merge de código não altera o gate `G0 BLOQUEADO`: Ollama integral, governança clínica/jurídica, operação de produção e demais critérios do Plano Mestre continuam pendentes.
 
+## UI-01 — Componentes BoardUI — 06/11/2026 — EM REVISÃO
+
+- Solicitação explícita de atualização visual; base `cf8fb9a`, branch `feat/boardui-interface`. RNF-06/RNF-08; regressão relacionada a F0-05, sem antecipar gates de funcionalidades clínicas.
+- Instalados componentes gratuitos oficiais e adaptados os controles compartilhados, cartões, cabeçalhos, buscas e login. Tailwind 4/PostCSS e tailwind-merge 3, mantendo React 18/Vite/TypeScript. Referências dos campos adaptadas para React 18 e react-hook-form; sem alteração de back-end ou uso de dados reais.
+- Executados: 92 testes em 18 arquivos aprovados; lint com 0 erros/13 avisos; build aprovado com avisos de Zod/chunks. Instalação npm reportou 0 vulnerabilidades em 451 pacotes. `git diff --check` sem erros.
+- Limitação: nenhum navegador conectado; inspeção visual responsiva/leitor de tela e checks remotos não comprovados. Detalhes, comandos, decisão e revisão em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
+- Commit/PR: implementação `0a6830a`, [PR #15 em rascunho](https://github.com/erik-hp/aelo-psi/pull/15). Próximo item: revisão visual com dados sintéticos e conciliação com o PR #14 de identidade visual antes do merge. **G0 continua BLOQUEADO**.
+
+## UI-01 — Revisão de layout de todas as páginas — 06/11/2026 — EM REVISÃO
+
+- Continuação explicitamente solicitada no [PR #15](https://github.com/erik-hp/aelo-psi/pull/15), branch `feat/boardui-interface`, a partir de `32f523f`. RNF-06/RNF-08 e regressão F0-05.
+- Revisadas as 14 páginas existentes, sem reativar rotas legadas. Tokens e tipografia uniformizados; shell, cabeçalhos, cartões, buscas, ações, tabelas, abas e diálogos alinhados ao BoardUI. Ajustados breakpoints, quebras de texto, largura de colunas, rolagem de calendário/evidências/Markdown e camadas dos toasts. Usuários sintéticos aparecem só na demonstração, explicitamente identificada; em modo API a tela declara a integração pendente.
+- Evidência: commit `39792be`, 108 testes aprovados em 20 arquivos, incluindo renderização das 14 páginas e testes de teclado/associação de abas e foco/Escape dos diálogos; build de produção aprovado com avisos de Zod/chunks; lint com 0 erros e 13 avisos.
+- A tentativa de navegador retornou `Browser is not available: iab`; não declarar inspeção visual responsiva, leitor de tela ou conformidade WCAG executados. Inventário, decisões e limitações em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
+- Próximo item: inspeção visual com dados sintéticos, conciliação do PR #14 e verificação dos checks remotos antes do merge. **G0 continua BLOQUEADO**.
+
+## Restabelecimento do acesso local — 06/11/2026
+
+- Diagnóstico F0-01/F0-04: o front-end em modo API apontava para `localhost:8000`, mas os containers existentes `backend-db-1` e `backend-api-1` estavam parados. Ambos foram iniciados; a API está publicada somente em `127.0.0.1:8000` e o banco não possui porta Docker publicada.
+- Criada uma conta profissional sintética local, não administrativa, sem grants de prontuários. A conta anterior foi preservada. A senha aleatória foi entregue fora do repositório; nenhum segredo ou token foi versionado.
+- Verificado no ambiente em execução: `manage.py check` sem problemas; login, `/auth/me/` e refresh por cookie retornaram HTTP 200, com origem autorizada do front-end (`http://localhost:5173`). A verificação não removeu a proteção de origem nem alterou permissões.
+- Nenhum código da aplicação foi alterado. A disponibilidade de Ollama/IA não foi validada neste restabelecimento. **G0 continua BLOQUEADO**; acesso local sintético não libera uso clínico real.
+
+## Correção da sincronização da agenda no modo API — 06/11/2026
+
+- Base `45b9ac1`, branch `feat/boardui-interface`, [PR #15](https://github.com/erik-hp/aelo-psi/pull/15). Escopo F0-01/F0-05, RNF-06/RNF-08: corrigir o carregamento da agenda sem alterar autorização, contratos HTTP ou dados.
+- Causa reproduzida: `clinicalService.getAgenda` era passada diretamente como `queryFn`; a chamada perdia o contexto e `this.getPatients()` lançava `TypeError` antes de consultar a API. A referência agora é explícita: `clinicalService.getPatients()`.
+- Evidência anterior à correção: os nove novos testes falharam, reproduzindo o `TypeError`. Após a correção: 117 testes aprovados em 21 arquivos; build TypeScript/Vite aprovado; lint com 0 erros/13 avisos. Permanecem os avisos conhecidos de Zod/chunks.
+- Casos cobertos: execução real pelo QueryClient, dados sintéticos paginados, resposta vazia válida, erros 401/403/500 em ambos os endpoints e dashboard com o serviço real sem alerta indevido quando a agenda está vazia. Falhas de API continuam explícitas, sem fallback demonstrativo.
+- Verificação local HTTP com a conta sintética: `/patients/`, `/sessions/` e `/analysis/` retornaram 200 com contagem zero. O módulo servido pelo Vite em `localhost:5173` retornou 200 e contém a referência corrigida, sem `this.getPatients()`. Nenhum conteúdo clínico ou token foi registrado.
+- Limitação: sem inspeção de navegador; a regressão do dashboard foi validada em DOM e a API foi consultada em execução. Próximo item: recarregar a página e revisar os checks do PR. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@/components/base/table/table";
 
 export interface DataTableColumn<T> {
   key: string;
@@ -16,35 +17,32 @@ interface DataTableProps<T> {
 
 export function DataTable<T>({ columns, data, getRowKey, onRowClick }: DataTableProps<T>) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-secondary/80 text-xs uppercase text-muted-foreground">
-            <tr>
-              {columns.map((column) => (
-                <th key={column.key} className={cn("px-4 py-3 font-medium", column.className)}>
+    <div className="min-w-0 overflow-hidden rounded-3xl border border-border-button-default bg-background-primary-default">
+        <Table aria-label={columns.map((column) => column.header).join(", ")} size="sm" className="min-w-[640px]" containerClassName="focus-ring">
+          <TableHeader>
+              {columns.map((column, index) => (
+                <TableColumn id={column.key} key={column.key} isRowHeader={index === 0} className={cn("px-4 py-3 text-caption-1-medium", column.className)}>
                   {column.header}
-                </th>
+                </TableColumn>
               ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
+          </TableHeader>
+          <TableBody renderEmptyState={() => <span className="text-body-regular text-text-secondary">Nenhum registro disponível.</span>}>
             {data.map((item) => (
-              <tr
+              <TableRow
+                id={getRowKey(item)}
                 key={getRowKey(item)}
-                className={cn("bg-card/40 transition", onRowClick && "cursor-pointer hover:bg-secondary/50")}
-                onClick={() => onRowClick?.(item)}
+                className={cn("transition-colors", onRowClick && "cursor-pointer")}
+                onAction={onRowClick ? () => onRowClick(item) : undefined}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={cn("px-4 py-3 align-middle", column.className)}>
+                  <TableCell key={column.key} className={cn("px-4 py-3 align-middle whitespace-normal", column.className)}>
                     {column.render(item)}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
     </div>
   );
 }

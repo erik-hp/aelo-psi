@@ -1,14 +1,14 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { InputBase, type InputBaseProps } from "@/components/base/input/input";
+import { cx } from "@/utils/cx";
 
-export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => (
-    <input
-      ref={ref}
-      className={cn(
-        "focus-ring flex h-10 w-full rounded-md border border-input bg-background/70 px-3 py-2 text-sm placeholder:text-muted-foreground",
-        className,
-      )}
+export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & Pick<InputBaseProps, "leadingIcon">>(
+  ({ className, leadingIcon, size: _size, ...props }, ref) => (
+    <InputBase
+      inputRef={ref}
+      leadingIcon={leadingIcon}
+      className="min-h-6"
+      fieldClassName={cx("border border-border-button-default focus-within:ring-border-focus-ring", className)}
       {...props}
     />
   ),

@@ -78,8 +78,8 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
 
     // Initial state: Sidebar should have -translate-x-full (hidden on mobile, visible on desktop via lg:translate-x-0)
     const aside = screen.getByRole("complementary");
-    expect(aside.className).toContain("-translate-x-full");
-    expect(aside.className).toContain("lg:translate-x-0");
+    expect(aside.getAttribute("data-state")).toBe("closed");
+    expect(aside.className).toContain("lg:flex");
 
     // Backdrop should not be present initially
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
@@ -91,16 +91,16 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
     fireEvent.click(openMenuBtn);
 
     // After clicking open: aside should have translate-x-0 and backdrop should be mounted
-    expect(aside.className).toContain("translate-x-0");
+    expect(aside.getAttribute("data-state")).toBe("open");
     const backdrop = screen.getByLabelText("Fechar navegação móvel");
     expect(backdrop).toBeDefined();
-    expect(backdrop.className).toContain("bg-black/60");
+    expect(backdrop.className).toContain("bg-overlay");
 
     // Click backdrop to close
     fireEvent.click(backdrop);
 
     // Sidebar should transition back to closed
-    expect(aside.className).toContain("-translate-x-full");
+    expect(aside.getAttribute("data-state")).toBe("closed");
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
   });
 
@@ -119,7 +119,7 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
     // Backdrop should be dismissed
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
     const aside = screen.getByRole("complementary");
-    expect(aside.className).toContain("-translate-x-full");
+    expect(aside.getAttribute("data-state")).toBe("closed");
   });
 
   it("closes mobile drawer when clicking the close button inside Sidebar", async () => {
@@ -135,7 +135,7 @@ describe("Empirical Challenge: Mobile Drawer & AppLayout Responsiveness", () => 
 
     expect(screen.queryByLabelText("Fechar navegação móvel")).toBeNull();
     const aside = screen.getByRole("complementary");
-    expect(aside.className).toContain("-translate-x-full");
+    expect(aside.getAttribute("data-state")).toBe("closed");
   });
 
   it("automatically closes mobile drawer when a NavLink is clicked", async () => {
@@ -283,7 +283,7 @@ describe("Empirical Challenge: Audit Table Severity Badges & Semantic Categoriza
     }
   });
 
-  it("verifies badge rendering with exact Tailwind CSS classes for critical, success, warning, and muted", () => {
+  it("preserves distinct semantic status tokens for critical, success, warning, and muted", () => {
     const events: AuditEvent[] = [
       {
         id: "evt-critical",
@@ -340,38 +340,38 @@ describe("Empirical Challenge: Audit Table Severity Badges & Semantic Categoriza
 
     // Verify Critical Badge styling
     const criticalBadge = screen.getByText("Segurança / LGPD Art. 11");
-    expect(criticalBadge.className).toContain("text-destructive");
-    expect(criticalBadge.className).toContain("bg-destructive/15");
+    expect(criticalBadge.className).toContain("text-status-rose-text");
+    expect(criticalBadge.className).toContain("bg-status-rose-background");
 
     // Verify Success Badge styling
     const successBadge = screen.getByText("Assinatura P-256 / SHA-256");
-    expect(successBadge.className).toContain("text-accent");
-    expect(successBadge.className).toContain("bg-accent/10");
+    expect(successBadge.className).toContain("text-status-lime-text");
+    expect(successBadge.className).toContain("bg-status-lime-background");
 
     // Verify Warning Badge styling
     const warningBadge = screen.getByText("Aditamento / Alteração");
-    expect(warningBadge.className).toContain("text-amber-300");
-    expect(warningBadge.className).toContain("bg-amber-400/10");
+    expect(warningBadge.className).toContain("text-status-yellow-text");
+    expect(warningBadge.className).toContain("bg-status-yellow-background");
 
     // Verify Muted Badge styling
     const mutedBadge = screen.getByText("Consulta de Prontuário");
-    expect(mutedBadge.className).toContain("text-muted-foreground");
-    expect(mutedBadge.className).toContain("bg-secondary");
+    expect(mutedBadge.className).toContain("text-text-secondary");
+    expect(mutedBadge.className).toContain("bg-background-secondary-default");
 
     // Verify Default Badge styling
     const defaultBadge = screen.getByText("Evento de Auditoria");
-    expect(defaultBadge.className).toContain("text-primary");
-    expect(defaultBadge.className).toContain("bg-primary/10");
+    expect(defaultBadge.className).toContain("text-status-cyan-text");
+    expect(defaultBadge.className).toContain("bg-status-cyan-background");
 
     // Verify Role Badges
     const adminRoleBadge = screen.getAllByText("ADMIN")[0];
-    expect(adminRoleBadge.className).toContain("text-primary"); // default variant
+    expect(adminRoleBadge.className).toContain("text-status-cyan-text"); // default variant
 
     const psychRoleBadge = screen.getAllByText("PSYCHOLOGIST")[0];
-    expect(psychRoleBadge.className).toContain("text-accent"); // success variant
+    expect(psychRoleBadge.className).toContain("text-status-lime-text"); // success variant
 
     const internRoleBadge = screen.getByText("INTERN");
-    expect(internRoleBadge.className).toContain("text-muted-foreground"); // muted variant
+    expect(internRoleBadge.className).toContain("text-text-secondary"); // muted variant
   });
 
   it("handles empty strings and missing properties in audit events safely", () => {

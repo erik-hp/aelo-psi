@@ -12,7 +12,7 @@ export function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Settings className="h-4 w-4" /> Segurança</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-3 text-body-regular text-text-secondary">
             <p>Refresh token automático habilitado.</p>
             <p>Logout por sessão expirada configurado.</p>
             <p>Controle visual por permissão ativo.</p>

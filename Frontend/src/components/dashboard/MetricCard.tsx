@@ -13,18 +13,18 @@ interface MetricCardProps {
 export function MetricCard({ label, value, delta, icon: Icon, tone = "blue" }: MetricCardProps) {
   return (
     <Card>
-      <CardContent className="flex items-start justify-between p-5">
-        <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-2 text-2xl font-semibold">{value}</p>
-          {delta ? <p className="mt-2 text-xs text-muted-foreground">{delta}</p> : null}
+      <CardContent className="flex items-start justify-between gap-3 p-5">
+        <div className="min-w-0 break-words">
+          <p className="text-body-regular text-text-secondary">{label}</p>
+          <p className="mt-2 text-title-2-semibold">{value}</p>
+          {delta ? <p className="mt-2 text-caption-1-regular text-text-secondary">{delta}</p> : null}
         </div>
         <div
           className={cn(
-            "grid h-10 w-10 place-items-center rounded-md",
-            tone === "blue" && "bg-primary/10 text-primary",
-            tone === "cyan" && "bg-accent/10 text-accent",
-            tone === "amber" && "bg-amber-400/10 text-amber-300",
+            "grid size-10 shrink-0 place-items-center rounded-xl",
+            tone === "blue" && "bg-status-blue-background text-status-blue-text",
+            tone === "cyan" && "bg-status-lime-background text-status-lime-text",
+            tone === "amber" && "bg-status-yellow-background text-status-yellow-text",
           )}
         >
           <Icon className="h-5 w-5" />

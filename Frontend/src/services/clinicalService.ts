@@ -195,7 +195,7 @@ export const clinicalService = {
   async getAgenda(): Promise<AgendaItem[]> {
     if (isApiMode) {
       const [patientsData, sessionsData] = await Promise.all([
-        this.getPatients(),
+        clinicalService.getPatients(),
         apiClient.get<ApiSession[] | PaginatedResponse<ApiSession>>("/sessions/"),
       ]);
       const apiSessions = unwrap(sessionsData.data);

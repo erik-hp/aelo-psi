@@ -1,20 +1,20 @@
-import { Link } from "react-router-dom";
+import { ButtonLink } from "@/components/ui/button-link";
 
 export function NotFoundPage() {
   return (
-    <main className="grid min-h-screen place-items-center bg-background p-6 text-center">
+    <main className="grid min-h-screen place-items-center bg-background-full p-6 text-center">
       <div>
-        <p className="text-sm font-medium text-primary">404</p>
-        <h1 className="mt-3 text-3xl font-semibold">Página não encontrada</h1>
-        <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+        <p className="text-body-medium text-status-blue-text">404</p>
+        <h1 className="mt-3 text-title-1-semibold">Página não encontrada</h1>
+        <p className="mt-3 max-w-md text-body-regular text-text-secondary">
           A rota solicitada não existe ou não está disponível para o perfil atual.
         </p>
-        <Link
+        <ButtonLink
           to="/dashboard"
-          className="focus-ring mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+          variant="primary" className="mt-6"
         >
           Voltar ao dashboard
-        </Link>
+        </ButtonLink>
       </div>
     </main>
   );

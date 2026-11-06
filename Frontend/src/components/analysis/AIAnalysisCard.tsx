@@ -42,51 +42,51 @@ export function AIAnalysisCard({ analysis }: { analysis: AIAnalysis }) {
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-md border border-border bg-secondary/40 p-3">
-            <Gauge className="h-4 w-4 text-primary" />
-            <p className="mt-2 text-xs text-muted-foreground">Score de relevância</p>
-            <p className="text-xl font-semibold">{analysis.relevanceScore}%</p>
+          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
+            <Gauge className="h-4 w-4 text-status-blue-text" />
+            <p className="mt-2 text-caption-1-regular text-text-secondary">Score de relevância</p>
+            <p className="text-title-3-semibold">{analysis.relevanceScore}%</p>
           </div>
-          <div className="rounded-md border border-border bg-secondary/40 p-3">
-            <CheckCircle2 className="h-4 w-4 text-accent" />
-            <p className="mt-2 text-xs text-muted-foreground">Coerência narrativa</p>
-            <p className="text-xl font-semibold">{analysis.narrativeCoherence === null ? "—" : `${analysis.narrativeCoherence}%`}</p>
+          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
+            <CheckCircle2 className="h-4 w-4 text-status-lime-text" />
+            <p className="mt-2 text-caption-1-regular text-text-secondary">Coerência narrativa</p>
+            <p className="text-title-3-semibold">{analysis.narrativeCoherence === null ? "—" : `${analysis.narrativeCoherence}%`}</p>
           </div>
-          <div className="rounded-md border border-border bg-secondary/40 p-3">
-            <FileText className="h-4 w-4 text-primary" />
-            <p className="mt-2 text-xs text-muted-foreground">Fontes utilizadas</p>
-            <p className="text-xl font-semibold">{analysis.sources.length}</p>
+          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
+            <FileText className="h-4 w-4 text-status-blue-text" />
+            <p className="mt-2 text-caption-1-regular text-text-secondary">Fontes utilizadas</p>
+            <p className="text-title-3-semibold">{analysis.sources.length}</p>
           </div>
         </div>
         <section>
-          <h4 className="text-sm font-medium">Padrões identificados</h4>
+          <h4 className="text-body-medium">Padrões identificados</h4>
           <div className="mt-3 flex flex-wrap gap-2">
             {analysis.patterns.map((pattern) => <Badge key={pattern} variant="default">{pattern}</Badge>)}
           </div>
         </section>
         <section>
-          <h4 className="text-sm font-medium">Evolução longitudinal</h4>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{analysis.longitudinalEvolution}</p>
+          <h4 className="text-body-medium">Evolução longitudinal</h4>
+          <p className="mt-2 text-body-regular text-text-secondary">{analysis.longitudinalEvolution}</p>
         </section>
         <section>
-          <h4 className="flex items-center gap-2 text-sm font-medium">
-            <AlertTriangle className="h-4 w-4 text-amber-300" />
+          <h4 className="flex items-center gap-2 text-body-medium">
+            <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
             Pontos de atenção
           </h4>
-          <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+          <ul className="mt-2 space-y-2 text-body-regular text-text-secondary">
             {analysis.attentionPoints.map((point) => <li key={point}>{point}</li>)}
           </ul>
         </section>
         <section>
-          <h4 className="text-sm font-medium">Sessões relacionadas e fontes</h4>
+          <h4 className="text-body-medium">Sessões relacionadas e fontes</h4>
           <div className="mt-3 flex flex-wrap gap-2">
             {analysis.sources.map((source) => <Badge key={source} variant="muted">{source}</Badge>)}
           </div>
         </section>
         {canReview && (
-          <div className="space-y-3 border-t border-border pt-4">
+          <div className="space-y-3 border-t border-border-button-default pt-4">
             <Textarea value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Comentário da revisão (opcional)" />
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-body-regular">
               <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />
               Revisei o conteúdo e as fontes desta análise.
             </label>

@@ -16,10 +16,10 @@ export function ActivityTimeline({ items }: { items: TimelineItem[] }) {
         <ol className="space-y-4">
           {items.map((item) => (
             <li key={`${item.title}-${item.time}`} className="relative pl-6">
-              <span className="absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
-              <p className="text-sm font-medium">{item.title}</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{item.time}</p>
+              <span className="absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full bg-accent-600" />
+              <p className="text-body-medium">{item.title}</p>
+              <p className="mt-1 text-body-regular text-text-secondary">{item.description}</p>
+              <p className="mt-1 text-caption-1-regular text-text-secondary">{item.time}</p>
             </li>
           ))}
         </ol>

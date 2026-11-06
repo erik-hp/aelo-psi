@@ -1,4 +1,7 @@
-import { cn } from "@/lib/utils";
+import { Chip, type ChipColor } from "@/components/base/badges/chip";
+import { cx } from "@/utils/cx";
+
+const colors = { default: "cyan", success: "lime", warning: "yellow", muted: "soft", critical: "rose" } as const satisfies Record<string, ChipColor>;
 
 export function Badge({
   className,
@@ -6,17 +9,11 @@ export function Badge({
   ...props
 }: React.HTMLAttributes<HTMLSpanElement> & { variant?: "default" | "success" | "warning" | "muted" | "critical" }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium",
-        variant === "default" && "border-primary/30 bg-primary/10 text-primary",
-        variant === "success" && "border-accent/30 bg-accent/10 text-accent",
-        variant === "warning" && "border-amber-400/30 bg-amber-400/10 text-amber-300",
-        variant === "muted" && "border-border bg-secondary text-muted-foreground",
-        variant === "critical" && "border-destructive/40 bg-destructive/15 text-destructive font-semibold",
-        className,
-      )}
+    <Chip
       {...props}
+      className={cx("max-w-full whitespace-normal break-words text-start", className)}
+      variant="caption"
+      color={colors[variant]}
     />
   );
 }

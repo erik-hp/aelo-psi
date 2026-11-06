@@ -52,7 +52,7 @@ export function TabsList({ className, children, ...props }: TabsListProps) {
     <div
       role="tablist"
       className={cn(
-        "inline-flex h-11 items-center justify-start rounded-lg bg-secondary/60 p-1 text-muted-foreground border border-border/60",
+        "inline-flex h-11 items-center justify-start rounded-lg bg-background-secondary-default p-1 text-text-secondary border border-border-button-default",
         className,
       )}
       {...props}
@@ -83,10 +83,10 @@ export function TabsTrigger({ value, className, children, ...props }: TabsTrigge
       tabIndex={isSelected ? 0 : -1}
       onClick={() => context.onValueChange(value)}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium transition-all focus-ring disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-body-medium transition-all focus-ring disabled:pointer-events-none disabled:opacity-50",
         isSelected
-          ? "bg-background text-foreground shadow-sm font-semibold"
-          : "text-muted-foreground hover:bg-background/40 hover:text-foreground",
+          ? "bg-background-full text-text-primary shadow-sm text-body-semibold"
+          : "text-text-secondary hover:bg-background-full hover:text-text-primary",
         className,
       )}
       {...props}

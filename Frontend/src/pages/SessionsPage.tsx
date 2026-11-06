@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/hooks/usePermissions";
 import { clinicalService } from "@/services/clinicalService";
+import { PageError, PageLoading } from "@/components/ui/page-state";
 
 export function SessionsPage() {
   const { can } = usePermissions();
-  const { data } = useQuery({ queryKey: ["dashboard"], queryFn: clinicalService.getDashboard });
+  const { data, isLoading, isError } = useQuery({ queryKey: ["dashboard"], queryFn: clinicalService.getDashboard });
   const sessions = data?.sessions ?? [];
 
   return (
@@ -19,7 +20,7 @@ export function SessionsPage() {
         description="Registro e histórico das sessões, sempre vinculadas individualmente ao paciente e ao seu prontuário."
         action={can("sessions:write") ? <Button><Plus className="h-4 w-4" /> Registrar sessão</Button> : null}
       />
-      {sessions.length ? (
+      {isLoading ? <PageLoading label="Carregando sessões…" /> : isError ? <PageError description="Não foi possível consultar as sessões. Tente novamente." /> : sessions.length ? (
         <div className="grid gap-4 lg:grid-cols-2">
           {sessions.map((session) => <SessionCard key={session.id} session={session} />)}
         </div>

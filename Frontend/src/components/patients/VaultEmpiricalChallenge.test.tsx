@@ -159,7 +159,7 @@ describe("Empirical Challenge: VaultNodeInspector Clinical Note Linking & Resili
 
     // 5. Verify highlight ring classes applied
     expect(noteEl).toHaveClass("ring-2");
-    expect(noteEl).toHaveClass("ring-primary");
+    expect(noteEl).toHaveClass("ring-border-focus-ring");
 
     // 6. Fast-forward 2500ms and verify highlight ring is cleanly removed
     act(() => {
@@ -167,7 +167,7 @@ describe("Empirical Challenge: VaultNodeInspector Clinical Note Linking & Resili
     });
 
     expect(noteEl).not.toHaveClass("ring-2");
-    expect(noteEl).not.toHaveClass("ring-primary");
+    expect(noteEl).not.toHaveClass("ring-border-focus-ring");
   });
 
   it("handles missing target note element gracefully without DOM error or unhandled exceptions", () => {

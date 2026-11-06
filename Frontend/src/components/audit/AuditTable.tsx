@@ -3,6 +3,7 @@ import { Eye, FileCode2, KeyRound, ShieldCheck, X } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/modal";
 import type { AuditEvent } from "@/types/clinical";
 
 export interface AuditTableProps {
@@ -66,12 +67,12 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
           {
             key: "date",
             header: "Data / Hora",
-            render: (event) => <span className="font-mono text-xs text-muted-foreground">{event.date}</span>,
+            render: (event) => <span className="font-mono text-caption-1-regular text-text-secondary">{event.date}</span>,
           },
           {
             key: "actor",
             header: "Usuário",
-            render: (event) => <span className="font-medium text-foreground">{event.actor}</span>,
+            render: (event) => <span className="text-body-medium text-text-primary">{event.actor}</span>,
           },
           {
             key: "role",
@@ -97,8 +98,8 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
               const cat = getEventCategory(event);
               return (
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">{event.action}</p>
-                  <Badge variant={cat.variant} className="text-[10px]">
+                  <p className="text-body-medium text-text-primary">{event.action}</p>
+                  <Badge variant={cat.variant} className="text-caption-2-regular">
                     {cat.label}
                   </Badge>
                 </div>
@@ -108,12 +109,12 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
           {
             key: "entity",
             header: "Entidade",
-            render: (event) => <span className="text-sm text-muted-foreground">{event.entity}</span>,
+            render: (event) => <span className="text-body-regular text-text-secondary">{event.entity}</span>,
           },
           {
             key: "ip",
             header: "Endereço IP",
-            render: (event) => <code className="text-xs text-muted-foreground font-mono">{event.ip}</code>,
+            render: (event) => <code className="text-caption-1-regular text-text-secondary font-mono">{event.ip}</code>,
           },
           {
             key: "inspect",
@@ -123,7 +124,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1.5 text-xs text-primary hover:text-primary"
+                className="h-8 gap-1.5 text-caption-1-regular text-status-blue-text hover:text-status-blue-text"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleInspect(event);
@@ -140,22 +141,16 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
 
       {/* MODAL / DRAWER DE DETALHES TÉCNICOS DO EVENTO DE AUDITORIA */}
       {activeEvent ? (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="audit-detail-title"
-        >
-          <div className="w-full max-w-2xl rounded-xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between border-b border-border/80 pb-4">
+        <Dialog open onClose={() => setActiveEvent(null)} title="Inspeção Técnica de Auditoria Imutável" size="xl">
+            <div className="flex items-start justify-between border-b border-border-button-default pb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-accent" />
-                  <h2 id="audit-detail-title" className="text-lg font-bold text-foreground">
+                  <ShieldCheck className="h-5 w-5 text-status-lime-text" />
+                  <h2 id="audit-detail-title" className="text-title-3-bold text-text-primary">
                     Inspeção Técnica de Auditoria Imutável
                   </h2>
                 </div>
-                <p className="text-xs text-muted-foreground font-mono">
+                <p className="text-caption-1-regular text-text-secondary font-mono">
                   Identificador do registro: {activeEvent.id}
                 </p>
               </div>
@@ -170,63 +165,63 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             </div>
 
             {/* Metadados Principais */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-1">
-                <span className="text-muted-foreground">Classificação & Gravidade</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-caption-1-regular">
+              <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
+                <span className="text-text-secondary">Classificação & Gravidade</span>
                 <div>
-                  <Badge variant={getEventCategory(activeEvent).variant} className="text-xs">
+                  <Badge variant={getEventCategory(activeEvent).variant} className="text-caption-1-regular">
                     {getEventCategory(activeEvent).label}
                   </Badge>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-1">
-                <span className="text-muted-foreground">Usuário Responsável & Perfil</span>
-                <p className="font-semibold text-foreground">
+              <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
+                <span className="text-text-secondary">Usuário Responsável & Perfil</span>
+                <p className="text-body-semibold text-text-primary">
                   {activeEvent.actor} • <Badge variant="muted">{activeEvent.role}</Badge>
                 </p>
               </div>
 
-              <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-1">
-                <span className="text-muted-foreground">Data e Fuso Horário</span>
-                <p className="font-semibold text-foreground">{activeEvent.date}</p>
+              <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
+                <span className="text-text-secondary">Data e Fuso Horário</span>
+                <p className="text-body-semibold text-text-primary">{activeEvent.date}</p>
               </div>
 
-              <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-1">
-                <span className="text-muted-foreground">Origem do Tráfego (IP)</span>
-                <p className="font-mono text-foreground">{activeEvent.ip}</p>
+              <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
+                <span className="text-text-secondary">Origem do Tráfego (IP)</span>
+                <p className="font-mono text-text-primary">{activeEvent.ip}</p>
               </div>
             </div>
 
             {/* Ação e Entidade */}
-            <div className="rounded-lg border border-border p-3.5 bg-secondary/20 space-y-1">
-              <span className="text-xs text-muted-foreground">Ação Realizada</span>
-              <p className="text-sm font-semibold text-foreground">{activeEvent.action}</p>
-              <span className="text-xs text-muted-foreground mt-2 block">Entidade Afetada</span>
-              <p className="text-xs text-foreground font-mono">{activeEvent.entity}</p>
+            <div className="rounded-lg border border-border-button-default p-3.5 bg-background-secondary-default space-y-1">
+              <span className="text-caption-1-regular text-text-secondary">Ação Realizada</span>
+              <p className="text-body-semibold text-text-primary">{activeEvent.action}</p>
+              <span className="text-caption-1-regular text-text-secondary mt-2 block">Entidade Afetada</span>
+              <p className="text-caption-1-regular text-text-primary font-mono">{activeEvent.entity}</p>
             </div>
 
             {/* Hash Criptográfico SHA-256 (Cadeia de Custódia) */}
             <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                <KeyRound className="h-3.5 w-3.5 text-accent" />
+              <div className="flex items-center gap-1.5 text-caption-1-semibold text-text-primary">
+                <KeyRound className="h-3.5 w-3.5 text-status-lime-text" />
                 Hash Criptográfico de Integridade (SHA-256):
               </div>
-              <div className="rounded-md border border-accent/30 bg-accent/5 p-2.5 font-mono text-[11px] break-all text-accent select-all">
+              <div className="rounded-md border border-status-lime-text bg-status-lime-background p-2.5 font-mono text-caption-1-regular break-all text-status-lime-text select-all">
                 {activeEvent.sha256 || "Hash não informado pelo servidor"}
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-caption-1-regular text-text-secondary">
                 A presença do hash não comprova, por si só, a integridade da cadeia. Execute a verificação de auditoria no servidor.
               </p>
             </div>
 
             {/* Payload Técnico JSON */}
             <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                <FileCode2 className="h-3.5 w-3.5 text-primary" />
+              <div className="flex items-center gap-1.5 text-caption-1-semibold text-text-primary">
+                <FileCode2 className="h-3.5 w-3.5 text-status-blue-text" />
                 Payload de Rastreabilidade Estruturado:
               </div>
-              <pre className="max-h-48 overflow-y-auto rounded-lg border border-border bg-secondary/60 p-3 text-[11px] font-mono text-foreground leading-relaxed">
+              <pre className="max-h-48 overflow-y-auto rounded-lg border border-border-button-default bg-background-secondary-default p-3 text-caption-1-regular font-mono text-text-primary">
                 {JSON.stringify(
                   activeEvent.payload || {
                     event_id: activeEvent.id,
@@ -243,13 +238,12 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
               </pre>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-border">
+            <div className="flex justify-end pt-3 border-t border-border-button-default">
               <Button onClick={() => setActiveEvent(null)}>
                 Concluir Inspeção
               </Button>
             </div>
-          </div>
-        </div>
+        </Dialog>
       ) : null}
     </>
   );
