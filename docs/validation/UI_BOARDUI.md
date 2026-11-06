@@ -40,6 +40,8 @@ Não executados: inspeção visual em navegador, dimensões móveis, leitor de t
 
 Continuação solicitada de UI-01 no PR #15. Revisão do código e teste de renderização das 14 páginas, incluindo os componentes de layout e os blocos internos compartilhados:
 
+Entrega: commit `39792be`, na mesma branch e PR.
+
 | Página | Revisão aplicada |
 | --- | --- |
 | Dashboard | Tokens, tipografia, ações de navegação BoardUI e colunas redimensionáveis |
