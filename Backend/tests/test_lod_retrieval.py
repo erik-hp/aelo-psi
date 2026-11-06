@@ -138,3 +138,71 @@ def test_identifier_in_a_remote_note_blocks_the_request(records, remote, setting
     anchor = add_note(records, "Hoje o relato foi sobre luto.")
     with pytest.raises(UnsafeClinicalText):
         build_context(records["patient"], 10, anchor=anchor)
+
+
+def test_source_text_finds_a_note_the_graph_missed(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    history(records)
+    missed = add_note(records, "Relato sintético: o incêndio destruiu a padaria da família.", days_ago=500)
+    anchor = add_note(records, "Voltou a sonhar com o incêndio da padaria.")
+    assert str(missed.id) in ids(build_context(records["patient"], 10, anchor=anchor))
+
+
+def test_source_search_can_be_disabled_to_compare_retrieval_arms(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    settings.AI_LOD_SOURCE_SEARCH = False
+    history(records)
+    missed = add_note(records, "Relato sintético: o incêndio destruiu a padaria da família.", days_ago=500)
+    anchor = add_note(records, "Voltou a sonhar com o incêndio da padaria.")
+    assert str(missed.id) not in ids(build_context(records["patient"], 10, anchor=anchor))
+
+
+def test_words_common_across_the_history_recover_nothing(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    for index in range(30):
+        add_note(records, f"Rotina de trabalho e sono registrada {index}.", days_ago=100 + index)
+    history(records, total=10)
+    anchor = add_note(records, "Rotina de trabalho e sono nesta semana.")
+    context = build_context(records["patient"], 10, anchor=anchor)
+    assert [item for item in context if item["tier"] == "far"] == []
+
+
+def test_source_search_ranks_rarer_shared_terms_first(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    settings.AI_LOD_MAX_REMOTE_NOTES = 1
+    history(records)
+    add_note(records, "Mencionou a padaria de passagem.", days_ago=300)
+    add_note(records, "Mencionou a padaria na semana seguinte.", days_ago=310)
+    both = add_note(records, "A padaria pegou fogo no incêndio daquele ano.", days_ago=600)
+    anchor = add_note(records, "Lembrou da padaria e do incêndio.")
+    assert str(both.id) in ids(build_context(records["patient"], 10, anchor=anchor))
+
+
+def test_source_search_stays_inside_the_patient(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    owner = records["owner"]
+    other = Patient.objects.create(clinic=owner.clinic, internal_code="P-8", display_name="Outra", created_by=owner)
+    PatientAccess.objects.create(patient=other, user=owner, can_edit=True, granted_by=owner)
+    foreign = add_note(records, "O incêndio destruiu a padaria.", days_ago=300, patient=other)
+    history(records)
+    anchor = add_note(records, "Voltou a sonhar com o incêndio da padaria.")
+    assert str(foreign.id) not in ids(build_context(records["patient"], 10, anchor=anchor))
+
+
+def test_each_route_keeps_a_slot_when_the_graph_only_finds_weaker_notes(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    history(records)
+    missed = add_note(records, "O luto pelo avô foi narrado em detalhes.", days_ago=500)
+    for days_ago in (300, 310):
+        decoy = add_note(records, "Menção breve ao luto entre outros assuntos.", days_ago=days_ago)
+        link_concepts(decoy, "luto", "rotina")
+    anchor = add_note(records, "Hoje falou do luto pelo avô.")
+    assert str(missed.id) in ids(build_context(records["patient"], 10, anchor=anchor))
+
+
+def test_short_family_words_are_searchable(records, settings):
+    settings.AI_LOD_RETRIEVAL = True
+    history(records)
+    remote = add_note(records, "O pai foi embora naquela época.", days_ago=500)
+    anchor = add_note(records, "Lembrou do pai hoje.")
+    assert str(remote.id) in ids(build_context(records["patient"], 10, anchor=anchor))

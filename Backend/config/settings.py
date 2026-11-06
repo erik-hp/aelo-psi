@@ -157,6 +157,7 @@ AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 # Layered retrieval stays off until the decision recorded in ADR-003 is approved.
 AI_LOD_RETRIEVAL = os.getenv("AI_LOD_RETRIEVAL", "False").lower() == "true"
 AI_LOD_MAX_REMOTE_NOTES = max(1, min(5, int(os.getenv("AI_LOD_MAX_REMOTE_NOTES", "2"))))
+AI_LOD_SOURCE_SEARCH = os.getenv("AI_LOD_SOURCE_SEARCH", "True").lower() == "true"
 
 # Enable only behind a reverse proxy that overwrites client-supplied scheme headers.
 TRUST_PROXY_HEADERS = os.getenv("DJANGO_TRUST_PROXY_HEADERS", "False").lower() == "true"

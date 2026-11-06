@@ -1,43 +1,59 @@
 # ADR-003 — Recuperação em camadas (Level of Detail na busca)
 
-**Status:** proposta, aguardando decisão do autor e do orientador.
+**Status:** desenho escolhido pelo autor em 06/11/2026; ativação em dados reais ainda não autorizada.
 **Data:** 06/11/2026.
 **Relaciona-se a:** ADR-001, F2-03/F2-04, RF-05/RF-06, RNF-07. **G0 continua BLOQUEADO.**
 **Evidências:** [relatório de pesquisa](../research/recuperacao-lod-e-ia-em-nuvem.md), `Backend/tests/evaluate_lod_retrieval.py`.
 
 ## Contexto
 
-O autor propôs aplicar à memória do paciente a ideia de *Level of Detail* de jogos: quanto mais antiga a nota, menos detalhe. A proposta inicial reduziria notas antigas a frases, palavras e tags. A discussão evoluiu para reduzir detalhe só na busca, preservando o texto integral.
+O autor propôs aplicar à memória do paciente a ideia de *Level of Detail* de jogos: dar a cada nota o nível de detalhe necessário, sem que a IA releia todo o histórico a cada análise. Na formulação do autor, a IA lê cada nota inteira uma vez, estrutura o conteúdo e classifica as partes mais relevantes. Depois, a busca consulta esse resultado para encontrar o que se liga à sessão atual. "Tags" significa esse resultado da leitura completa, não um resumo que substitui a leitura.
 
-A inspeção do código mostrou um problema anterior: `build_context` entregava apenas as últimas `context_limit` notas, com máximo de 20. Em teste sintético com 31 notas, a sessão 1 ficava fora do contexto mesmo no limite máximo. Hoje a IA não vê a sessão antiga em nível nenhum de detalhe.
+A inspeção do código mostrou um problema anterior: `build_context` entregava apenas as últimas `context_limit` notas, com máximo de 20. Em teste sintético com 31 notas, a sessão 1 ficava fora do contexto mesmo no limite máximo. A IA não via a sessão antiga em nível nenhum de detalhe.
 
-## Decisão proposta
+O risco restante é decidir hoje o que será relevante no futuro: o que a estrutura não guardou não seria encontrado. A literatura indica o mesmo. No LongMemEvalM, palavras-chave extraídas do texto completo recuperaram menos que o texto original, enquanto texto original somado a fatos extraídos recuperou mais. Os valores e ressalvas estão no relatório.
 
-1. **Nada é degradado no registro.** Nota clínica permanece íntegra, e índice, grafo e resumo são derivados e reconstruíveis, como exige o `AGENTS.md`.
-2. **O grafo do Vault é a visão distante.** Conceitos de `VaultNode` presentes na nota analisada levam, por `VaultEdge`, às notas de origem.
-3. **O modelo recebe texto integral**, nunca a versão resumida da nota remota. O limite é o número de notas (`AI_LOD_MAX_REMOTE_NOTES`).
-4. **Idade não reduz a posição.** A ordem usa conceitos compartilhados e confiança da evidência. O decaimento `0,98^dias` do grafo não participa da recuperação: seu peso é 0,0263 em 180 dias e 0,0006 em 365 dias, o que reproduziria na busca a degradação rejeitada acima.
-5. **Escopo por paciente no banco**, com notas excluídas fora da seleção.
+## Decisão
+
+1. **A IA lê a nota inteira uma vez**, e o resultado é estruturado com tema, evento e trecho de origem.
+2. **Relevância ordena, nunca descarta.** Ela não é avaliação clínica, e a revisão humana da ADR-001 continua valendo.
+3. **A busca tem duas rotas:** estrutura extraída e texto original. Cada rota tem vagas próprias, para que notas encontradas pelas duas não expulsem o que só uma encontrou.
+4. **A busca cobre notas de qualquer idade.** Não há regra de "só palavras-chave depois de muito tempo", e a idade não reduz a posição. O decaimento `0,98^dias` do grafo fica fora da recuperação: vale 0,0263 em 180 dias e 0,0006 em 365 dias.
+5. **O modelo recebe a nota escolhida inteira.** O limite é o número de notas (`AI_LOD_MAX_REMOTE_NOTES`), nunca o texto reduzido.
+6. **Nada é degradado no registro.** Estrutura e índices são derivados e reconstruíveis.
+7. **Escopo por paciente**, com notas excluídas fora da seleção.
 
 ## Estado da implementação
 
-Implementado em `Backend/apps/ai_analysis/retrieval.py`, **desligado por padrão** (`AI_LOD_RETRIEVAL=False`). Sem tabela nova, migração ou indexação adicional: usa apenas dados derivados já existentes. Enquanto a flag estiver desligada, muda só uma correção: a nota analisada sempre entra no contexto.
+| Parte | Estado |
+| --- | --- |
+| Rota da estrutura sobre o grafo do Vault | Implementada |
+| Rota do texto original, com BM25 em memória | Implementada; o texto é pontuado após autorização, sem nada persistido |
+| Vagas por rota e nota analisada sempre incluída | Implementadas |
+| Ligar a seleção | **Desligada por padrão** (`AI_LOD_RETRIEVAL=False`) |
+| Comparar rotas | `AI_LOD_SOURCE_SEARCH=False` deixa só a estrutura |
+| Extração automática de cada nota | **Pendente:** hoje ela só ocorre no checkpoint manual, que também trava a nota. É preciso separar as duas coisas |
+| Classificação de relevância | **Pendente:** hoje existem só `confidence` e contagem de menções |
+| Busca vetorial sobre o texto | Pendente |
+
+Sem tabela nova, migração ou indexação adicional nesta etapa.
 
 ## Evidência e limites
 
-Experimento sintético com 20 pacientes e 60 sessões:
+Experimento sintético com 20 pacientes e 60 sessões, usando o código real de seleção:
 
-| Extração assumida | Mesma palavra | Janela atual | Camadas |
-| --- | --- | --- | --- |
-| 90% | 100% | 0/20 | 17/20 |
-| 70% | 70% | 0/20 | 9/20 |
-| 50% | 40% | 0/20 | 5/20 |
+| Extração assumida | Mesma palavra | Janela atual | Só estrutura | Estrutura + texto |
+| --- | --- | --- | --- | --- |
+| 90% | 100% | 0/20 | 17/20 | 20/20 |
+| 90% | 70% | 0/20 | 14/20 | 17/20 |
+| 70% | 100% | 0/20 | 12/20 | 20/20 |
+| 70% | 70% | 0/20 | 9/20 | 19/20 |
+| 50% | 70% | 0/20 | 5/20 | 11/20 |
+| 50% | 40% | 0/20 | 5/20 | 9/20 |
 
-**Este experimento comprova o mecanismo, não uma taxa de acerto.** O 0/20 da janela é garantido por construção, pois o evento foi plantado fora dela. O acerto em camadas apenas acompanha `extração × mesma palavra`, parâmetros assumidos, e não medições do Ollama ou de pacientes. O uso de cerca de 20% do histórico é a aritmética de 12 notas em 60.
+**O experimento compara rotas no simulador, não mede uma taxa real.** O 0/20 da janela é garantido por construção, a extração e o vocabulário são parâmetros assumidos, e o desenho das vagas foi ajustado depois que uma primeira versão mostrou resultado idêntico entre as rotas. O uso de texto ficou próximo nas duas rotas e em cerca de 20% do histórico, o que é a aritmética de 12 notas em 60.
 
-O que ele demonstra é o ponto fraco: **conceito não extraído continua invisível**, e paráfrase não é reconhecida. A seleção busca só em rótulos do grafo, justamente a variante que a literatura mostra perder recall. Como `VaultNode.label` é cifrado, a seleção decifra até 1.000 rótulos na aplicação, e esse tempo não foi medido.
-
-A literatura aponta na mesma direção. No LongMemEvalM, buscar por palavras-chave ou resumos recuperou menos que buscar pelo texto, mesmo devolvendo o texto integral ao final. Valores e ressalvas estão no relatório. Não foi encontrado teste direto em psicoterapia.
+Limites conhecidos: paráfrase não é reconhecida pela busca lexical, não há redução de palavras à raiz, e a seleção decifra notas e rótulos na aplicação, com tempo ainda não medido em histórico longo.
 
 ## Alternativas
 
@@ -45,24 +61,25 @@ A literatura aponta na mesma direção. No LongMemEvalM, buscar por palavras-cha
 | --- | --- |
 | Degradar notas antigas por idade | Rejeitada: perde evidência e contraria a regra de fonte da verdade. |
 | Ler todo o histórico a cada análise | Rejeitada: excede o contexto local e piora com histórico longo. |
-| Manter a janela de recência | Rejeitada como solução final: a sessão antiga fica invisível. |
-| Só grafo | Adotada apenas como primeiro passo, pelo limite descrito acima. |
-| Grafo + busca lexical e vetorial sobre o texto | **Direção recomendada** para F2. |
+| Manter a janela de recência | Rejeitada: a sessão antiga fica invisível. |
+| Buscar só na estrutura | Rejeitada como rota única: o que a extração perdeu fica invisível. |
+| Somar pontos das rotas (RRF) | Rejeitada nesta etapa: notas nas duas listas tomaram as vagas no ensaio. Reavaliar com dados melhores. |
+| Estrutura + texto original com vagas por rota | **Escolhida.** |
 
-## Próximos passos, depois de G0/G1
+## Próximos passos
 
-1. Busca lexical em memória sobre texto decifrado, somente após autorização. O texto é cifrado na aplicação, então PostgreSQL FTS não alcança o conteúdo, e um `tsvector` em claro desfaria a proteção. Exige decisão própria.
-2. Vetores por trecho com busca exata filtrada por clínica e paciente. Índice HNSW global não é indicado: o filtro ocorre após a varredura e pode devolver poucos resultados sem aviso.
-3. Medir com conjunto de referência estratificado por idade da evidência, usando Recall@k, MRR e precisão de citação. Metas só depois da linha de base.
-4. Revisar o decaimento do checkpoint, que hoje ordena conceitos por centralidade.
+1. Separar a extração do checkpoint e rodá-la para cada nota, por job, depois de definida a passagem pelo G0.
+2. Medir a extração com modelo real em conjunto sintético de referência.
+3. Classificar relevância para ordenar, com revisão humana.
+4. Adicionar vetores por trecho, com busca exata filtrada por clínica e paciente. Índice HNSW global não é indicado, e `tsvector` em claro desfaria a criptografia.
+5. Para o TCC2, comparar só estrutura com estrutura + texto, estratificando pela idade da evidência, com Recall@k, MRR e precisão de citação. Não foi encontrado teste equivalente em psicoterapia.
 
-## Critérios para ligar a flag
+## Critérios para usar fora de dados sintéticos
 
-- Decisão registrada do autor e do orientador.
 - G0 e G1 atingidos.
-- Extração medida com modelo real em conjunto sintético de referência.
+- Extração medida com modelo real.
 - Contexto real dentro de `OLLAMA_NUM_CTX`.
 
 ## Consequências
 
-**Positivas:** a sessão antiga passa a poder chegar ao modelo, sem custo de LLM na seleção e com rastreabilidade por nota. **Negativas:** depende de checkpoints já gerados e herda as falhas da extração. Um identificador em nota antiga bloqueia a análise, comportamento intencional de falha fechada.
+**Positivas:** a sessão antiga pode chegar ao modelo sem custo de LLM na seleção e com rastreabilidade por nota. Falha de extração deixa de esconder a nota. **Negativas:** cada análise passa a ler o histórico do paciente em memória. Um identificador em nota antiga selecionada bloqueia a análise, comportamento intencional de falha fechada.

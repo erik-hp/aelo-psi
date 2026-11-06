@@ -305,6 +305,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **CI remota em `ec0f06d`:** os 9 jobs passaram, incluindo PostgreSQL/pgvector e smoke HTTP: [baseline #42239357957](https://github.com/erik-hp/aelo-psi/actions/runs/42239357957), [qualidade e segurança #42239358067](https://github.com/erik-hp/aelo-psi/actions/runs/42239358067), [dependências #42239358199](https://github.com/erik-hp/aelo-psi/actions/runs/42239358199) e [segredos #42239358006](https://github.com/erik-hp/aelo-psi/actions/runs/42239358006).
 - **Limitações:** seleção busca só em rótulos do grafo; paráfrase não é reconhecida; decifração de rótulos sem tempo medido; `embeddinggemma` aceita 2.048 tokens, então nota longa pode falhar explicitamente no embed; imagem `ollama/ollama:latest` segue sem versão fixa. **G0 continua BLOQUEADO**. Próximo item: decisão das ADRs com o orientador, depois medir extração real em conjunto sintético de referência.
 
+## Recuperação em camadas, desenho do autor — 06/11/2026 — EM REVISÃO
+
+- Decisão do autor: a IA lê cada nota inteira e a estrutura; relevância ordena sem descartar; busca por estrutura e texto original em notas de qualquer idade; nota escolhida vai inteira ao modelo. TCC1 fica somente como consulta. [ADR-003](architecture/ADR-003-recuperacao-em-camadas.md) atualizada; PR #22.
+- Implementada a rota do texto original com BM25 em memória, sem persistência, com `AI_LOD_SOURCE_SEARCH` para comparar rotas. A seleção segue desligada por padrão (`AI_LOD_RETRIEVAL=False`).
+- **Erro encontrado e corrigido:** a primeira versão somava as rotas por RRF e deu resultado idêntico a "só estrutura". O diagnóstico mostrou a nota certa em 1º lugar na busca textual, expulsa por notas presentes nas duas listas. Rotas agora têm vagas próprias. Termos de 3 letras, como "pai" e "avô", passaram a contar.
+- **Executados:** backend SQLite 157 aprovados/2 ignorados, Ruff sem erros. Simulador: só estrutura de 17/20 a 5/20; estrutura + texto de 20/20 a 9/20. Compara rotas, não mede taxa real, e o desenho foi ajustado após ver o simulador.
+- **Pendente:** extração automática por nota (hoje presa ao checkpoint manual, que trava a nota), classificação de relevância, paráfrase e tempo em histórico longo. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

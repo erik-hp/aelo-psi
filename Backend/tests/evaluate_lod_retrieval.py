@@ -91,12 +91,13 @@ def evaluate(extraction_recall, same_word_rate, settings):
     clinic = Clinic.objects.create(name=f"Sintetica {extraction_recall}-{same_word_rate}", document=f"{rng.randint(10**13, 10**14 - 1)}")
     author = User.objects.create_user(username=f"sint-{extraction_recall}-{same_word_rate}", password="unused", role=UserRole.PSYCHOLOGIST, clinic=clinic)
     settings.AI_LOD_MAX_REMOTE_NOTES = REMOTE_NOTES
-    hits = {"recency": 0, "layered": 0}
-    chars = {"recency": 0, "layered": 0, "full": 0}
+    hits = {"recency": 0, "graph": 0, "graph+text": 0}
+    chars = {"recency": 0, "graph": 0, "graph+text": 0, "full": 0}
     for index in range(PATIENTS):
         patient, anchor, gold = build_patient(index, clinic, author, rng, extraction_recall, same_word_rate)
-        for strategy, enabled in (("recency", False), ("layered", True)):
+        for strategy, enabled, source_search in (("recency", False, False), ("graph", True, False), ("graph+text", True, True)):
             settings.AI_LOD_RETRIEVAL = enabled
+            settings.AI_LOD_SOURCE_SEARCH = source_search
             context = build_context(patient, CONTEXT_LIMIT, anchor=anchor)
             hits[strategy] += str(gold.id) in {item["note_id"] for item in context}
             chars[strategy] += sum(len(item["text"]) for item in context)
@@ -107,10 +108,10 @@ def evaluate(extraction_recall, same_word_rate, settings):
 @pytest.mark.django_db
 def test_print_layered_retrieval_table(settings):
     print(f"\n{PATIENTS} pacientes sintéticos, {SESSIONS} sessões, semente {SEED}, janela {CONTEXT_LIMIT}, até {REMOTE_NOTES} notas remotas")
-    print("extração | mesma palavra | recência acerto | camadas acerto | chars recência | chars camadas | chars histórico")
+    print("extração | mesma palavra | recência | só grafo | grafo+texto | chars recência | chars grafo+texto | chars histórico")
     for extraction_recall, same_word_rate in SCENARIOS:
         hits, chars = evaluate(extraction_recall, same_word_rate, settings)
         print(
-            f"{extraction_recall:.0%} | {same_word_rate:.0%} | {hits['recency']}/{PATIENTS} | {hits['layered']}/{PATIENTS} | "
-            f"{chars['recency'] // PATIENTS} | {chars['layered'] // PATIENTS} | {chars['full'] // PATIENTS}"
+            f"{extraction_recall:.0%} | {same_word_rate:.0%} | {hits['recency']}/{PATIENTS} | {hits['graph']}/{PATIENTS} | {hits['graph+text']}/{PATIENTS} | "
+            f"{chars['recency'] // PATIENTS} | {chars['graph+text'] // PATIENTS} | {chars['full'] // PATIENTS}"
         )
