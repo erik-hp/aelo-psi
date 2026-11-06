@@ -31,6 +31,10 @@ O tempo da aresta é o da nota fonte; eventos internos à narrativa não são ex
 
 O [plano arquitetural do Obsidian](../../1%20-%20TCC/wiki/outputs/plano_arquitetural_vault_graphrag.md) propõe um campo de estado próprio no checkpoint e gravação do relatório diretamente pelo serviço de IA. Aqui o estado/revisor são derivados da análise e sua assinatura, evitando duas fontes de verdade; o Markdown final é montado pelo Django a partir de dados validados e de observações citadas do serviço. O plano também sugere exemplos de alerta clínico. O protótipo os trata apenas como perguntas para revisão e não emite diagnóstico ou recomendação terapêutica. A Resolução CFP 09/2024 não é uma norma específica de IA, e o art. 20 da LGPD não equivale a uma garantia automática de explicabilidade deste software.
 
+## Recuperação em camadas
+
+`AI_LOD_RETRIEVAL` vem desligada. Quando ligada, conceitos do grafo presentes na nota analisada trazem até `AI_LOD_MAX_REMOTE_NOTES` notas antigas em texto integral, sem penalizar idade. Conceito não extraído e paráfrase não são recuperados. Ver [ADR-003](../../docs/architecture/ADR-003-recuperacao-em-camadas.md).
+
 ## Implantação e verificação
 
 Instale `Backend/requirements/base.txt`, migre o PostgreSQL com a extensão `vector` disponível e mantenha as variáveis existentes do serviço de IA/Ollama. Inicie um processo separado com `python manage.py process_vault_jobs`; o Compose inclui o serviço `vault-worker` e um serviço único `migrate`. Rode `python -m pytest`, `python -m ruff check .`, `npm.cmd test`, `npm.cmd run lint` e `npm.cmd run build`. As migrações e 37 testes, incluindo busca vetorial real, passaram no Compose PostgreSQL/pgvector; a latência e a inferência com Ollama real ainda precisam de validação integrada. A rotina de retenção remove jobs e resultados do paciente na ordem das dependências.

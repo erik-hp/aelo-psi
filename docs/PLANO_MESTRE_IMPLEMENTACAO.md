@@ -10,6 +10,8 @@
 
 **Complemento documental de 06/11/2026:** [Plano operacional digital da clínica](PLANO_OPERACIONAL_CLINICA.md), pesquisa e proposta SC-OP-01 solicitadas pelo autor para priorizar a operação antes da análise por IA. Refina capacidades relacionadas a F0/F1 e registra ampliações em backlog; não altera IDs, critérios de aceite ou gates F0–F7. Financeiro, novos papéis, comunicação e portal dependem de decisão de escopo antes de implementação.
 
+**Propostas de 06/11/2026, não aprovadas:** [ADR-003](architecture/ADR-003-recuperacao-em-camadas.md) detalha F2-04 com recuperação em camadas, código desligado por padrão. [ADR-004](architecture/ADR-004-ia-externa.md) recomenda manter inferência local para conteúdo clínico. Nenhuma altera IDs, critérios ou gates.
+
 **Título acadêmico:** Plataforma Web Inteligente para Gestão Operacional e Auxílio ao Monitoramento Terapêutico em Clínicas de Psicologia.
 
 **Problema:** carga de documentação e dificuldade de recuperar contexto de narrativas clínicas acumuladas ao longo de múltiplas sessões.
