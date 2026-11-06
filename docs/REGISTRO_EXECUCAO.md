@@ -256,7 +256,7 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Causa: o Select aplicava texto temático, mas não definia superfície opaca para o popup nativo de opções. Definidos fundo/texto por tokens semânticos para `option`/`optgroup`, texto de opções desabilitadas e `color-scheme` claro/escuro. Removida declaração global redundante que fixava esquema escuro; a raiz continua controlada pelo tema BoardUI.
 - Padrão obrigatório para novos campos desse tipo: importar `Select` de `@/components/ui/select`, associar `label`/`id` ou `aria-label`, passar as opções nativas e usar `disabled` quando indisponível. Ref, eventos, validação e teclado nativos preservados. A busca por `<select` em `Frontend/src` encontrou somente esse componente: Editor, Agenda, Pacientes, Auditoria e página longitudinal herdam a correção.
 - Executados: `npm.cmd test -- --run` (**132 aprovados/24 arquivos**), `npm.cmd run build` (aprovado; avisos conhecidos Zod/chunks), `npm.cmd run lint` (**0 erros/11 avisos**), `git diff --check` sem erros. Testes DOM comprovam regressão funcional, não aparência do popup do sistema. Conferência visual em navegador claro/escuro/alto contraste continua pendente.
-- Commit/PR a registrar após publicação. Próximo item: revisar o menu aberto em navegador e os checks remotos. **G0 continua BLOQUEADO**.
+- Implementação `aabda1e`, [PR #17 em rascunho](https://github.com/erik-hp/aelo-psi/pull/17), dependente do #16, sem merge. Próximo item: revisar o menu aberto em navegador e os checks remotos, ainda não confirmados. **G0 continua BLOQUEADO**.
 
 ## Pendências de decisão
 
