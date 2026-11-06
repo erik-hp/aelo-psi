@@ -209,6 +209,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - O Cérebro `tcc-cofre` integrou o branch documental em `main` por fast-forward até `10ca78624deeb8fb35ef712b242d59e1a9d1a9d1`, com push confirmado. Preferências locais do Obsidian e arquivos pessoais não integraram o commit.
 - O merge de código não altera o gate `G0 BLOQUEADO`: Ollama integral, governança clínica/jurídica, operação de produção e demais critérios do Plano Mestre continuam pendentes.
 
+## UI-01 — Componentes BoardUI — 06/11/2026 — EM REVISÃO
+
+- Solicitação explícita de atualização visual; base `cf8fb9a`, branch `feat/boardui-interface`. RNF-06/RNF-08; regressão relacionada a F0-05, sem antecipar gates de funcionalidades clínicas.
+- Instalados componentes gratuitos oficiais e adaptados os controles compartilhados, cartões, cabeçalhos, buscas e login. Tailwind 4/PostCSS e tailwind-merge 3, mantendo React 18/Vite/TypeScript. Referências dos campos adaptadas para React 18 e react-hook-form; sem alteração de back-end ou uso de dados reais.
+- Executados: 92 testes em 18 arquivos aprovados; lint com 0 erros/13 avisos; build aprovado com avisos de Zod/chunks. Instalação npm reportou 0 vulnerabilidades em 451 pacotes. `git diff --check` sem erros.
+- Limitação: nenhum navegador conectado; inspeção visual responsiva/leitor de tela e checks remotos não comprovados. Detalhes, comandos, decisão e revisão em [UI_BOARDUI.md](validation/UI_BOARDUI.md).
+- Commit/PR: entrega nesta branch, identificação no histórico Git; PR a abrir após o commit. Próximo item: revisão visual com dados sintéticos e conciliação com o PR #14 de identidade visual antes do merge. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

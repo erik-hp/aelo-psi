@@ -35,16 +35,16 @@ export function LoginForm() {
   }
 
   return (
-    <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+    <form className="space-y-4" noValidate aria-busy={isLoading} onSubmit={form.handleSubmit(onSubmit)}>
       <div>
         <label className="text-sm font-medium" htmlFor="email">Email</label>
-        <Input id="email" type="email" autoComplete="email" className="mt-2" {...form.register("email")} />
-        {form.formState.errors.email ? <p className="mt-1 text-xs text-destructive">{form.formState.errors.email.message}</p> : null}
+        <Input id="email" type="email" autoComplete="email" className="mt-2" aria-invalid={!!form.formState.errors.email} aria-describedby={form.formState.errors.email ? "email-error" : undefined} {...form.register("email")} />
+        {form.formState.errors.email ? <p id="email-error" role="alert" className="mt-1 text-caption-1-medium text-text-error-primary">{form.formState.errors.email.message}</p> : null}
       </div>
       <div>
         <label className="text-sm font-medium" htmlFor="password">Senha</label>
-        <Input id="password" type="password" autoComplete="current-password" className="mt-2" {...form.register("password")} />
-        {form.formState.errors.password ? <p className="mt-1 text-xs text-destructive">{form.formState.errors.password.message}</p> : null}
+        <Input id="password" type="password" autoComplete="current-password" className="mt-2" aria-invalid={!!form.formState.errors.password} aria-describedby={form.formState.errors.password ? "password-error" : undefined} {...form.register("password")} />
+        {form.formState.errors.password ? <p id="password-error" role="alert" className="mt-1 text-caption-1-medium text-text-error-primary">{form.formState.errors.password.message}</p> : null}
       </div>
       <Button className="w-full" disabled={isLoading} type="submit">
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

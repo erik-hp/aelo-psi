@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { RiSearchLine } from "@remixicon/react";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -33,8 +33,7 @@ export function PatientsPage() {
       />
       <div className="mb-5 flex flex-col gap-3 md:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Buscar por nome" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Input leadingIcon={RiSearchLine} aria-label="Buscar por nome" placeholder="Buscar por nome" value={search} onChange={(event) => setSearch(event.target.value)} />
         </div>
         <Select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filtrar status">
           <option value="all">Todos os status</option>

@@ -47,6 +47,8 @@ Ver [Plano Mestre](PLANO_MESTRE_IMPLEMENTACAO.md) e [registro](REGISTRO_EXECUCAO
 
 ## Regras de atualização
 
+Evidência incremental UI-01 (06/11/2026): RNF-06/RNF-08 recebem a integração visual BoardUI e testes de regressão em [UI_BOARDUI.md](validation/UI_BOARDUI.md). **EM REVISÃO**; os critérios completos desses requisitos continuam não validados e os gates não são alterados.
+
 1. Cada PR cita ID(s) F0–F7 + requisito(s) RF/RNF/VAL.
 2. Mudar estado somente com commit/PR e teste/evidência no `REGISTRO_EXECUCAO.md`.
 3. Não usar “compliant LGPD”/“FHIR-certified” como estado; registrar controles e riscos residuais.
