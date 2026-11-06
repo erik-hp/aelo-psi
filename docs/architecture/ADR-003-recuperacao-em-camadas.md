@@ -1,6 +1,6 @@
 # ADR-003 — Recuperação em camadas (Level of Detail na busca)
 
-**Status:** desenho escolhido pelo autor em 06/11/2026; ativação em dados reais ainda não autorizada.
+**Status:** desenho escolhido pelo autor em 06/11/2026. Leitura automática autorizada pelo autor somente em ambiente sintético; dados reais seguem bloqueados.
 **Data:** 06/11/2026.
 **Relaciona-se a:** ADR-001, F2-03/F2-04, RF-05/RF-06, RNF-07. **G0 continua BLOQUEADO.**
 **Evidências:** [relatório de pesquisa](../research/recuperacao-lod-e-ia-em-nuvem.md), `Backend/tests/evaluate_lod_retrieval.py`.
@@ -32,11 +32,11 @@ O risco restante é decidir hoje o que será relevante no futuro: o que a estrut
 | Vagas por rota e nota analisada sempre incluída | Implementadas |
 | Ligar a seleção | **Desligada por padrão** (`AI_LOD_RETRIEVAL=False`) |
 | Comparar rotas | `AI_LOD_SOURCE_SEARCH=False` deixa só a estrutura |
-| Extração automática de cada nota | **Pendente:** hoje ela só ocorre no checkpoint manual, que também trava a nota. É preciso separar as duas coisas |
+| Extração automática de cada nota | Implementada, separada do checkpoint e sem travar a nota. Exige `AI_AUTO_EXTRACTION=True` e `AELO_SYNTHETIC_DATA_ONLY=True`; a aplicação não inicia sem o segundo nem em modo HTTPS |
 | Classificação de relevância | **Pendente:** hoje existem só `confidence` e contagem de menções |
 | Busca vetorial sobre o texto | Pendente |
 
-Sem tabela nova, migração ou indexação adicional nesta etapa.
+A fila `NoteExtractionJob` (migração `0013`) registra uma leitura por versão da nota, e o worker a processa fora da requisição. Reprocessar não duplica o grafo, editar substitui o que veio do texto antigo, e o estado aparece em `extraction` na rota do Vault. Peso e menções são aproximações exploratórias: uma edição não recalcula o peso já acumulado.
 
 ## Evidência e limites
 
@@ -68,11 +68,10 @@ Limites conhecidos: paráfrase não é reconhecida pela busca lexical, não há 
 
 ## Próximos passos
 
-1. Separar a extração do checkpoint e rodá-la para cada nota, por job, depois de definida a passagem pelo G0.
-2. Medir a extração com modelo real em conjunto sintético de referência.
-3. Classificar relevância para ordenar, com revisão humana.
-4. Adicionar vetores por trecho, com busca exata filtrada por clínica e paciente. Índice HNSW global não é indicado, e `tsvector` em claro desfaria a criptografia.
-5. Para o TCC2, comparar só estrutura com estrutura + texto, estratificando pela idade da evidência, com Recall@k, MRR e precisão de citação. Não foi encontrado teste equivalente em psicoterapia.
+1. Medir a extração com modelo real em conjunto sintético de referência.
+2. Classificar relevância para ordenar, com revisão humana.
+3. Adicionar vetores por trecho, com busca exata filtrada por clínica e paciente. Índice HNSW global não é indicado, e `tsvector` em claro desfaria a criptografia.
+4. Para o TCC2, comparar só estrutura com estrutura + texto, estratificando pela idade da evidência, com Recall@k, MRR e precisão de citação. Não foi encontrado teste equivalente em psicoterapia.
 
 ## Critérios para usar fora de dados sintéticos
 

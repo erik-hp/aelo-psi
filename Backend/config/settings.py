@@ -174,6 +174,12 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 X_FRAME_OPTIONS = "DENY"
 
+# Automatic reading writes data derived from notes: synthetic environments only, until G0.
+AI_AUTO_EXTRACTION = os.getenv("AI_AUTO_EXTRACTION", "False").lower() == "true"
+AELO_SYNTHETIC_DATA_ONLY = os.getenv("AELO_SYNTHETIC_DATA_ONLY", "False").lower() == "true"
+if AI_AUTO_EXTRACTION and (REQUIRE_HTTPS or not AELO_SYNTHETIC_DATA_ONLY):
+    raise ImproperlyConfigured("AI_AUTO_EXTRACTION requires AELO_SYNTHETIC_DATA_ONLY=True and no HTTPS deployment.")
+
 if REQUIRE_HTTPS:
     if DEBUG:
         raise ImproperlyConfigured("HTTPS deployment requires DEBUG=False.")

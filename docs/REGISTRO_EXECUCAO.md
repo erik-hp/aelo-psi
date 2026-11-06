@@ -313,6 +313,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **Executados:** backend SQLite 157 aprovados/2 ignorados, Ruff sem erros. Simulador: só estrutura de 17/20 a 5/20; estrutura + texto de 20/20 a 9/20. Compara rotas, não mede taxa real, e o desenho foi ajustado após ver o simulador.
 - **Pendente:** extração automática por nota (hoje presa ao checkpoint manual, que trava a nota), classificação de relevância, paráfrase e tempo em histórico longo. **G0 continua BLOQUEADO**.
 
+## Leitura automática de notas em ambiente sintético — 06/11/2026 — EM REVISÃO
+
+- Autorização explícita do autor: seguir com a automação **somente em ambiente sintético**, mantendo o bloqueio para dados reais. G0 não foi alterado. Branch `feat/recuperacao-camadas-lod`, PR #22.
+- Extração separada do checkpoint e da trava da nota. Fila `NoteExtractionJob` por versão (migração `ai_analysis.0013`), processada pelo worker, nunca na requisição HTTP. Gravação idempotente: reler não duplica, e editar substitui o que veio do texto antigo. Comando `queue_note_extractions` para notas existentes. Rota do Vault informa leituras pendentes e com falha. Retenção remove a fila.
+- **Trava:** `AI_AUTO_EXTRACTION=True` exige `AELO_SYNTHETIC_DATA_ONLY=True`, e a aplicação recusa iniciar em modo HTTPS. Isso é declaração de ambiente: não verifica se os dados são de fato sintéticos.
+- **Executados:** suíte backend, Ruff e migração, com resultado na CI do PR. Mutação manual: 10 de 10 proteções quebradas de propósito foram detectadas pelos testes. Os testes foram escritos depois do código, por falha de ferramenta, sem a etapa de falha prévia; a mutação compensa parcialmente isso.
+- **Limitações:** extração real com `llama3.1` não medida; relevância ainda não classificada; peso acumulado não é recalculado após edição. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

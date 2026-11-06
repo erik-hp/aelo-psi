@@ -10,24 +10,19 @@ from rest_framework.exceptions import ValidationError
 from services.ai.client import AIClient
 from services.security.anonymization import UnsafeClinicalText, prepare_ai_text, residual_identifier_codes
 
-from ..models import AnalysisStatus, VaultCheckpoint, VaultEdge, VaultNode
+from ..models import AnalysisStatus, NoteExtractionJob, VaultCheckpoint, VaultEdge, VaultJob, VaultNode
 from .algorithms import detect_communities, fingerprint as node_fingerprint, weighted_centrality
 from .constants import KINDS, RELATIONS
 from .renderers import render_checkpoint_markdown
 
 
-def create_checkpoint(analysis):
-    if analysis.status != AnalysisStatus.PENDING_REVIEW:
-        raise ValidationError("A checkpoint must be created before the signed clinical review.")
-    if analysis.note is None or analysis.note.deleted_at is not None:
-        raise ValidationError("A non-deleted source note is required for a vault checkpoint.")
-    if analysis.note_version is None or analysis.note_version != analysis.note.version:
-        raise ValidationError("The source note version no longer matches the analysis.")
-    if VaultCheckpoint.objects.filter(analysis=analysis).exists():
-        raise ValidationError("A checkpoint already exists for this analysis.")
-    note = analysis.note
-    source_version = note.version
-    patient = analysis.patient
+class SupersededNote(Exception):
+    """The note changed or was deleted while it was being read."""
+
+
+def extract_note_graph(note):
+    """Read one full note through the local model and validate literal evidence."""
+    patient = note.patient
     text = prepare_ai_text(note.raw_text, patient.display_name, patient.internal_code)
     if not text.strip():
         raise ValidationError("The anonymized source note is empty.")
@@ -51,6 +46,83 @@ def create_checkpoint(analysis):
             raise ValidationError("Invalid edge confidence.") from None
         if not 0 <= confidence <= 1:
             raise ValidationError("Invalid edge confidence.")
+    return raw_nodes, raw_edges
+
+
+def persist_note_graph(note, raw_nodes, raw_edges):
+    """Replace this note's derived graph; call inside a transaction holding the note lock.
+
+    Reading a note again never duplicates it, and an edited note stops contributing
+    what came from its previous text. Mentions count once per note.
+    """
+    patient = note.patient
+    previous = list(VaultEdge.objects.filter(note=note).values_list("source_id", "target_id"))
+    first_reading = not previous and not NoteExtractionJob.objects.filter(note=note, status=VaultJob.Status.COMPLETED).exists()
+    VaultEdge.objects.filter(note=note).delete()
+    nodes = []
+    seen_fingerprints = set()
+    seen_at = note.created_at
+    for item in raw_nodes:
+        fingerprint = node_fingerprint(patient.pk, item["kind"], item["label"])
+        node, created = VaultNode.objects.get_or_create(
+            patient=patient, fingerprint=fingerprint,
+            defaults={"kind": item["kind"], "label": item["label"], "embedding": item.get("embedding"), "first_seen_at": seen_at, "last_seen_at": seen_at, "mention_count": 1, "weight": Decimal("1.000")},
+        )
+        if not created and first_reading and fingerprint not in seen_fingerprints:
+            fields = []
+            elapsed_days = max((seen_at - node.last_seen_at).days, 0)
+            node.weight = min(Decimal("99999.999"), node.weight * (Decimal("0.98") ** elapsed_days) + Decimal("1.000"))
+            node.mention_count += 1
+            fields.extend(["weight", "mention_count"])
+            if seen_at > node.last_seen_at:
+                node.last_seen_at = seen_at
+                fields.append("last_seen_at")
+            if seen_at < node.first_seen_at:
+                node.first_seen_at = seen_at
+                fields.append("first_seen_at")
+            if fields:
+                node.save(update_fields=[*fields, "updated_at"])
+        seen_fingerprints.add(fingerprint)
+        nodes.append(node)
+    seen_edges = set()
+    for item in raw_edges:
+        edge_key = (nodes[item["source"]].pk, nodes[item["target"]].pk, item["relation"], item["evidence"])
+        if edge_key in seen_edges:
+            continue
+        seen_edges.add(edge_key)
+        VaultEdge.objects.create(
+            patient=patient, source=nodes[item["source"]], target=nodes[item["target"]],
+            note=note, relation=item["relation"], evidence=item["evidence"],
+            observed_at=seen_at, confidence=Decimal(str(item.get("confidence", 0))), weight=Decimal(str(item.get("confidence", 0))),
+        )
+    stale = {node_id for pair in previous for node_id in pair} - {node.pk for node in nodes}
+    VaultNode.objects.filter(pk__in=stale, mention_count__lte=1, outgoing_edges__isnull=True, incoming_edges__isnull=True).delete()
+    return nodes
+
+
+def refresh_note_graph(note, version):
+    """Read a note outside any transaction, then store the result only if it still applies."""
+    raw_nodes, raw_edges = extract_note_graph(note)
+    with transaction.atomic():
+        locked_note = type(note).objects.select_related("patient").select_for_update(of=("self",)).get(pk=note.pk)
+        if locked_note.deleted_at is not None or locked_note.version != version or locked_note.raw_text != note.raw_text:
+            raise SupersededNote()
+        persist_note_graph(locked_note, raw_nodes, raw_edges)
+
+
+def create_checkpoint(analysis):
+    if analysis.status != AnalysisStatus.PENDING_REVIEW:
+        raise ValidationError("A checkpoint must be created before the signed clinical review.")
+    if analysis.note is None or analysis.note.deleted_at is not None:
+        raise ValidationError("A non-deleted source note is required for a vault checkpoint.")
+    if analysis.note_version is None or analysis.note_version != analysis.note.version:
+        raise ValidationError("The source note version no longer matches the analysis.")
+    if VaultCheckpoint.objects.filter(analysis=analysis).exists():
+        raise ValidationError("A checkpoint already exists for this analysis.")
+    note = analysis.note
+    source_version = note.version
+    patient = analysis.patient
+    raw_nodes, raw_edges = extract_note_graph(note)
 
     current_evidence = [{"note_id": str(note.pk), "excerpt": item["evidence"]} for item in raw_nodes]
     historical_edges = list(VaultEdge.objects.filter(patient=patient, observed_at__lt=note.created_at).order_by("-observed_at", "-id")[:30])
@@ -79,42 +151,8 @@ def create_checkpoint(analysis):
         if locked_note.locked_at is None:
             locked_note.locked_at = timezone.now()
             locked_note.save(update_fields=["locked_at", "updated_at"])
-        nodes = []
-        seen_fingerprints = set()
+        persist_note_graph(note, raw_nodes, raw_edges)
         seen_at = note.created_at
-        for item in raw_nodes:
-            fingerprint = node_fingerprint(patient.pk, item["kind"], item["label"])
-            node, created = VaultNode.objects.get_or_create(
-                patient=patient, fingerprint=fingerprint,
-                defaults={"kind": item["kind"], "label": item["label"], "embedding": item.get("embedding"), "first_seen_at": seen_at, "last_seen_at": seen_at, "mention_count": 1, "weight": Decimal("1.000")},
-            )
-            if not created and fingerprint not in seen_fingerprints:
-                fields = []
-                elapsed_days = max((seen_at - node.last_seen_at).days, 0)
-                node.weight = min(Decimal("99999.999"), node.weight * (Decimal("0.98") ** elapsed_days) + Decimal("1.000"))
-                node.mention_count += 1
-                fields.extend(["weight", "mention_count"])
-                if seen_at > node.last_seen_at:
-                    node.last_seen_at = seen_at
-                    fields.append("last_seen_at")
-                if seen_at < node.first_seen_at:
-                    node.first_seen_at = seen_at
-                    fields.append("first_seen_at")
-                if fields:
-                    node.save(update_fields=[*fields, "updated_at"])
-            seen_fingerprints.add(fingerprint)
-            nodes.append(node)
-        seen_edges = set()
-        for item in raw_edges:
-            edge_key = (nodes[item["source"]].pk, nodes[item["target"]].pk, item["relation"], item["evidence"])
-            if edge_key in seen_edges:
-                continue
-            seen_edges.add(edge_key)
-            VaultEdge.objects.create(
-                patient=patient, source=nodes[item["source"]], target=nodes[item["target"]],
-                note=note, relation=item["relation"], evidence=item["evidence"],
-                observed_at=seen_at, confidence=Decimal(str(item.get("confidence", 0))), weight=Decimal(str(item.get("confidence", 0))),
-            )
         all_nodes = list(VaultNode.objects.filter(patient=patient).order_by("first_seen_at", "id")[:1000])
         node_ids = {node.id for node in all_nodes}
         all_edges = list(VaultEdge.objects.filter(patient=patient, source_id__in=node_ids, target_id__in=node_ids).select_related("note", "source", "target").order_by("observed_at", "id")[:2000])

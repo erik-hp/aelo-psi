@@ -2,7 +2,7 @@ import time
 
 from django.core.management.base import BaseCommand
 
-from apps.ai_analysis.jobs import process_next_job, process_next_analysis_job
+from apps.ai_analysis.jobs import process_next_analysis_job, process_next_extraction_job, process_next_job
 
 
 class Command(BaseCommand):
@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         while True:
-            processed = process_next_analysis_job() or process_next_job()
+            processed = process_next_analysis_job() or process_next_extraction_job() or process_next_job()
             if options["once"]:
                 return
             if not processed:

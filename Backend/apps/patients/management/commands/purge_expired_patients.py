@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.ai_analysis.models import AIAnalysis, VaultCheckpoint, VaultEdge, VaultNode, VaultJob, AnalysisJob
+from apps.ai_analysis.models import AIAnalysis, NoteExtractionJob, VaultCheckpoint, VaultEdge, VaultNode, VaultJob, AnalysisJob
 from apps.audit_logs.integrity import append_audit_log
 from apps.clinical_notes.models import ClinicalNote
 from apps.patients.models import Patient
@@ -47,6 +47,7 @@ class Command(BaseCommand):
                 VaultEdge.objects.filter(patient=patient).delete()
                 VaultNode.objects.filter(patient=patient).delete()
                 VaultJob.objects.filter(analysis__patient=patient).delete()
+                NoteExtractionJob.objects.filter(note__patient=patient).delete()
                 AnalysisJob.objects.filter(patient=patient).update(result=None)
                 AIAnalysis.objects.filter(patient=patient).delete()
                 AnalysisJob.objects.filter(patient=patient).delete()

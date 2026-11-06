@@ -7,9 +7,9 @@ from django.utils import timezone
 
 from apps.patients.access import can_edit_patient
 
-from .models import AIAnalysis, AnalysisJob, VaultCheckpoint, VaultJob
+from .models import AIAnalysis, AnalysisJob, NoteExtractionJob, VaultCheckpoint, VaultJob
 from .services import request_ai_analysis
-from .vault import create_checkpoint
+from .vault import SupersededNote, create_checkpoint, refresh_note_graph
 
 
 def _claim_job(model):
@@ -70,6 +70,29 @@ def process_next_job():
         job.error_code = type(exc).__name__[:64]
     else:
         job.status = VaultJob.Status.COMPLETED
+    job.save(update_fields=["status", "error_code", "updated_at"])
+    return True
+
+
+def process_next_extraction_job():
+    job_id = _claim_job(NoteExtractionJob)
+    if job_id is None:
+        return False
+    job = NoteExtractionJob.objects.select_related("note", "note__patient", "note__author").get(pk=job_id)
+    note = job.note
+    job.status = VaultJob.Status.COMPLETED
+    try:
+        if note.deleted_at is not None or note.version != job.note_version:
+            raise SupersededNote()
+        if not note.author.is_active or not can_edit_patient(note.author, note.patient):
+            raise PermissionError("Patient edit access was revoked")
+        refresh_note_graph(note, job.note_version)
+    except SupersededNote:
+        job.error_code = "SupersededNote"
+    except Exception as exc:
+        # Clinical text and exception messages must not enter operational logs.
+        job.status = VaultJob.Status.FAILED
+        job.error_code = type(exc).__name__[:64]
     job.save(update_fields=["status", "error_code", "updated_at"])
     return True
 

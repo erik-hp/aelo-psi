@@ -17,7 +17,7 @@ from django.db.models import Q
 
 from apps.clinical_notes.models import ClinicalNote
 
-from .models import VaultEdge, VaultNode
+from .models import NoteExtractionJob, VaultEdge, VaultNode
 
 MAX_GRAPH_LABELS = 1000
 MIN_LABEL_LENGTH = 3
@@ -33,6 +33,12 @@ STOPWORDS = frozenset(
     sobre suas seus teve toda todo todos voltou ainda apenas depois entre foi hoje semana sessao
     """.split()
 )
+
+
+def queue_note_extraction(note) -> None:
+    """Queue automatic reading of this note version; never calls the model in a request."""
+    if settings.AI_AUTO_EXTRACTION:
+        NoteExtractionJob.objects.get_or_create(note=note, note_version=note.version)
 
 
 def normalized(text: str) -> str:
