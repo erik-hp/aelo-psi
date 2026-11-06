@@ -80,7 +80,7 @@ def main():
             browser_login = proxied.post("/api/auth/login/", json={
                 "username": "security1_admin", "password": "synthetic-only-password-2026",
             })
-            assert browser_login.status_code == 200
+            assert browser_login.status_code == 200, browser_login.status_code
             assert "httponly" in browser_login.headers["set-cookie"].lower()
             proxied.headers["Authorization"] = f"Bearer {browser_login.json()['access']}"
             assert proxied.get("/api/patients/").status_code == 200
