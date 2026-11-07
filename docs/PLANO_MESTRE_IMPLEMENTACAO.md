@@ -224,7 +224,7 @@ Se um item não se aplica, documentar *por quê*; não marcar “testado” sem 
 1. **Abrir trabalho:** ler `AGENTS.md`, este plano, matriz, registro e ADR-001; confirmar branch/commit e código real.
 2. **Escolher:** o menor item pendente **da fase não bloqueada**; criar issue/checklist com ID, dependências, arquivos, critério de aceite e evidências.
 3. **Projetar:** descrever contratos, esquema, impacto LGPD e estratégia de teste; decisões incompatíveis com ADR precisam de nova ADR antes de mudar código.
-4. **Executar:** PR pequeno na branch de tarefa; sem edições diretas em `main`; nunca migrar stack sem decisão registrada.
+4. **Executar:** branch e PR só para mudança grande, arriscada ou que precise de revisão separada; ajustes pequenos podem ir direto em `main`, com testes pertinentes aprovados; nunca migrar stack sem decisão registrada.
 5. **Verificar:** rodar testes e auditoria de permissões, checar diferenças da API/UI, registrar comandos e saídas verdadeiras.
 6. **Fechar:** PR revisado, atualizar matriz/registro e registrar gate; se bloqueado, marcar `BLOQUEADO` com motivo.
 7. **Mudança de escopo:** registrar solicitação, motivação, impacto em hipótese/risco/prazo, opções e decisão de responsável/orientador; somente então modificar este plano e a ADR.

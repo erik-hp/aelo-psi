@@ -17,7 +17,7 @@
 2. Identificar **uma tarefa** na fase mais baixa cujo gate ainda não foi atingido; mapear IDs na matriz.
 3. Inspecionar os arquivos reais antes de propor alterações; não assumir que mock é produção.
 4. Declarar escopo, plano mínimo, dependências, testes, risco e artefatos a atualizar.
-5. Trabalhar em branch e PR pequenos; nunca editar `main` diretamente ou apagar código sem necessidade.
+5. Criar branch e PR só quando a mudança for grande, arriscada ou precisar de revisão separada, e apagar a branch após o merge. Ajustes pequenos podem ir direto em `main`, com os testes pertinentes aprovados. Não apagar código sem necessidade.
 6. Rodar testes/build/lint/checks pertinentes; **nunca** declarar resultado executado quando foi somente revisão estática.
 7. Registrar commit/PR, resultado, limitações, decisão e próximo item no `docs/REGISTRO_EXECUCAO.md`.
 8. Se não houver acesso de execução, deixar a tarefa `EM REVISÃO` ou `BLOQUEADO`, com comando de verificação, não `CONCLUÍDO`.

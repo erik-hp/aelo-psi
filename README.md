@@ -234,7 +234,7 @@ Para iniciar qualquer alteração:
 1. Ler [AGENTS.md](AGENTS.md), [Plano Mestre](docs/PLANO_MESTRE_IMPLEMENTACAO.md), [Matriz de Requisitos](docs/MATRIZ_REQUISITOS.md), [Registro de Execução](docs/REGISTRO_EXECUCAO.md) e [ADR-001](docs/architecture/ADR-001-memoria-terapeutica-longitudinal.md).
 2. Escolher a menor tarefa da fase desbloqueada e citar o ID (ex.: `F0-02`) no issue/PR.
 3. Especificar comportamento, permissões, caso de erro, impacto em dados pessoais e testes.
-4. Implementar em branch própria; usar migrações, testes e documentação proporcional à mudança.
+4. Implementar em branch própria quando a mudança for grande ou arriscada; usar migrações, testes e documentação proporcional à mudança.
 5. Revisar diffs, executar checks realmente disponíveis, registrar resultados completos e limitações.
 6. Atualizar matriz/registro e solicitar revisão no PR. Não marcar **CONCLUÍDO** sem evidência verificável.
 
