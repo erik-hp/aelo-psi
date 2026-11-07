@@ -365,6 +365,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **Limites:** axe cobre parte da WCAG: leitor de tela e teclado completo não foram testados, nem houve teste com usuários. Telas em modo API não foram inspecionadas. Não declarar conformidade.
 - **Achado fora do escopo:** o modo demonstração exibe "Alertas clínicos severos", "Ideação / Risco imediato", índices de atenção e "Cenários de risco", contrários à regra de não classificar risco. Só existem nos dados demonstrativos. Texto mantido, aguardando decisão. **G0 continua BLOQUEADO**.
 
+## Fluxo de notas com Claude como motor de teste — 07/11/2026 — EM REVISÃO
+
+- Pedido do autor: testar o serviço de notas completo com o Claude. `AI_ENGINE=claude-cli` em `ai_service/claude_cli.py` roda `claude -p` sem ferramentas, fora do projeto. Autorizado apenas com `AELO_SYNTHETIC_DATA_ONLY=True`; o serviço recusa iniciar sem isso. O padrão segue `ollama`, e a ADR-004 não muda. Sem embeddings nesse motor: a parte próxima do contexto usa recência, e a busca em camadas segue ativa.
+- Prompt de análise agora descreve o formato e exige citação literal, o que antes faltava para qualquer modelo. Iniciador local em `Backend/scripts/run_ai_claude.py`, pois o CLI só existe no computador do autor, não nos containers.
+- **Ensaio real com dados sintéticos:** 13 notas, 18 conceitos e 29 relações gerados pela leitura automática, sem falhas; prévia mascarou nome e telefone; análise em 12 s, em revisão humana; a sessão 1, fora da janela de 10, foi citada como fonte. Em navegador, salvar, revisar e confirmar concluiu em 14 s. Com o serviço parado, 13 leituras e a análise falharam de forma explícita.
+- **Limites:** sem assinatura da revisão em navegador. Conjunto pequeno, não mede qualidade clínica. Não vale para modelo local. `Backend/.env` local aponta para o serviço no computador; para Ollama, reverter `AI_SERVICE_URL`. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
