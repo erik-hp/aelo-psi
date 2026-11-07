@@ -43,7 +43,7 @@ export function PatientsPage() {
       />
       <div className="mb-5 flex flex-col gap-3 md:flex-row">
         <div className="relative flex-1">
-          <Input leadingIcon={RiSearchLine} aria-label="Buscar por nome" placeholder="Buscar por nome" value={search} onChange={(event) => setSearchParams(event.target.value ? { search: event.target.value } : {}, { replace: true })} />
+          <Input leadingIcon={RiSearchLine} aria-label="Buscar por nome" autoComplete="off" placeholder="Buscar por nome" value={search} onChange={(event) => setSearchParams(event.target.value ? { search: event.target.value } : {}, { replace: true })} />
         </div>
         <Select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filtrar status">
           <option value="all">Todos os status</option>

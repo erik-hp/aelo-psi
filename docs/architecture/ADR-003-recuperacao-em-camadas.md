@@ -59,6 +59,8 @@ Limites conhecidos: paráfrase não é reconhecida pela busca lexical, não há 
 
 Em 20 notas sintéticas com Claude (`sonnet`), a primeira rodada achou 43 de 44 conceitos, mas a validação manteve só 15: o prompt pedia conceito resumido e a regra exigia cópia literal. Depois de pedir cópia exata e descartar só o item inválido, foram 44 de 44, com 59 de 59 conceitos aceitos. As notas são curtas e explícitas, o gabarito é do mesmo autor e o prompt foi ajustado após a primeira rodada. Isso valida o caminho técnico, não a qualidade clínica, e não vale para o modelo local.
 
+Com `llama3.1` em CPU, no mesmo conjunto: 19 de 44 conceitos, 11 de 20 notas com grafo e mediana de 43 s por nota. O modelo local segue como decisão em aberto: a leitura automática só serve ao produto com um modelo que atinja qualidade e tempo aceitáveis no hardware da clínica.
+
 Rótulos são cópias literais. Paráfrases como "evitação da casa antiga" são recusadas de propósito, pois seriam interpretação gravada como conceito.
 
 ## Alternativas

@@ -57,6 +57,8 @@ Tecnicamente é viável. O bloqueio atual é de governança, segurança e norma 
 
 Em 06/11/2026, 20 notas totalmente sintéticas foram enviadas ao Claude em avaliação isolada, por decisão do autor e dentro da alternativa aceitável acima. Nenhum dado real foi enviado, e o sistema continua sem qualquer rota de envio externo.
 
+A medição também comparou o modelo local no mesmo conjunto: `llama3.1` em CPU fez 19 de 44 conceitos em cerca de 43 s por nota, contra 44 de 44 em cerca de 4 s no Claude. A diferença é real nesse conjunto sintético, mas não altera esta decisão: ela decorre de governança e norma, e o próximo passo é comparar outros modelos locais.
+
 ## Consequências
 
 O projeto preserva a hipótese H2 do TCC e evita depender de fornecedor. Em troca, aceita a capacidade do hardware local e precisa medir latência e qualidade reais. Execução local também não é conformidade automática: criptografia, acesso, backup e RIPD continuam necessários.

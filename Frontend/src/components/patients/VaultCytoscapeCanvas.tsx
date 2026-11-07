@@ -16,7 +16,7 @@ export function VaultCytoscapeSkeleton() {
       </div>
       <div className="flex flex-col items-center justify-center space-y-3">
         <div className="h-12 w-12 rounded-full border-2 border-border-focus-ring border-t-border-focus-ring animate-spin" />
-        <p className="text-caption-1-regular text-text-secondary">Renderizando topologia conceitual do grafo...</p>
+        <p className="text-caption-1-regular text-text-secondary">Renderizando topologia conceitual do grafo…</p>
       </div>
       <div className="flex gap-4">
         <div className="h-3 w-20 rounded bg-background-tertiary-default" />

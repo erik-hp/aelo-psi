@@ -1,6 +1,8 @@
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { ButtonLink } from "@/components/ui/button-link";
 
 export function NotFoundPage() {
+  usePageTitle("Página não encontrada");
   return (
     <main className="grid min-h-screen place-items-center bg-background-full p-6 text-center">
       <div>

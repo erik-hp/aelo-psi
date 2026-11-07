@@ -278,7 +278,7 @@ export function NarrativeEditor({
         <Textarea
           id="content"
           className="min-h-[380px] font-sans text-headline-regular placeholder:text-text-secondary resize-y"
-          placeholder="Descreva a evolução da sessão, falas do paciente, intervenções aplicadas e desfechos..."
+          placeholder="Descreva a evolução da sessão, falas do paciente, intervenções aplicadas e desfechos…"
           onKeyDown={handleKeyDown}
           {...form.register("content")}
         />
@@ -311,7 +311,7 @@ export function NarrativeEditor({
           className="gap-2 px-6 text-body-semibold shadow-md"
         >
           <Sparkles className="h-4 w-4" />
-          {isSubmitting ? "Enviando análise..." : "Solicitar análise assistiva"}
+          {isSubmitting ? "Enviando análise…" : "Solicitar análise assistiva"}
         </Button>
       </div>
     </form>

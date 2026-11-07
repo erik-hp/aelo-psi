@@ -119,7 +119,7 @@ export function VaultApprovalModal({
             onChange={(event) => setJustification(event.target.value)}
             maxLength={2000}
             rows={4}
-            placeholder="Descreva a fundamentação técnica para homologação deste checkpoint do cofre cognitivo..."
+            placeholder="Descreva a fundamentação técnica para homologação deste checkpoint do cofre cognitivo…"
             aria-label="Justificativa clínica"
             className="text-body-regular"
           />

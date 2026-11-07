@@ -71,7 +71,7 @@ describe("VaultCytoscapeSkeleton", () => {
   it("renders loading skeleton with pulse effect and accessibility text", () => {
     render(<VaultCytoscapeSkeleton />);
     expect(
-      screen.getByText(/Renderizando topologia conceitual do grafo.../i),
+      screen.getByText(/Renderizando topologia conceitual do grafo…/i),
     ).toBeDefined();
   });
 });

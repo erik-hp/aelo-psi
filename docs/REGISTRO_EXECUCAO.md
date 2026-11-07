@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** ampliar o conjunto sintético com notas longas e implícitas e medir o modelo local escolhido; depois OP-00/UX-01. G0 permanece bloqueado.
+- **Próxima tarefa:** comparar outros modelos locais no mesmo conjunto sintético, já que `llama3.1` não atendeu em CPU; depois inspeção em navegador real e OP-00/UX-01. G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -343,6 +343,17 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **Correção:** o prompt exige cópia exata, sem paráfrase; `literal_graph` descarta só o conceito ou a relação sem âncora na nota. A garantia foi mantida: rótulos interpretativos não entram. Se nada proposto sobreviver, a falha continua explícita (503).
 - **Resultado após a correção:** 20 de 20 notas com grafo, 59 de 59 conceitos e 37 de 37 relações aceitos, 44 de 44 conceitos do gabarito, mediana de cerca de 4 s por nota. Backend 185 aprovados/2 ignorados, Ruff sem erros.
 - **Limites:** notas curtas e explícitas, gabarito do mesmo autor das notas e prompt ajustado depois da primeira medição: não é taxa real. O resultado **não vale para `llama3.1`**, modelo do produto, ainda não medido. **G0 continua BLOQUEADO**.
+
+## Decisões pendentes e revisão de interface — 06/11/2026 — EM REVISÃO
+
+- **`llama3.1` medido:** mesmas 20 notas sintéticas, Ollama 0.40.15 em CPU (Ryzen 5 5600X, 7,7 GB no Docker, GPU AMD não usada). Foram 11 de 20 notas com grafo e 19 de 44 conceitos do gabarito; 28 de 33 conceitos e 2 de 6 relações aceitos; 5 respostas fora do schema e 4 vazias. Mediana de cerca de 43 s por nota e máximo de 107 s. Com o mesmo prompt, o Claude fez 44 de 44 em cerca de 4 s. O script usa limite de 600 s, mas o serviço corta em 45 s: 8 das 20 notas ultrapassariam esse tempo. Conjunto curto: não é taxa real. Conclusão: `llama3.1` não atende neste hardware e nenhum modelo local foi aprovado ainda. Nenhum outro modelo foi medido.
+- **PR #13 integrado** (`9c29041`): benchmark sintético de evidências e transição do TCC1.
+- **PR #14:** não integrado como estava, pois era anterior ao BoardUI. Logo, favicon e guia entraram adaptados, sem a paleta, que usava tokens substituídos.
+- **Revisão de interface:** regras da `web-design-guidelines` aplicadas por inspeção de código. Falsos alarmes descartados: botões de ícone rotulados, toasts anunciados e foco do seletor. Corrigidos: título por página, foco no conteúdo ao navegar, confirmação para cancelar sessão e registrar falta, erro visível por 10 s, autocompletar desligado nas buscas de pacientes, `transition-all` e reticências.
+- **Erros de teste revelados:** agenda usava data em UTC e falhava depois das 21h em São Paulo, inclusive na `main` limpa; sessão simulada tinha data fixa. Corrigidos. Limite de espera dos testes elevado para 5 s, pois páginas sob demanda excediam 1 s com a máquina ocupada.
+- **Executados:** frontend 146/146 em UTC e em São Paulo, lint 0 erros/9 avisos, build aprovado. Sem navegador real nem leitor de tela: não declarar conformidade WCAG.
+- **`security-smoke`:** a mesma falha aparece no PR #14 em 03/11, antes deste trabalho. Causa segue desconhecida.
+- **Branches:** as 10 antigas têm conteúdo idêntico aos merges, mas a exclusão foi bloqueada pelo controle de permissões. Permanecem no remoto, com `feat/aelo-brand-identity-v1` e `feat/tcc2-alinhamento-evidencias-sinteticas-20261103`. **G0 continua BLOQUEADO**.
 
 ## Pendências de decisão
 

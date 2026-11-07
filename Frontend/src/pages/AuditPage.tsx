@@ -82,7 +82,8 @@ export function AuditPage() {
         <div className="relative flex-1">
           <Input
             leadingIcon={RiSearchLine}
-            placeholder="Pesquisar ação, usuário, entidade ou endereço IP..."
+            placeholder="Pesquisar ação, usuário, entidade ou endereço IP…"
+            autoComplete="off"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             aria-label="Pesquisar eventos"

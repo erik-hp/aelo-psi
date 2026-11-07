@@ -1,3 +1,4 @@
+import { localDateKey } from "@/lib/dates";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -31,7 +32,7 @@ function renderAgendaPage() {
 }
 
 describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () => {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
 
   beforeEach(() => {
     vi.restoreAllMocks();

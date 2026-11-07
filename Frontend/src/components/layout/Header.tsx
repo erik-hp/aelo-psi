@@ -31,7 +31,7 @@ export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </Button>
         <form role="search" className="relative hidden flex-1 md:block" onSubmit={(event) => { event.preventDefault(); navigate(`/patients?search=${encodeURIComponent(search.trim())}`); }}>
-          <Input leadingIcon={RiSearchLine} className="max-w-xl" placeholder="Buscar pacientes por nome e pressionar Enter" aria-label="Buscar pacientes" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Input leadingIcon={RiSearchLine} className="max-w-xl" placeholder="Buscar pacientes por nome e pressionar Enter" aria-label="Buscar pacientes" autoComplete="off" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} />
         </form>
         <div className="ml-auto flex items-center gap-2">
           <Button size="icon" variant="ghost" aria-label="Notificações indisponíveis" title="Notificações ainda não implementadas" disabled>

@@ -159,7 +159,7 @@ function SessionAnalysisBlock({
             className="min-h-32 text-body-regular"
             value={content}
             onChange={(event) => { setContent(event.target.value); setPreview(null); }}
-            placeholder="Insira aqui o texto do prontuário que será analisado pela IA assistiva..."
+            placeholder="Insira aqui o texto do prontuário que será analisado pela IA assistiva…"
           />
           {preview !== null ? <div className="rounded border p-3 text-caption-1-regular"><p>Texto preparado para a IA. Confira os identificadores antes de confirmar:</p><pre className="whitespace-pre-wrap break-words">{preview}</pre></div> : null}
           <div className="flex flex-col gap-3 text-caption-1-regular text-text-secondary sm:flex-row sm:items-center sm:justify-between">
@@ -175,7 +175,7 @@ function SessionAnalysisBlock({
               className="gap-1.5 shadow-sm"
             >
               <Send className="h-3.5 w-3.5" />
-              {mutation.isPending ? "Processando..." : !isApiMode ? "Enviar para análise" : preview !== null ? "Confirmar envio à IA" : "Revisar texto para IA"}
+              {mutation.isPending ? "Processando…" : !isApiMode ? "Enviar para análise" : preview !== null ? "Confirmar envio à IA" : "Revisar texto para IA"}
             </Button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { localDateKey } from "@/lib/dates";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -215,7 +216,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
 });
 
 describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", () => {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
 
   beforeEach(() => {
     vi.restoreAllMocks();

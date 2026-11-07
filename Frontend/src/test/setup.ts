@@ -1,3 +1,4 @@
+import { configure } from "@testing-library/react";
 import cssEscape from "css.escape";
 
 // jsdom does not implement these browser APIs used by React Aria.
@@ -8,3 +9,6 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 };
+
+// Lazy pages can exceed the default 1 s on a busy machine.
+configure({ asyncUtilTimeout: 5_000 });

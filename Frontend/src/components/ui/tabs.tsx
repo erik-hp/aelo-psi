@@ -83,7 +83,7 @@ export function TabsTrigger({ value, className, children, ...props }: TabsTrigge
       tabIndex={isSelected ? 0 : -1}
       onClick={() => context.onValueChange(value)}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-body-medium transition-all focus-ring disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-body-medium transition-colors focus-ring disabled:pointer-events-none disabled:opacity-50",
         isSelected
           ? "bg-background-full text-text-primary shadow-sm text-body-semibold"
           : "text-text-secondary hover:bg-background-full hover:text-text-primary",

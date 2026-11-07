@@ -20,7 +20,7 @@ export function SessionCard({ session, notes = [] }: { session: TherapySession; 
         {notes.length ? (
           <div className="mt-4 space-y-3 border-t border-border-button-default pt-4">
             {notes.map((note) => (
-              <div key={note.id} id={`note-${note.id}`} className="rounded-md p-2 transition-all">
+              <div key={note.id} id={`note-${note.id}`} className="rounded-md p-2 transition-colors">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-body-medium">
                     <FileText className="h-4 w-4 text-status-blue-text" />

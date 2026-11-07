@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { ConfirmDialog } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/modal";
 import { RiSearchLine } from "@remixicon/react";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -109,6 +110,7 @@ export function AgendaPage() {
 
   // Estado do modal funcional de nova sessão
   const [isNewSessionOpen, setIsNewSessionOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<{ id: string; status: "cancelled" | "missed" } | null>(null);
   const [newPatientName, setNewPatientName] = useState("");
   const [newPatientId, setNewPatientId] = useState(params.get("patient") ?? "");
   const [newDate, setNewDate] = useState(today);
@@ -215,6 +217,12 @@ export function AgendaPage() {
     setSelectedDate(nextKey);
     setVisibleMonth(current);
   }
+
+  const confirmPendingStatus = () => {
+    if (!pendingStatus) return;
+    setPendingStatus(null);
+    void handleUpdateStatus(pendingStatus.id, pendingStatus.status);
+  };
 
   // Transição do ciclo de vida clínico
   const handleUpdateStatus = async (sessionId: string, newStatus: SessionStatus) => {
@@ -423,7 +431,8 @@ export function AgendaPage() {
               <Input
                 leadingIcon={RiSearchLine}
                 aria-label="Buscar paciente na agenda"
-                placeholder="Buscar paciente na agenda..."
+                placeholder="Buscar paciente na agenda…"
+                autoComplete="off"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
@@ -564,7 +573,7 @@ export function AgendaPage() {
                   <Card
                     key={item.id}
                     className={cn(
-                      "transition-all shadow-sm border",
+                      "transition-colors shadow-sm border",
                       item.status === "in_progress" && "border-border-focus-ring bg-status-blue-background",
                       isHighRisk && "border-border-error-default bg-status-rose-background",
                       item.status === "needs_review" && !isHighRisk && "border-status-yellow-text bg-status-yellow-background",
@@ -651,8 +660,8 @@ export function AgendaPage() {
                               <ButtonLink to={`/editor?patient=${encodeURIComponent(item.patientId)}&session=${encodeURIComponent(item.id)}`} size="small">Abrir editor</ButtonLink>
                               {item.status === "draft" && <>
                                 <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "completed")}>Concluir atendimento</Button>
-                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "cancelled")}>Cancelar sessão</Button>
-                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "missed")}>Registrar falta</Button>
+                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => setPendingStatus({ id: item.id, status: "cancelled" })}>Cancelar sessão</Button>
+                                <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => setPendingStatus({ id: item.id, status: "missed" })}>Registrar falta</Button>
                               </>}
                             </>}
                             <ButtonLink
@@ -735,6 +744,16 @@ export function AgendaPage() {
       </section>
 
       {/* MODAL FUNCIONAL DE NOVA SESSÃO (LEI DE FITTS: CAMPOS GENEROSOS E FOCO ACESSÍVEL) */}
+      <ConfirmDialog
+        open={pendingStatus !== null}
+        title={pendingStatus?.status === "missed" ? "Registrar falta nesta sessão?" : "Cancelar esta sessão?"}
+        description="O novo status fica registrado no servidor e esta tela não oferece desfazer. A nota clínica não é alterada."
+        confirmLabel={pendingStatus?.status === "missed" ? "Sim, registrar falta" : "Sim, cancelar sessão"}
+        cancelLabel="Voltar"
+        onConfirm={confirmPendingStatus}
+        onClose={() => setPendingStatus(null)}
+      />
+
       {isNewSessionOpen ? (
         <Dialog open onClose={() => setIsNewSessionOpen(false)} busy={createSession.isPending} title="Agendar Nova Sessão Clínica">
             <div className="flex items-start justify-between">

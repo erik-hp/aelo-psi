@@ -39,10 +39,30 @@ function show(Page: typeof PatientsPage | typeof AgendaPage | typeof ClinicalEdi
   return render(<QueryClientProvider client={client}><ToastProvider><MemoryRouter initialEntries={[url]}><Page /></MemoryRouter></ToastProvider></QueryClientProvider>);
 }
 function existingSession() {
-  sessions = [{ id: "s-1", patient: "p-1", professional: "professional-1", status: "SCHEDULED", scheduled_at: "2026-11-06T12:00:00Z", summary: "" }];
+  const noonToday = new Date();
+  noonToday.setHours(12, 0, 0, 0);
+  sessions = [{ id: "s-1", patient: "p-1", professional: "professional-1", status: "SCHEDULED", scheduled_at: noonToday.toISOString(), summary: "" }];
 }
 
 describe("Operational flows in API mode, with real frontend services", () => {
+  it.each([["Cancelar sessão", "CANCELLED"], ["Registrar falta", "MISSED"]])("asks before saving %s", async (label, status) => {
+    existingSession();
+    const user = userEvent.setup(); show(AgendaPage, "/agenda");
+    await user.click(await screen.findByRole("button", { name: label }));
+    expect(http.patch).not.toHaveBeenCalled();
+    await user.click(await screen.findByRole("button", { name: `Sim, ${label.toLowerCase()}` }));
+    await waitFor(() => expect(http.patch).toHaveBeenCalledWith("/sessions/s-1/", { status }));
+  });
+
+  it("keeps the session untouched when the confirmation is dismissed", async () => {
+    existingSession();
+    const user = userEvent.setup(); show(AgendaPage, "/agenda");
+    await user.click(await screen.findByRole("button", { name: "Cancelar sessão" }));
+    await user.click(await screen.findByRole("button", { name: "Voltar" }));
+    expect(http.patch).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Cancelar sessão" })).toBeDefined();
+  });
+
   it("creates a patient through POST and reloads the directory", async () => {
     const user = userEvent.setup(); show(PatientsPage);
     await user.click(screen.getByRole("button", { name: "Adicionar paciente" }));

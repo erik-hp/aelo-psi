@@ -11,7 +11,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((current) => [...current, { ...toast, id }]);
     window.setTimeout(() => {
       setToasts((current) => current.filter((item) => item.id !== id));
-    }, 4200);
+    }, toast.type === "error" ? 10_000 : 4_200);
   }, []);
 
   const value = useMemo(() => ({ notify }), [notify]);

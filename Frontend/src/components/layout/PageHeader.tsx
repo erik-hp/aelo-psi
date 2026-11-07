@@ -1,3 +1,5 @@
+import { usePageTitle } from "@/hooks/usePageTitle";
+
 interface PageHeaderProps {
   title: string;
   description: string;
@@ -5,6 +7,7 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, description, action }: PageHeaderProps) {
+  usePageTitle(title);
   return (
     <div className="mb-6 flex min-w-0 flex-col justify-between gap-4 xl:flex-row xl:items-end">
       <div className="min-w-0">

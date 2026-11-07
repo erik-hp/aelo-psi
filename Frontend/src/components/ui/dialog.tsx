@@ -6,11 +6,13 @@ interface ConfirmDialogProps {
   open: boolean;
   title: string;
   description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onClose: () => void;
 }
 
-export function ConfirmDialog({ open, title, description, onConfirm, onClose }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, title, description, confirmLabel = "Confirmar", cancelLabel = "Cancelar", onConfirm, onClose }: ConfirmDialogProps) {
   if (!open) return null;
 
   return (
@@ -25,8 +27,8 @@ export function ConfirmDialog({ open, title, description, onConfirm, onClose }: 
           </Button>
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button onClick={onConfirm}>Confirmar</Button>
+          <Button variant="ghost" onClick={onClose}>{cancelLabel}</Button>
+          <Button onClick={onConfirm}>{confirmLabel}</Button>
         </div>
     </Dialog>
   );
