@@ -48,6 +48,47 @@ const managementItems: NavItem[] = [
   { label: "Configurações", to: "/settings", icon: Settings, permission: "settings:manage" },
 ];
 
+function NavSection({ label, items, pendingReviews, onNavigate, className }: {
+  label: string;
+  items: NavItem[];
+  pendingReviews: number;
+  onNavigate?: () => void;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <p className="px-3 text-caption-1-medium text-text-secondary">{label}</p>
+      <nav className="mt-2 space-y-0.5" aria-label={label}>
+        {items.map((item) => {
+          const Icon = item.icon;
+          const hasPendingBadge = item.badge === "agenda" && pendingReviews > 0;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={() => onNavigate?.()}
+              className={({ isActive }) =>
+                cn(
+                  "aelo-nav-link focus-ring relative flex items-center gap-3 rounded-md py-2.5 ps-4 pe-3 text-body-regular text-text-secondary transition-colors hover:bg-background-secondary-default hover:text-text-primary",
+                  isActive && "text-text-primary text-body-medium",
+                )
+              }
+            >
+              <Icon className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="min-w-0 flex-1">{item.label}</span>
+              {hasPendingBadge ? (
+                <Badge variant="warning" showIcon={false} className="h-4 px-1.5 py-0 text-caption-2-semibold">
+                  {pendingReviews}
+                </Badge>
+              ) : null}
+            </NavLink>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const fade = useScrollFade();
   const { can } = usePermissions();
@@ -72,12 +113,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     <>
       {/* Backdrop para mobile / tablet (<1024px) */}
       {isOpen ? (
-        <div
-          className="fixed inset-0 z-40 bg-overlay backdrop-blur-sm lg:hidden"
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-overlay lg:hidden"
           onClick={onClose}
           aria-label="Fechar navegação móvel"
-          role="button"
-          tabIndex={0}
           onKeyDown={(event) => event.key === "Escape" && onClose?.()}
         />
       ) : null}
@@ -106,84 +146,23 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
         <div className="relative mt-6 min-h-0 flex-1">
         <div onScroll={fade.onScroll} className="flex h-full flex-col gap-1 overflow-y-auto overscroll-contain pb-2">
-          {/* Seção 1: Atendimento Clínico */}
-          <div>
-            <p className="px-2 text-caption-1-semibold uppercase tracking-wider text-text-secondary">
-              Atendimento Clínico
-            </p>
-            <nav className="mt-2 space-y-1" aria-label="Atendimento Clínico">
-              {visibleClinical.map((item) => {
-                const Icon = item.icon;
-                const hasPendingBadge = item.badge === "agenda" && pendingReviews > 0;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => onClose?.()}
-                    className={({ isActive }) =>
-                      cn(
-                        "focus-ring flex items-center justify-between rounded-md px-3 py-2.5 text-body-regular text-text-secondary transition hover:bg-background-secondary-default hover:text-text-primary",
-                        isActive && "bg-background-secondary-default text-text-primary text-body-medium",
-                      )
-                    }
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-4 w-4 shrink-0 text-text-secondary" />
-                      <span>{item.label}</span>
-                    </div>
-                    {hasPendingBadge ? (
-                      <Badge variant="warning" className="ml-auto text-caption-2-semibold px-1.5 py-0 h-4">
-                        {pendingReviews}
-                      </Badge>
-                    ) : null}
-                  </NavLink>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Seção 2: Governança & Gestão */}
-          <div className="mt-6">
-            <p className="px-2 text-caption-1-semibold uppercase tracking-wider text-text-secondary">
-              Governança & Gestão
-            </p>
-            <nav className="mt-2 space-y-1" aria-label="Governança & Gestão">
-              {visibleManagement.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => onClose?.()}
-                    className={({ isActive }) =>
-                      cn(
-                        "focus-ring flex items-center gap-3 rounded-md px-3 py-2.5 text-body-regular text-text-secondary transition hover:bg-background-secondary-default hover:text-text-primary",
-                        isActive && "bg-background-secondary-default text-text-primary text-body-medium",
-                      )
-                    }
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-text-secondary" />
-                    <span>{item.label}</span>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          </div>
+          <NavSection label="Atendimento clínico" items={visibleClinical} pendingReviews={pendingReviews} onNavigate={onClose} />
+          <NavSection className="mt-6" label="Governança e gestão" items={visibleManagement} pendingReviews={0} onNavigate={onClose} />
 
           {/* Widget Zeigarnik: Consciência de Pendências Clínicas */}
           {pendingReviews > 0 ? (
             <div className="mt-auto pt-6">
-              <div className="rounded-lg border border-status-yellow-text bg-status-yellow-background p-3 text-caption-1-regular">
-                <div className="flex items-center justify-between text-body-semibold text-status-yellow-text">
-                  <span className="flex items-center gap-1.5">
-                    <ClockAlert className="h-3.5 w-3.5" />
-                    Pendências de Evolução
+              <div className="rounded-lg border border-border-button-default bg-background-primary-default p-3">
+                <div className="flex items-center justify-between gap-2 text-body-medium text-text-primary">
+                  <span className="flex items-center gap-2">
+                    <ClockAlert className="h-4 w-4 shrink-0 text-status-yellow-text" aria-hidden />
+                    Pendências de evolução
                   </span>
-                  <Badge variant="warning" className="px-1.5 py-0 text-caption-2-bold">
+                  <Badge variant="warning" showIcon={false} className="px-1.5 py-0 text-caption-2-bold">
                     {pendingReviews}
                   </Badge>
                 </div>
-                <p className="mt-1.5 leading-relaxed text-text-secondary">
+                <p className="mt-1.5 text-caption-1-regular text-text-secondary">
                   {pendingReviews === 1
                     ? "1 prontuário aguarda evolução para fechamento ético do dia."
                     : `${pendingReviews} prontuários aguardam evolução para fechamento ético do dia.`}

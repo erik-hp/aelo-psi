@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, FileText, Gauge } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,25 +37,22 @@ export function AIAnalysisCard({ analysis }: { analysis: AIAnalysis }) {
             <CardTitle>Análise assistiva</CardTitle>
             <CardDescription>Sugestão gerada por IA. Necessita validação humana.</CardDescription>
           </div>
-          <Badge variant={analysis.status === "validated" ? "success" : "warning"}>{analysis.status}</Badge>
+          <Badge variant={analysis.status === "validated" ? "success" : analysis.status === "rejected" ? "muted" : "warning"}>{analysis.status === "validated" ? "Validada" : analysis.status === "rejected" ? "Rejeitada" : "Pendente de revisão"}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
-            <Gauge className="h-4 w-4 text-status-blue-text" />
-            <p className="mt-2 text-caption-1-regular text-text-secondary">Score de relevância</p>
-            <p className="text-title-3-semibold">{analysis.relevanceScore === null ? "—" : `${analysis.relevanceScore}%`}</p>
+          <div>
+            <p className="text-caption-1-regular text-text-secondary">Score de relevância</p>
+            <p className="text-headline-semibold tabular-nums">{analysis.relevanceScore === null ? "—" : `${analysis.relevanceScore}%`}</p>
           </div>
-          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
-            <CheckCircle2 className="h-4 w-4 text-status-lime-text" />
-            <p className="mt-2 text-caption-1-regular text-text-secondary">Coerência narrativa</p>
-            <p className="text-title-3-semibold">{analysis.narrativeCoherence === null ? "—" : `${analysis.narrativeCoherence}%`}</p>
+          <div>
+            <p className="text-caption-1-regular text-text-secondary">Coerência narrativa</p>
+            <p className="text-headline-semibold tabular-nums">{analysis.narrativeCoherence === null ? "—" : `${analysis.narrativeCoherence}%`}</p>
           </div>
-          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3">
-            <FileText className="h-4 w-4 text-status-blue-text" />
-            <p className="mt-2 text-caption-1-regular text-text-secondary">Fontes utilizadas</p>
-            <p className="text-title-3-semibold">{analysis.sources.length}</p>
+          <div>
+            <p className="text-caption-1-regular text-text-secondary">Fontes utilizadas</p>
+            <p className="text-headline-semibold tabular-nums">{analysis.sources.length}</p>
           </div>
         </div>
         <section>
@@ -66,14 +63,14 @@ export function AIAnalysisCard({ analysis }: { analysis: AIAnalysis }) {
         </section>
         <section>
           <h4 className="text-body-medium">Evolução longitudinal</h4>
-          <p className="mt-2 text-body-regular text-text-secondary">{analysis.longitudinalEvolution}</p>
+          <p className="aelo-record mt-2 text-text-secondary">{analysis.longitudinalEvolution}</p>
         </section>
         <section>
           <h4 className="flex items-center gap-2 text-body-medium">
             <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
             Pontos de atenção
           </h4>
-          <ul className="mt-2 space-y-2 text-body-regular text-text-secondary">
+          <ul className="aelo-record mt-2 space-y-2 text-text-secondary">
             {analysis.attentionPoints.map((point) => <li key={point}>{point}</li>)}
           </ul>
         </section>

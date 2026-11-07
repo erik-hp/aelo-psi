@@ -45,7 +45,7 @@ export function PatientsPage() {
         <div className="relative flex-1">
           <Input leadingIcon={RiSearchLine} aria-label="Buscar por nome" autoComplete="off" placeholder="Buscar por nome" value={search} onChange={(event) => setSearchParams(event.target.value ? { search: event.target.value } : {}, { replace: true })} />
         </div>
-        <Select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filtrar status">
+        <Select className="md:w-56 md:flex-none" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filtrar status">
           <option value="all">Todos os status</option>
           <option value="active">Ativos</option>
           <option value="watch">Em atenção</option>
@@ -53,21 +53,22 @@ export function PatientsPage() {
         </Select>
       </div>
       {isLoading ? <PageLoading label="Carregando pacientes…" /> : isError ? <PageError description="Não foi possível consultar os pacientes. Tente novamente." /> : filtered.length ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="clinical-panel divide-y divide-separator-border overflow-hidden">
           {filtered.map((patient) => (
+            <li key={patient.id}>
             <PatientCard
-              key={patient.id}
               patient={patient}
               completedSessions={(dashboard?.sessions ?? []).filter((session) => session.patientId === patient.id && session.status === "completed").length}
               scheduledSessions={agenda.filter((item) => item.patientId === patient.id && item.status === "draft").length}
               analysis={(dashboard?.analyses ?? []).find((analysis) => analysis.patientId === patient.id)}
             />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
         <EmptyState title="Nenhum paciente encontrado" description="Ajuste os filtros ou cadastre um novo paciente quando permitido pelo seu perfil." />
       )}
-      <div className="mt-6 flex justify-end gap-2 text-body-regular text-text-secondary">
+      <div className="mt-4 flex justify-end gap-2 text-body-regular tabular-nums text-text-secondary">
         {filtered.length} registros encontrados
       </div>
       {creating && <CreatePatientDialog onClose={() => setCreating(false)} />}

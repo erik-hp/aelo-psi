@@ -42,13 +42,13 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
   const kindInfo = KIND_LABELS[selected.kind] ?? { label: selected.kind, variant: "default" };
 
   return (
-    <div className="space-y-4 rounded-lg border border-border-button-default bg-background-primary-default p-4 text-body-regular shadow-sm">
+    <div className="space-y-4 rounded-lg border border-border-button-default bg-background-primary-default p-4 text-body-regular">
       {/* Cabeçalho do Nó Selecionado */}
       <div className="border-b border-border-button-default pb-3">
         <div className="flex items-center justify-between gap-2">
           <Badge variant={kindInfo.variant}>{kindInfo.label}</Badge>
           <span className="text-caption-1-regular text-text-secondary">
-            {selected.mention_count} {selected.mention_count === 1 ? "menção" : "menções"} · peso {selected.weight}
+            {selected.mention_count} {selected.mention_count === 1 ? "menção" : "menções"}, peso {selected.weight}
           </span>
         </div>
         <h3 className="mt-2 text-headline-semibold text-text-primary">{selected.label}</h3>
@@ -57,7 +57,7 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
             <Calendar className="h-3.5 w-3.5" />
             Primeira menção em {new Date(selected.first_seen_at).toLocaleDateString("pt-BR")}
             {selected.last_seen_at && selected.last_seen_at !== selected.first_seen_at
-              ? ` · mais recente em ${new Date(selected.last_seen_at).toLocaleDateString("pt-BR")}`
+              ? `, mais recente em ${new Date(selected.last_seen_at).toLocaleDateString("pt-BR")}`
               : ""}
           </p>
         )}
@@ -65,9 +65,9 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
 
       {/* Lista de Relações e Evidências Literais (Lei da Proximidade da Gestalt) */}
       <div className="space-y-3">
-        <h4 className="flex items-center gap-1.5 text-caption-1-semibold uppercase tracking-wider text-text-secondary">
+        <h4 className="flex items-center gap-1.5 text-caption-1-semibold text-text-secondary">
           <Quote className="h-3.5 w-3.5 text-status-blue-text" />
-          Evidências Literais no Prontuário ({edges.length})
+          Evidências literais no prontuário ({edges.length})
         </h4>
 
         {edges.length === 0 ? (
@@ -94,7 +94,7 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
                   </div>
 
                   {/* Citação literal destacada com proximidade visual imediata */}
-                  <blockquote className="my-2 rounded-r border-l-2 border-border-focus-ring bg-background-full py-2 pl-3 pr-2 text-caption-1-regular italic text-text-primary font-serif">
+                  <blockquote className="aelo-record my-2 max-w-none border-s-2 border-border-focus-ring ps-3 text-text-primary">
                     “{edge.evidence}”
                   </blockquote>
 

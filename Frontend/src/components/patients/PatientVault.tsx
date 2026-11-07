@@ -58,13 +58,13 @@ export function PatientVault({
   const pendingCheckpoint = graph?.checkpoints.find((c) => c.analysis_id === approvalId);
 
   return (
-    <Card className="mt-6 border-border-button-default shadow-sm">
+    <Card className="mt-6">
       <CardHeader className="pb-3">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="flex items-center gap-2 text-title-3-regular">
               <Network className="h-5 w-5 text-status-blue-text" />
-              Cofre Cognitivo (Vault)
+              Cofre cognitivo (Vault)
             </CardTitle>
             <p className="mt-1 text-caption-1-regular text-text-secondary">
               Estruturação longitudinal em grafo de conhecimento (GraphRAG) a partir de trechos literais do prontuário.
@@ -75,7 +75,7 @@ export function PatientVault({
               type="button"
               disabled={create.isPending}
               onClick={() => create.mutate(latest.id)}
-              className="gap-2 shadow-sm shrink-0"
+              className="gap-2 shrink-0"
             >
               <Sparkles className="h-4 w-4" />
               Gerar checkpoint da análise recente
@@ -93,12 +93,12 @@ export function PatientVault({
         >
           <Tab id="graph" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
             <GitBranch className="h-3.5 w-3.5" />
-            Topologia do Grafo Cognitivo
+            Topologia do grafo cognitivo
           </Tab>
 
           <Tab id="timeline" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
             <History className="h-3.5 w-3.5" />
-            Histórico de Checkpoints Clínicos
+            Histórico de checkpoints clínicos
           </Tab>
         </TabList>
 

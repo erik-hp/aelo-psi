@@ -7,7 +7,7 @@ import { RiArrowDownSLine } from "@remixicon/react";
 /** Standard option picker for application forms. Keep native keyboard/form behavior. */
 export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className, ...props }, ref) => (
-    <Group className={(state) => cn(inputFieldClassName(state), "min-w-0 border border-border-button-default focus-within:ring-border-focus-ring", className)}>
+    <Group className={(state) => cn(inputFieldClassName(state), "min-w-0", className)}>
     <select
       ref={ref}
       className={cn(

@@ -1,6 +1,5 @@
-import { ShieldCheck, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -34,10 +33,10 @@ export function UsersPage() {
       <PageHeader title="Usuários" description="Gestão de perfis, permissões e acesso à plataforma clínica." />
       {isApiMode ? <StaffDirectory /> : <>
       <div className="mb-4"><Badge variant="muted">Demonstração com dados sintéticos</Badge></div>
-      <div className="mb-6 grid gap-4 md:grid-cols-2">
-        <MetricCard label="Usuários ativos" value="3" icon={UserCog} />
-        <MetricCard label="Perfis com auditoria" value="100%" icon={ShieldCheck} tone="cyan" />
-      </div>
+      <MetricStrip className="mb-6">
+        <MetricCard label="Usuários ativos" value="3" />
+        <MetricCard label="Perfis com auditoria" value="100%" />
+      </MetricStrip>
       <DataTable
         data={users}
         getRowKey={(user) => user.id}

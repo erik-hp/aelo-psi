@@ -277,7 +277,7 @@ export function NarrativeEditor({
         </label>
         <Textarea
           id="content"
-          className="min-h-[380px] font-sans text-headline-regular placeholder:text-text-secondary resize-y"
+          record className="min-h-[380px] resize-y placeholder:text-text-secondary"
           placeholder="Descreva a evolução da sessão, falas do paciente, intervenções aplicadas e desfechos…"
           onKeyDown={handleKeyDown}
           {...form.register("content")}
@@ -293,7 +293,7 @@ export function NarrativeEditor({
         <div className="flex items-center gap-4 text-caption-1-regular text-text-secondary">
           <span className="flex items-center gap-1">
             <FileText className="h-3.5 w-3.5" />
-            {charCount.toLocaleString("pt-BR")} caracteres · {wordCount} palavras
+            {charCount.toLocaleString("pt-BR")} caracteres, {wordCount} palavras
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
@@ -308,7 +308,7 @@ export function NarrativeEditor({
         <Button
           type="submit"
           disabled={isSubmitting || (isApiMode && !!patientId && !draftReady) || !formState.isValid}
-          className="gap-2 px-6 text-body-semibold shadow-md"
+          className="gap-2 px-6 text-body-semibold"
         >
           <Sparkles className="h-4 w-4" />
           {isSubmitting ? "Enviando análise…" : "Solicitar análise assistiva"}

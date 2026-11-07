@@ -355,6 +355,23 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - **`security-smoke`:** a mesma falha aparece no PR #14 em 03/11, antes deste trabalho. Causa segue desconhecida.
 - **Branches:** as 10 antigas têm conteúdo idêntico aos merges, mas a exclusão foi bloqueada pelo controle de permissões. Permanecem no remoto, com `feat/aelo-brand-identity-v1` e `feat/tcc2-alinhamento-evidencias-sinteticas-20261103`. **G0 continua BLOQUEADO**.
 
+## Design system "Continuidade" — 07/11/2026 — EM REVISÃO
+
+- Pedido do autor: pesquisar um design system, modelar o próprio e atualizar todos os componentes, com a skill `frontend-design`. Referências: NHS Design System e OpenMRS 3 com Carbon. Guia em [AELO_DESIGN_SYSTEM.md](design/AELO_DESIGN_SYSTEM.md). Trabalho dividido em três agentes, com arquivos exclusivos: fundação, estrutura e telas clínicas.
+- Implementado em camada sobre o BoardUI (`Frontend/src/styles/aelo-tokens.css`): neutras frias, ação verde-azulada, Atkinson Hyperlegible Next na interface, Source Serif 4 no registro clínico e títulos, formas por hierarquia, borda de campo com 3:1 e fio de continuidade no item ativo e na linha do tempo. Tema claro funcional pela primeira vez, com alternância salva e preferência do sistema.
+- Telas revistas: resumos em faixa única, listas densas, rótulos sem caixa alta, status com ícone e texto, rótulos crus traduzidos. Removidas as alegações "ambiente seguro" e "carregado com segurança".
+- **Primeira inspeção em navegador real do projeto:** Playwright com Chromium, em modo demonstração, 11 telas em 2 temas e 2 larguras, somando 44 capturas, com axe-core nas regras WCAG 2.0, 2.1 e 2.2 A/AA. Resultado final: 0 violações, sem transbordo horizontal e sem erro de console. Editor e linha do tempo também vistos com conta de psicólogo. Erros encontrados e corrigidos: contraste de rosa no escuro; variáveis de `:root` vazando sobre `.dark`, que elevou de 12 para 82 elementos antes de corrigido; campos e botões ghost com aparência incorreta; colunas desalinhadas.
+- **Executados:** frontend 211/211 em UTC e em São Paulo, lint 0 erros/9 avisos, build aprovado, `npm audit` 0 vulnerabilidades. Testes novos: contraste por tokens, paridade entre temas, tema e alternância.
+- **Limites:** axe cobre parte da WCAG: leitor de tela e teclado completo não foram testados, nem houve teste com usuários. Telas em modo API não foram inspecionadas. Não declarar conformidade.
+- **Achado fora do escopo:** o modo demonstração exibe "Alertas clínicos severos", "Ideação / Risco imediato", índices de atenção e "Cenários de risco", contrários à regra de não classificar risco. Só existem nos dados demonstrativos. Texto mantido, aguardando decisão. **G0 continua BLOQUEADO**.
+
+## Fluxo de notas com Claude como motor de teste — 07/11/2026 — EM REVISÃO
+
+- Pedido do autor: testar o serviço de notas completo com o Claude. `AI_ENGINE=claude-cli` em `ai_service/claude_cli.py` roda `claude -p` sem ferramentas, fora do projeto. Autorizado apenas com `AELO_SYNTHETIC_DATA_ONLY=True`; o serviço recusa iniciar sem isso. O padrão segue `ollama`, e a ADR-004 não muda. Sem embeddings nesse motor: a parte próxima do contexto usa recência, e a busca em camadas segue ativa.
+- Prompt de análise agora descreve o formato e exige citação literal, o que antes faltava para qualquer modelo. Iniciador local em `Backend/scripts/run_ai_claude.py`, pois o CLI só existe no computador do autor, não nos containers.
+- **Ensaio real com dados sintéticos:** 13 notas, 18 conceitos e 29 relações gerados pela leitura automática, sem falhas; prévia mascarou nome e telefone; análise em 12 s, em revisão humana; a sessão 1, fora da janela de 10, foi citada como fonte. Em navegador, salvar, revisar e confirmar concluiu em 14 s. Com o serviço parado, 13 leituras e a análise falharam de forma explícita.
+- **Limites:** sem assinatura da revisão em navegador. Conjunto pequeno, não mede qualidade clínica. Não vale para modelo local. `Backend/.env` local aponta para o serviço no computador; para Ollama, reverter `AI_SERVICE_URL`. **G0 continua BLOQUEADO**.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.

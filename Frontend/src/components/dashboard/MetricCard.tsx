@@ -1,35 +1,23 @@
-import type { LucideIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
   label: string;
-  value: string;
+  value: ReactNode;
   delta?: string;
-  icon: LucideIcon;
-  tone?: "blue" | "cyan" | "amber";
 }
 
-export function MetricCard({ label, value, delta, icon: Icon, tone = "blue" }: MetricCardProps) {
+/** A single panel of facts: related figures read better together than in identical cards. */
+export function MetricStrip({ className, children }: { className?: string; children: ReactNode }) {
+  return <dl className={cn("clinical-panel flex flex-wrap gap-x-8 gap-y-4 p-4 md:p-5", className)}>{children}</dl>;
+}
+
+export function MetricCard({ label, value, delta }: MetricCardProps) {
   return (
-    <Card>
-      <CardContent className="flex items-start justify-between gap-3 p-5">
-        <div className="min-w-0 break-words">
-          <p className="text-body-regular text-text-secondary">{label}</p>
-          <p className="mt-2 text-title-2-semibold">{value}</p>
-          {delta ? <p className="mt-2 text-caption-1-regular text-text-secondary">{delta}</p> : null}
-        </div>
-        <div
-          className={cn(
-            "grid size-10 shrink-0 place-items-center rounded-xl",
-            tone === "blue" && "bg-status-blue-background text-status-blue-text",
-            tone === "cyan" && "bg-status-lime-background text-status-lime-text",
-            tone === "amber" && "bg-status-yellow-background text-status-yellow-text",
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="min-w-40 flex-1 break-words">
+      <dt className="text-body-regular text-text-secondary">{label}</dt>
+      <dd className="mt-1 text-headline-semibold tabular-nums">{value}</dd>
+      {delta ? <dd className="mt-0.5 text-caption-1-regular text-text-secondary">{delta}</dd> : null}
+    </div>
   );
 }

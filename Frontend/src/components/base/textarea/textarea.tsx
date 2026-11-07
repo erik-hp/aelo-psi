@@ -74,8 +74,8 @@ const textareaStyles = sortCx({
   field: [
     "relative flex w-full flex-col",
     "rounded-2lg",
-    "bg-background-tertiary-default text-foreground-icon-tertiary",
-    "ring-2 ring-inset ring-transparent",
+    "bg-background-primary-default text-foreground-icon-tertiary",
+    "ring-1 ring-inset ring-border-field",
     "transition-[background-color,box-shadow,color] duration-[var(--input-transition-ms)] ease",
   ].join(" "),
 
@@ -170,12 +170,12 @@ export function TextareaBase({
             !isFocusWithin &&
             !isDisabled &&
             !isInvalid &&
-            "ring-border-button-hover",
+            "ring-2",
           // Focus wins over hover
           isFocusWithin &&
             !isDisabled &&
             !isInvalid &&
-            "ring-border-button-active",
+            "ring-2 ring-border-focus-ring",
           // Disabled
           isDisabled &&
             "bg-input-disabled-background text-input-disabled-foreground",

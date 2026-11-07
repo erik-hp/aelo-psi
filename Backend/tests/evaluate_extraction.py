@@ -2,7 +2,7 @@
 
 Run explicitly from Backend, with one of the engines:
     OLLAMA_BASE_URL=http://127.0.0.1:11499 OLLAMA_MODEL=llama3.1 python tests/evaluate_extraction.py
-    AELO_EVAL_ENGINE=claude AELO_EVAL_CLAUDE_MODEL=sonnet python tests/evaluate_extraction.py
+    AELO_EVAL_ENGINE=claude AI_CLAUDE_MODEL=sonnet python tests/evaluate_extraction.py
 
 The Claude engine sends these fixed synthetic notes to an external provider. It
 exists only for this evaluation (ADR-004): never point it at real clinical text.
@@ -12,9 +12,7 @@ this small set, not real clinical text.
 import asyncio
 import json
 import os
-import shutil
 import sys
-import tempfile
 import time
 import unicodedata
 from pathlib import Path
@@ -52,32 +50,6 @@ NOTES = [
     ("Fala da solidão desde que os filhos saíram de casa e da falta que sente da rotina antiga.", ["solidão", "filhos"]),
     ("Lembra da morte do irmão no mês do aniversário dele e fica irritado com todos em casa.", ["morte do irmão", "irritado"]),
 ]
-
-
-CLAUDE_MODEL = os.environ.get("AELO_EVAL_CLAUDE_MODEL", "sonnet")
-CLAUDE_INSTRUCTION = "Follow the task in the JSON below. Reply with one JSON object only, without commentary or code fences."
-
-
-async def generate_with_claude(prompt):
-    """Same prompt as Ollama, in a fresh Claude without tools, project or gold answers."""
-    command = [
-        shutil.which("claude"), "-p", "--model", CLAUDE_MODEL, "--tools", "", "--setting-sources", "",
-        "--strict-mcp-config", "--no-session-persistence",
-    ]
-    with tempfile.TemporaryDirectory() as empty_directory:
-        process = await asyncio.create_subprocess_exec(
-            *command, cwd=empty_directory, stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-        )
-        body = f"{CLAUDE_INSTRUCTION}\n\n{json.dumps(prompt, ensure_ascii=False)}".encode("utf-8")
-        output, _errors = await asyncio.wait_for(process.communicate(body), timeout=180)
-    if process.returncode != 0:
-        raise RuntimeError("Claude CLI failed.")
-    text = output.decode("utf-8")
-    start, end = text.find("{"), text.rfind("}")
-    if start < 0 or end < start:
-        raise ValueError("Claude returned no JSON object.")
-    return text[start:end + 1]
 
 
 def plain(text):
@@ -134,8 +106,8 @@ async def main():
     async with httpx.AsyncClient(timeout=httpx.Timeout(600.0, connect=5.0)) as client:
         ai.app.state.http_client = client
         if use_claude:
-            ai.generate_json = generate_with_claude
-            version, engine = "claude-cli", CLAUDE_MODEL
+            ai.AI_ENGINE = "claude-cli"
+            version, engine = "claude-cli", ai.claude_cli.model()
         else:
             version = (await client.get(f"{ai.OLLAMA_BASE_URL}/api/version")).json()["version"]
             engine = ai.OLLAMA_MODEL

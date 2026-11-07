@@ -135,8 +135,8 @@ const inputStyles = sortCx({
   field: [
     "relative flex w-full items-center",
     "rounded-2lg",
-    "bg-background-tertiary-default text-foreground-icon-tertiary",
-    "ring-2 ring-inset ring-transparent",
+    "bg-background-primary-default text-foreground-icon-tertiary",
+    "ring-1 ring-inset ring-border-field",
     "transition-[background-color,box-shadow,color] duration-[var(--input-transition-ms)] ease",
   ].join(" "),
 
@@ -188,9 +188,9 @@ export function inputFieldClassName(
     inputStyles.field,
     hasAddon ? inputStyles.fieldWithAddonSize[size] : inputStyles.fieldSize[size],
     // Hover: idle, no focus, no disabled, no invalid
-    isHovered && !isFocusWithin && !isDisabled && !isInvalid && "ring-border-button-hover",
+    isHovered && !isFocusWithin && !isDisabled && !isInvalid && "ring-2",
     // Focus wins over hover
-    isFocusWithin && !isDisabled && !isInvalid && "ring-border-button-active",
+    isFocusWithin && !isDisabled && !isInvalid && "ring-2 ring-border-focus-ring",
     // Disabled
     isDisabled && "bg-input-disabled-background text-input-disabled-foreground",
     // Invalid

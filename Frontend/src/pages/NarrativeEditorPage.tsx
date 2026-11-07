@@ -38,11 +38,11 @@ export function NarrativeEditorPage() {
   return (
     <>
       <PageHeader
-        title="Editor Narrativo de Prontuário"
+        title="Editor narrativo de prontuário"
         description="Ambiente de redação clínica longa com foco em legibilidade, preservação contínua de rascunhos (autosave) e scaffolds estruturados (SOAP/DAP)."
       />
 
-      <Card className="border-border-button-default shadow-sm">
+      <Card>
         <CardContent className="p-5 md:p-7">
           <NarrativeEditor
             isSubmitting={mutation.isPending}
@@ -51,10 +51,10 @@ export function NarrativeEditorPage() {
 
           {/* Feedback cognitivo imediato em estágios (<400ms - Limite de Doherty) */}
           {mutation.isPending ? (
-            <div className="mt-6 space-y-4 rounded-lg border border-border-focus-ring bg-status-blue-background p-5 animate-pulse">
+            <div className="mt-6 space-y-4 rounded-lg border border-border-focus-ring bg-status-blue-background p-5">
               <div className="flex items-center gap-2 text-body-semibold text-status-blue-text">
-                <Sparkles className="h-4 w-4 animate-spin text-status-blue-text" />
-                Processamento Cognitivo em Execução pela IA Consultiva
+                <Sparkles className="h-4 w-4 text-status-blue-text" aria-hidden="true" />
+                Processamento em execução pela IA consultiva
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 text-caption-1-regular">

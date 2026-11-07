@@ -1,13 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  FileText,
-  KeyRound,
-  ShieldAlert,
-} from "lucide-react";
 import { AuditTable, getEventCategory } from "@/components/audit/AuditTable";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -54,28 +49,23 @@ export function AuditPage() {
       />
 
       {/* Indicadores de Segurança e Conformidade */}
-      <section className="mb-6 grid gap-4 md:grid-cols-3">
+      <MetricStrip className="mb-6">
         <MetricCard
           label="Total de eventos auditados"
           value={String(auditEvents.length)}
           delta="Registros com hash SHA-256"
-          icon={FileText}
         />
         <MetricCard
           label="Assinaturas criptográficas"
           value={String(signatureCount)}
           delta="Chave P-256 / Validação ética"
-          icon={KeyRound}
-          tone="cyan"
         />
         <MetricCard
           label="Alertas de segurança LGPD"
           value={String(securityAlertCount)}
           delta={securityAlertCount > 0 ? "Acessos sensíveis monitorados" : "Nenhum incidente detectado"}
-          icon={ShieldAlert}
-          tone={securityAlertCount > 0 ? "amber" : undefined}
         />
-      </section>
+      </MetricStrip>
 
       {/* Barra de Filtros */}
       <div className="mb-5 flex flex-col gap-3 md:flex-row">
@@ -110,9 +100,9 @@ export function AuditPage() {
             className="w-full sm:w-48"
           >
             <option value="all">Todas as categorias</option>
-            <option value="security">Alertas de Segurança (LGPD)</option>
-            <option value="signature">Assinaturas Criptográficas</option>
-            <option value="clinical">Consultas e Aditamentos</option>
+            <option value="security">Alertas de segurança (LGPD)</option>
+            <option value="signature">Assinaturas criptográficas</option>
+            <option value="clinical">Consultas e aditamentos</option>
           </Select>
         </div>
       </div>

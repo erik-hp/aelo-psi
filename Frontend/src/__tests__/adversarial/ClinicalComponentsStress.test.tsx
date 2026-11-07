@@ -194,7 +194,7 @@ describe("Adversarial Stress Test: NarrativeEditor", () => {
       target: { value: "Uma duas três quatro cinco seis sete oito nove dez." },
     });
 
-    expect(screen.getByText(/51 caracteres · 10 palavras/i)).toBeDefined();
+    expect(screen.getByText(/51 caracteres, 10 palavras/i)).toBeDefined();
     expect(screen.getByText(/~1 min de leitura/i)).toBeDefined();
   });
 });
@@ -396,8 +396,8 @@ describe("Adversarial Stress Test: PatientProfilePage & SessionAnalysisBlock", (
       expect(screen.getByText("Carlos Eduardo Silva")).toBeDefined();
     });
 
-    // Navega para aba Prontuários e Sessões
-    fireEvent.click(screen.getByRole("tab", { name: /Prontuários e Sessões/i }));
+    // Navega para aba Prontuários e sessões
+    fireEvent.click(screen.getByRole("tab", { name: /Prontuários e sessões/i }));
 
     // Inicialmente o textarea do bloco de análise NÃO deve estar no DOM
     expect(screen.queryByLabelText(/Texto do prontuário para extração/i)).toBeNull();

@@ -1,0 +1,182 @@
+/* ---------------------------------------------------------------------------
+ * AELO design system "Continuidade"
+ *
+ * Layer over BoardUI: components keep their semantic tokens, and this file
+ * decides what those tokens mean for the product. Guide and rationale live in
+ * docs/design/AELO_DESIGN_SYSTEM.md. Contrast pairs are checked by
+ * src/styles/aelo-tokens.test.ts.
+ * --------------------------------------------------------------------------- */
+
+@theme {
+  --font-serif: "Source Serif 4 Variable", Georgia, "Times New Roman", serif;
+
+  /* Cool neutrals: every surface and text role inherits this hue. */
+  --color-neutral-50: #f6f9f8;
+  --color-neutral-100: #edf2f1;
+  --color-neutral-200: #dce5e3;
+  --color-neutral-300: #c1cecc;
+  --color-neutral-400: #8fa3a2;
+  --color-neutral-500: #586c6d;
+  --color-neutral-600: #4a5e60;
+  --color-neutral-700: #33484d;
+  --color-neutral-800: #1c303b;
+  --color-neutral-900: #152733;
+  --color-neutral-925: #0f1d27;
+  --color-neutral-950: #0b1522;
+
+  /* Action hue, derived from the mark. */
+  --color-accent-50: #e6f7f4;
+  --color-accent-100: #c4ede6;
+  --color-accent-200: #97dfd3;
+  --color-accent-300: #65dcc7;
+  --color-accent-400: #38b5a3;
+  --color-accent-500: #148f82;
+  --color-accent-600: #0e7269;
+  --color-accent-700: #0b5c56;
+  --color-accent-800: #0a4a46;
+  --color-accent-900: #083b38;
+  --color-accent-950: #042524;
+
+  /* Hierarchy by shape: page regions are soft, controls are firm, status is round. */
+  --radius-3xl: 0.875rem;
+  --radius-2xl: 0.75rem;
+  --radius-xl: 0.625rem;
+  --radius-lg: 0.5rem;
+
+  --shadow-xs: 0 0 0 0 transparent;
+}
+
+@theme inline {
+  --color-border-field: var(--aelo-field-border);
+}
+
+:root {
+  color-scheme: light;
+  --color-background-full: var(--color-neutral-100);
+  --color-background-primary-default: var(--color-white);
+  --color-background-secondary-default: var(--color-neutral-100);
+  --color-text-primary: var(--color-neutral-950);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-placeholder: var(--color-neutral-500);
+  --color-text-error-primary: #b42318;
+  --color-border-button-default: var(--color-neutral-300);
+  --color-border-button-hover: var(--color-neutral-400);
+  --color-separator-border: var(--color-neutral-200);
+  --color-border-focus-ring: var(--color-accent-600);
+  --gradient-button-primary-default: linear-gradient(180deg, var(--color-accent-600) 0%, var(--color-accent-700) 100%);
+  --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-800) 100%);
+  --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-800) 0%, var(--color-accent-900) 100%);
+  --aelo-button-primary-surface: var(--color-accent-700);
+  /* Ghost means no fill until the pointer arrives. */
+  --color-button-ghost-background: transparent;
+  --color-button-ghost-hover: var(--color-accent-50);
+  --color-button-ghost-active: var(--color-accent-100);
+  --color-button-ghost-disabled: transparent;
+  /* Status tints stay quiet for long reading; the text carries the emphasis. */
+  --color-status-lime-background: var(--color-lime-100);
+  --color-status-yellow-background: var(--color-yellow-100);
+  --color-status-rose-background: var(--color-rose-100);
+  --color-status-blue-background: var(--color-blue-100);
+  --aelo-field-border: var(--color-neutral-500);
+  --aelo-thread: var(--color-accent-600);
+  --aelo-thread-end: #2f5fa8;
+}
+
+.dark {
+  color-scheme: dark;
+  --shadow-xs: 0 0 0 0 transparent;
+  --color-background-full: var(--color-neutral-925);
+  --color-background-primary-default: var(--color-neutral-900);
+  --color-background-secondary-default: var(--color-neutral-800);
+  --color-background-secondary-hover: var(--color-neutral-700);
+  --color-text-primary: var(--color-neutral-50);
+  --color-text-secondary: var(--color-neutral-300);
+  --color-text-tertiary: var(--color-neutral-400);
+  --color-text-placeholder: var(--color-neutral-400);
+  --color-text-error-primary: #fda29b;
+  --color-border-button-default: var(--color-neutral-700);
+  --color-border-button-hover: var(--color-neutral-500);
+  --color-separator-border: var(--color-neutral-800);
+  --color-border-focus-ring: var(--color-accent-300);
+  --gradient-button-primary-default: linear-gradient(180deg, var(--color-accent-600) 0%, var(--color-accent-700) 100%);
+  --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-800) 100%);
+  --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-800) 0%, var(--color-accent-900) 100%);
+  --aelo-button-primary-surface: var(--color-accent-700);
+  --color-button-ghost-background: transparent;
+  --color-button-ghost-hover: var(--color-neutral-800);
+  --color-button-ghost-active: var(--color-neutral-700);
+  --color-button-ghost-disabled: transparent;
+  --color-button-ghost-foreground: var(--color-accent-300);
+  /* Same selector weight as :root, so every light override needs its dark value here. */
+  --color-status-lime-background: color-mix(in srgb, var(--color-lime-950) 60%, transparent);
+  --color-status-yellow-background: color-mix(in srgb, var(--color-yellow-950) 60%, transparent);
+  --color-status-rose-background: color-mix(in srgb, var(--color-rose-950) 60%, transparent);
+  --color-status-blue-background: color-mix(in srgb, var(--color-blue-950) 60%, transparent);
+  --color-status-rose-text: var(--color-rose-400);
+  --aelo-field-border: var(--color-neutral-400);
+  --aelo-thread: var(--color-accent-300);
+  --aelo-thread-end: #87b9f9;
+}
+
+@layer components {
+  /* The system speaks in sans; the record speaks in serif. */
+  .aelo-record {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    max-width: 72ch;
+  }
+
+  .aelo-page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  /* Continuity thread: the line and dot of the mark, used only for "you are here"
+     and for the sequence of sessions. */
+  .aelo-nav-link,
+  .aelo-thread-item {
+    position: relative;
+  }
+
+  .aelo-nav-link[aria-current="page"]::before,
+  .aelo-thread-item::before {
+    content: "";
+    position: absolute;
+    inset-block: 0.25rem;
+    inset-inline-start: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: var(--aelo-thread);
+  }
+
+  .aelo-nav-link[aria-current="page"]::after,
+  .aelo-thread-item::after {
+    content: "";
+    position: absolute;
+    inset-block-end: 0.25rem;
+    inset-inline-start: -2.5px;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--aelo-thread-end);
+  }
+
+  .aelo-thread-list > .aelo-thread-item {
+    padding-inline-start: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

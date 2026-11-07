@@ -118,7 +118,7 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
     renderDashboardPage();
 
     // O dashboard NÃO deve quebrar nem exibir mensagem fatal
-    expect(await screen.findByText("Dashboard Clínico")).toBeDefined();
+    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
     expect(await screen.findByRole("heading", { name: "Ana Clara Silva", level: 2 })).toBeDefined();
 
     // Módulo financeiro exibe degradação graciosa em vez de quebrar a página
@@ -128,9 +128,9 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
   it("segregates high-risk clinical alerts from normal administrative reviews (Von Restorff)", async () => {
     renderDashboardPage();
 
-    expect(await screen.findByText(/Alertas Clínicos de Alto Risco/i)).toBeDefined();
+    expect(await screen.findByText(/Alertas clínicos de alto risco/i)).toBeDefined();
     expect(await screen.findByText(/Índice 85/i)).toBeDefined();
-    expect(screen.getByText(/Pendências de Evolução/i)).toBeDefined();
+    expect(screen.getByText(/Pendências de evolução/i)).toBeDefined();
   });
 
   it("renders Zeigarnik open records section with actionable 'Evoluir' button", async () => {

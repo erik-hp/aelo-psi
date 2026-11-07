@@ -48,6 +48,8 @@ export interface ApiAuditEvent {
   created_at: string;
 }
 
+const SESSION_STATUS_LABELS = { SCHEDULED: "agendada", COMPLETED: "concluída", CANCELLED: "cancelada", MISSED: "com falta" } as const;
+
 export function unwrap<T>(data: T[] | PaginatedResponse<T>): T[] {
   return Array.isArray(data) ? data : data.results;
 }
@@ -79,7 +81,7 @@ export function mapSession(session: ApiSession): TherapySession {
     date: new Date(session.scheduled_at).toLocaleDateString("pt-BR"),
     duration: startedAt && endedAt ? Math.max(0, Math.round((endedAt - startedAt) / 60000)) : null,
     status: session.status === "COMPLETED" ? "completed" : session.status === "SCHEDULED" ? "draft" : session.status === "CANCELLED" ? "cancelled" : "missed",
-    title: `Sessão ${session.status.toLowerCase()}`,
+    title: `Sessão ${SESSION_STATUS_LABELS[session.status]}`,
     summary: session.summary || "Sem resumo registrado.",
     narrative: session.summary || "",
     complement: session.summary || "",

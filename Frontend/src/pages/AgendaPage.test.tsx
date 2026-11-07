@@ -74,15 +74,15 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
   it("renders chronological daily timeline view as default and supports toggling to monthly matrix (Hick Law)", async () => {
     renderAgendaPage();
 
-    expect(await screen.findByRole("button", { name: /Linha do Tempo Diária/i })).toBeDefined();
-    expect(screen.getByRole("button", { name: /Matriz Mensal/i })).toBeDefined();
+    expect(await screen.findByRole("button", { name: /Linha do tempo diária/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Matriz mensal/i })).toBeDefined();
 
     // Visualização da linha do tempo diária presente por padrão
     expect(await screen.findByText("Ana Clara Silva")).toBeDefined();
     expect(screen.getByText("09:00")).toBeDefined();
 
     // Alternar para a matriz mensal completa de planejamento
-    const matrixBtn = screen.getByRole("button", { name: /Matriz Mensal/i });
+    const matrixBtn = screen.getByRole("button", { name: /Matriz mensal/i });
     fireEvent.click(matrixBtn);
 
     expect(await screen.findByText(/Clique em um dia para selecionar e inspecionar/i)).toBeDefined();
@@ -95,18 +95,18 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
 
     // Ana Clara Silva está com status 'draft' ("Aguardando")
     expect(await screen.findByText("Ana Clara Silva")).toBeDefined();
-    const startBtn = screen.getByRole("button", { name: /Iniciar Consulta/i });
+    const startBtn = screen.getByRole("button", { name: /Iniciar consulta/i });
     expect(startBtn).toBeDefined();
 
     // Terapeuta inicia a consulta
     fireEvent.click(startBtn);
 
     // Agora o botão de encerramento e evolução deve estar disponível
-    const evolveButtons = await screen.findAllByRole("button", { name: /Encerrar & Evoluir Nota/i });
+    const evolveButtons = await screen.findAllByRole("button", { name: /Encerrar e evoluir nota/i });
     expect(evolveButtons.length).toBeGreaterThan(0);
 
     // Sessão de Beatriz Fernandes tem status 'needs_review' ("Evolução pendente")
-    const signBtn = screen.getByRole("button", { name: /Assinar & Finalizar/i });
+    const signBtn = screen.getByRole("button", { name: /Assinar e finalizar/i });
     expect(signBtn).toBeDefined();
 
     fireEvent.click(signBtn);
@@ -121,7 +121,7 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
     const newSessionBtn = await screen.findByRole("button", { name: /Nova sessão/i });
     await user.click(newSessionBtn);
 
-    expect(screen.getByRole("heading", { name: /Agendar Nova Sessão Clínica/i })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Agendar nova sessão clínica/i })).toBeDefined();
 
     const nameInput = screen.getByLabelText(/Nome do Paciente/i);
     await user.type(nameInput, "Mariana Vasconcelos");

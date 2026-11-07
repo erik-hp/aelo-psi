@@ -2,9 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
-  AlertTriangle,
   ArrowRight,
-  Banknote,
   CalendarCheck,
   CheckCircle2,
   Clock,
@@ -14,7 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +24,8 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { localDateKey } from "@/lib/dates";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+const shortDate = (dateKey: string) => new Date(`${dateKey}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
 const statusLabel: Record<string, string> = {
   completed: "Concluída",
@@ -94,20 +94,20 @@ export function DashboardPage() {
 
   const recentActivities = dashboard?.auditEvents.slice(0, 4).map((event) => ({
     title: event.action,
-    description: `${event.actor} • ${event.entity}`,
+    description: `${event.actor}, ${event.entity}`,
     time: event.date,
   })) ?? [];
 
   return (
     <>
       <PageHeader
-        title="Dashboard Clínico"
+        title="Dashboard clínico"
         description="Acompanhe pacientes autorizados, agendamentos e registros do consultório."
         action={
           <div className="flex flex-col gap-2 sm:flex-row">
             <ButtonLink to="/editor">
               <FileEdit className="h-4 w-4" />
-              Editor de Prontuário
+              Editor de prontuário
             </ButtonLink>
             <ButtonLink to="/patients">
               <Users className="h-4 w-4" />
@@ -115,7 +115,7 @@ export function DashboardPage() {
             </ButtonLink>
             <ButtonLink variant="primary" to="/agenda">
               <CalendarCheck className="h-4 w-4" />
-              Agenda do Dia
+              Agenda do dia
             </ButtonLink>
           </div>
         }
@@ -131,28 +131,24 @@ export function DashboardPage() {
             <span>Não foi possível sincronizar a agenda imediata. Tente recarregar.</span>
           </div>
         ) : nextSession ? (
-          <div className="relative overflow-hidden rounded-xl border-2 border-border-focus-ring bg-gradient-to-r from-background-primary-default via-background-primary-default to-background-secondary-default p-5 md:p-6 shadow-md">
+          <div className="clinical-panel p-5 md:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="default" className="gap-1.5 px-2 py-0.5 text-caption-1-semibold uppercase tracking-wider">
-                    <Clock className="h-3.5 w-3.5 text-status-blue-text" />
-                    {isUsingUpcomingFallback ? "Próxima Sessão em Destaque" : "Próxima Sessão do Dia"}
-                  </Badge>
-                  <span className="text-body-semibold text-status-blue-text">
-                    {nextSession.time} • {nextSession.date}
-                  </span>
+                  <p className="text-body-medium text-text-secondary">
+                    {isUsingUpcomingFallback ? "Próxima sessão" : "Próxima sessão do dia"}: {nextSession.time}, {shortDate(nextSession.date)}
+                  </p>
                   {nextSession.attentionIndex !== null && nextSession.attentionIndex >= 80 ? (
-                    <Badge variant="critical">Atenção Prioritária: {nextSession.attentionIndex}</Badge>
+                    <Badge variant="critical">Atenção prioritária: {nextSession.attentionIndex}</Badge>
                   ) : null}
                 </div>
 
                 <div>
-                  <h2 className="text-title-3-bold md:text-title-2-bold text-text-primary">
+                  <h2 className="font-serif text-title-2-semibold text-text-primary">
                     {nextSession.patientName}
                   </h2>
                   <p className="text-body-regular text-text-secondary mt-0.5">
-                    {nextSession.complement || "Sessão de Psicoterapia Individual • Acolhimento e intervenção clínica"}
+                    {nextSession.complement || "Sessão de psicoterapia individual"}
                   </p>
                 </div>
               </div>
@@ -164,7 +160,7 @@ export function DashboardPage() {
                   variant="primary" className="min-h-12 px-6"
                   aria-label={`Acessar prontuário de ${nextSession.patientName}`}
                 >
-                  <span>Acessar Prontuário</span>
+                  <span>Acessar prontuário</span>
                   <ArrowRight className="h-4 w-4" />
                 </ButtonLink>
               </div>
@@ -179,48 +175,36 @@ export function DashboardPage() {
       </section>
 
       {/* Métricas Principais (com resiliência e degradação graciosa) */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Indicadores do consultório">
         {dashboardQuery.isLoading ? (
-          <>
-            <LoadingSkeleton className="h-28" />
-            <LoadingSkeleton className="h-28" />
-            <LoadingSkeleton className="h-28" />
-            <LoadingSkeleton className="h-28" />
-          </>
+          <LoadingSkeleton className="h-24 w-full" />
         ) : dashboardQuery.isError ? (
-          <div className="col-span-full rounded-md border border-border-error-default bg-status-rose-background p-3 text-caption-1-regular text-text-error-primary">
+          <div className="rounded-md border border-border-error-default bg-status-rose-background p-3 text-caption-1-regular text-text-error-primary">
             Indicadores de pacientes temporariamente indisponíveis.
           </div>
         ) : (
-          <>
+          <MetricStrip>
             <MetricCard
               label="Pacientes ativos"
               value={String(activePatients)}
               delta={`${dashboard?.patients.length ?? 0} cadastrados no cofre`}
-              icon={Users}
             />
             <MetricCard
               label="Sessões do dia"
               value={String(displayedSessions.length)}
               delta={isUsingUpcomingFallback ? "Próximas na agenda" : `${actualTodaySessions.length} programadas hoje`}
-              icon={CalendarCheck}
-              tone="cyan"
             />
             <MetricCard
               label={isApiMode ? "Análises registradas" : "Alertas clínicos severos"}
               value={String(isApiMode ? dashboard?.analyses.length ?? 0 : criticalRiskAlerts.length)}
               delta={isApiMode ? "Sugestões assistivas para revisão" : criticalRiskAlerts.length > 0 ? "Ideação / Risco imediato" : "Sem alertas críticos ativos"}
-              icon={AlertTriangle}
-              tone={criticalRiskAlerts.length > 0 ? "amber" : undefined}
             />
             <MetricCard
               label="Repasse financeiro"
               value={isApiMode ? "Indisponível" : money.format(financeTotals.pending)}
               delta={isApiMode ? "Módulo não conectado" : `${money.format(financeTotals.paid)} já quitado`}
-              icon={Banknote}
-              tone="cyan"
             />
-          </>
+          </MetricStrip>
         )}
       </section>
 
@@ -229,7 +213,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Sessões do Dia & Agenda Imediata</CardTitle>
+              <CardTitle>Sessões de hoje</CardTitle>
               <p className="mt-1 text-body-regular text-text-secondary">
                 {isUsingUpcomingFallback
                   ? "Exibindo próximas sessões agendadas no consultório"
@@ -255,22 +239,17 @@ export function DashboardPage() {
                 Não foi possível carregar as sessões da agenda.
               </p>
             ) : displayedSessions.length > 0 ? (
-              <div className="space-y-3">
+              <ul className="divide-y divide-separator-border">
                 {displayedSessions.map((session) => {
                   const isHighRisk = (session.attentionIndex ?? 0) >= 80;
                   return (
-                    <div
-                      key={session.id}
-                      className={`rounded-lg border p-4 transition ${
-                        isHighRisk ? "border-border-error-default bg-status-rose-background" : "border-border-button-default hover:bg-background-secondary-default"
-                      }`}
-                    >
+                    <li key={session.id} className={isHighRisk ? "rounded-md bg-status-rose-background p-3" : "py-3"}>
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-body-semibold">
-                            <Clock className="h-4 w-4 text-status-blue-text" />
-                            <span>
-                              {session.time} {session.date !== today ? `(${session.date})` : ""}
+                            <Clock className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+                            <span className="tabular-nums">
+                              {session.time} {session.date !== today ? `(${shortDate(session.date)})` : ""}
                             </span>
                           </div>
                           <Link
@@ -299,13 +278,13 @@ export function DashboardPage() {
                           ) : null}
                         </div>
                       </div>
-                      <p className="mt-2.5 text-body-regular text-text-secondary">
+                      <p className="mt-2 text-body-regular text-text-secondary">
                         {session.complement || "Sem observações adicionais para este atendimento."}
                       </p>
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             ) : (
               <EmptyState
                 title="Nenhuma sessão para hoje"
@@ -319,7 +298,7 @@ export function DashboardPage() {
         <ActivityTimeline items={recentActivities} />
       </section>
 
-      {/* Grid Inferior: Segregação de Alertas (Von Restorff), Pendências Zeigarnik e Módulo Financeiro */}
+      {/* Grid Inferior: Segregação de Alertas (Von Restorff), Pendências Zeigarnik e Financeiro */}
       <section className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Indicadores indisponíveis não equivalem à ausência de risco. */}
         {isApiMode ? <Card><CardHeader><CardTitle>Avaliação clínica</CardTitle></CardHeader><CardContent><p className="text-body-regular text-text-secondary">A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.</p></CardContent></Card> : <Card className="border-border-button-default">
@@ -327,10 +306,10 @@ export function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-headline-regular flex items-center gap-2 text-text-primary">
                 <ShieldAlert className="h-4 w-4 text-text-error-primary" />
-                Alertas Clínicos de Alto Risco
+                Alertas clínicos de alto risco
               </CardTitle>
               {criticalRiskAlerts.length > 0 ? (
-                <Badge variant="critical">{criticalRiskAlerts.length}</Badge>
+                <Badge variant="critical" showIcon={false}>{criticalRiskAlerts.length}</Badge>
               ) : null}
             </div>
             <p className="text-caption-1-regular text-text-secondary mt-1">
@@ -358,7 +337,7 @@ export function DashboardPage() {
                     </div>
                     <p className="text-caption-1-regular text-text-secondary">{item.complement}</p>
                     <p className="text-caption-1-regular text-text-secondary">
-                      Sessão em {item.date} às {item.time}
+                      Sessão em {shortDate(item.date)} às {item.time}
                     </p>
                   </div>
                 ))}
@@ -378,10 +357,10 @@ export function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-headline-regular flex items-center gap-2 text-text-primary">
                 <ClockAlert className="h-4 w-4 text-status-yellow-text" />
-                Pendências de Evolução
+                Pendências de evolução
               </CardTitle>
               {openRecords.length > 0 ? (
-                <Badge variant="warning">{openRecords.length}</Badge>
+                <Badge variant="warning" showIcon={false}>{openRecords.length}</Badge>
               ) : null}
             </div>
             <p className="text-caption-1-regular text-text-secondary mt-1">
@@ -392,12 +371,9 @@ export function DashboardPage() {
             {agendaQuery.isLoading ? (
               <LoadingSkeleton className="h-28" />
             ) : openRecords.length > 0 ? (
-              <div className="space-y-3">
+              <ul className="divide-y divide-separator-border">
                 {openRecords.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-border-button-default p-3"
-                  >
+                  <li key={item.id} className="flex items-center justify-between gap-3 py-3">
                     <div className="min-w-0">
                       <Link
                         className="text-body-medium hover:text-status-blue-text truncate block"
@@ -406,7 +382,7 @@ export function DashboardPage() {
                         {item.patientName}
                       </Link>
                       <p className="text-caption-1-regular text-text-secondary">
-                        {item.date} às {item.time}
+                        {shortDate(item.date)} às {item.time}
                       </p>
                     </div>
                     <ButtonLink
@@ -415,9 +391,9 @@ export function DashboardPage() {
                     >
                       Evoluir
                     </ButtonLink>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : administrativePending.length > 0 ? (
               <div className="space-y-3">
                 {administrativePending.map((item) => (
@@ -436,11 +412,11 @@ export function DashboardPage() {
           </CardContent>
         </Card>}
 
-        {/* Bloco 3: Módulo Financeiro (Desacoplado) */}
+        {/* Bloco 3: Financeiro (Desacoplado) */}
         <Card className="border-border-button-default">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-headline-regular">Módulo Financeiro</CardTitle>
+              <CardTitle className="text-headline-regular">Financeiro</CardTitle>
               <p className="text-caption-1-regular text-text-secondary mt-1">Repasses e recebimentos clínicos.</p>
             </div>
             <Link className="text-caption-1-medium text-status-blue-text hover:underline" to="/finance">
@@ -456,23 +432,23 @@ export function DashboardPage() {
               </div>
             ) : isApiMode ? (
               <div className="text-caption-1-regular text-text-secondary p-2">
-                O módulo financeiro está em modo desacoplado da API central.
+                O módulo financeiro ainda não está conectado à API.
               </div>
             ) : (
-              <div className="space-y-3 text-body-regular">
-                <div className="flex items-center justify-between rounded-md border border-border-button-default p-2.5">
-                  <span className="text-caption-1-regular text-text-secondary">Recebido</span>
-                  <span className="text-body-semibold text-status-lime-text">{money.format(financeTotals.paid)}</span>
+              <dl className="divide-y divide-separator-border text-body-regular">
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-text-secondary">Recebido</dt>
+                  <dd className="text-body-semibold tabular-nums">{money.format(financeTotals.paid)}</dd>
                 </div>
-                <div className="flex items-center justify-between rounded-md border border-border-button-default p-2.5">
-                  <span className="text-caption-1-regular text-text-secondary">Pendente</span>
-                  <span className="text-body-semibold text-status-yellow-text">{money.format(financeTotals.pending)}</span>
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-text-secondary">Pendente</dt>
+                  <dd className="text-body-semibold tabular-nums">{money.format(financeTotals.pending)}</dd>
                 </div>
-                <div className="flex items-center justify-between rounded-md border border-border-button-default p-2.5">
-                  <span className="text-caption-1-regular text-text-secondary">Total Bruto</span>
-                  <span className="text-body-semibold text-text-primary">{money.format(financeTotals.gross)}</span>
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-text-secondary">Total bruto</dt>
+                  <dd className="text-body-semibold tabular-nums">{money.format(financeTotals.gross)}</dd>
                 </div>
-              </div>
+              </dl>
             )}
           </CardContent>
         </Card>

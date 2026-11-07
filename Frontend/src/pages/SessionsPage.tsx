@@ -21,9 +21,9 @@ export function SessionsPage() {
         action={can("sessions:write") ? <Button><Plus className="h-4 w-4" /> Registrar sessão</Button> : null}
       />
       {isLoading ? <PageLoading label="Carregando sessões…" /> : isError ? <PageError description="Não foi possível consultar as sessões. Tente novamente." /> : sessions.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {sessions.map((session) => <SessionCard key={session.id} session={session} />)}
-        </div>
+        <ol className="aelo-thread-list space-y-8">
+          {sessions.map((session) => <li key={session.id} className="aelo-thread-item pb-4"><SessionCard session={session} /></li>)}
+        </ol>
       ) : (
         <EmptyState title="Nenhuma sessão registrada" description="As sessões aparecerão aqui conforme forem registradas pela equipe clínica." />
       )}

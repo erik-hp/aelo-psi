@@ -29,9 +29,9 @@ let client: QueryClient;
 afterEach(() => { cleanup(); client?.clear(); });
 
 const pages = [
-  [DashboardPage, "Dashboard Clínico"], [PatientsPage, "Pacientes"],
-  [PatientProfilePage, patients[0].name], [AgendaPage, "Agenda Clínica"],
-  [NarrativeEditorPage, "Editor Narrativo de Prontuário"], [FinancePage, "Financeiro"],
+  [DashboardPage, "Dashboard clínico"], [PatientsPage, "Pacientes"],
+  [PatientProfilePage, patients[0].name], [AgendaPage, "Agenda clínica"],
+  [NarrativeEditorPage, "Editor narrativo de prontuário"], [FinancePage, "Financeiro"],
   [AuditPage, "Trilha de Auditoria"], [UsersPage, "Usuários"],
   [SettingsPage, "Configurações"], [LoginPage, "AELO"],
   [NotFoundPage, "Página não encontrada"], [SessionsPage, "Sessões terapêuticas"],

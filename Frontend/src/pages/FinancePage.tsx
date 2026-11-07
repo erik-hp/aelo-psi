@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Banknote, CircleDollarSign, WalletCards } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { clinicalService } from "@/services/clinicalService";
@@ -34,11 +33,11 @@ export function FinancePage() {
       />
       {isApiMode ? <EmptyState title="Financeiro indisponível" description="O módulo financeiro ainda não está integrado à API." /> : (
       <>
-      <section className="mb-6 grid gap-4 md:grid-cols-3">
-        <MetricCard label="Valor bruto" value={money.format(totals.gross)} icon={CircleDollarSign} />
-        <MetricCard label="Taxas da plataforma" value={money.format(totals.fees)} icon={WalletCards} tone="amber" />
-        <MetricCard label="Repasse líquido" value={money.format(totals.net)} icon={Banknote} tone="cyan" />
-      </section>
+      <MetricStrip className="mb-6">
+        <MetricCard label="Valor bruto" value={money.format(totals.gross)} />
+        <MetricCard label="Taxas da plataforma" value={money.format(totals.fees)} />
+        <MetricCard label="Repasse líquido" value={money.format(totals.net)} />
+      </MetricStrip>
       <DataTable<FinancialRecord>
         data={data}
         getRowKey={(record) => record.id}
@@ -46,12 +45,12 @@ export function FinancePage() {
           { key: "psychologist", header: "Agente psicológico", render: (record) => record.psychologist },
           { key: "patientName", header: "Paciente", render: (record) => record.patientName },
           { key: "date", header: "Data", render: (record) => record.date },
-          { key: "sessionValue", header: "Sessão", render: (record) => money.format(record.sessionValue) },
-          { key: "netValue", header: "Repasse", render: (record) => money.format(record.netValue) },
+          { key: "sessionValue", header: "Sessão", render: (record) => <span className="tabular-nums">{money.format(record.sessionValue)}</span> },
+          { key: "netValue", header: "Repasse", render: (record) => <span className="tabular-nums">{money.format(record.netValue)}</span> },
           {
             key: "status",
             header: "Status",
-            render: (record) => <Badge variant={record.status === "paid" ? "success" : record.status === "overdue" ? "warning" : "muted"}>{record.status}</Badge>,
+            render: (record) => <Badge variant={record.status === "paid" ? "success" : record.status === "overdue" ? "warning" : "muted"}>{record.status === "paid" ? "Pago" : record.status === "overdue" ? "Em atraso" : "Pendente"}</Badge>,
           },
         ]}
       />

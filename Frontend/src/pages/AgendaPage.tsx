@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   ArrowRight,
   Calendar,
-  CalendarDays,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -22,7 +21,7 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/modal";
 import { RiSearchLine } from "@remixicon/react";
 import { ButtonLink } from "@/components/ui/button-link";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -282,7 +281,7 @@ export function AgendaPage() {
       date: newDate,
       time: newTime,
       status: "draft",
-      complement: `${newModality}${newComplement ? ` • ${newComplement}` : ""}`,
+      complement: `${newModality}${newComplement ? `: ${newComplement}` : ""}`,
       attentionIndex: null,
     };
 
@@ -302,7 +301,7 @@ export function AgendaPage() {
   return (
     <>
       <PageHeader
-        title="Agenda Clínica"
+        title="Agenda clínica"
         description="Agendamentos e registro do status dos atendimentos. Os horários seguem o fuso deste navegador."
         action={
           canSchedule ? <Button onClick={() => setIsNewSessionOpen(true)} className="gap-2">
@@ -314,30 +313,25 @@ export function AgendaPage() {
       {!isApiMode && <p className="mb-4 text-body-regular text-status-yellow-text">Demonstração: alterações de agenda nesta tela são temporárias e não são salvas no servidor.</p>}
 
       {/* Indicadores do Turno Clínico */}
-      <section className="grid gap-4 md:grid-cols-3">
+      <MetricStrip>
         <MetricCard
           label="Sessões no dia selecionado"
           value={String(filteredItems.length)}
           delta={`${agenda.length} atendimentos registrados no total`}
-          icon={CalendarDays}
         />
         <MetricCard
           label={isApiMode ? "Atendimentos concluídos" : "Em atendimento agora"}
           value={String(isApiMode ? agenda.filter((item) => item.status === "completed").length : inProgressCount)}
           delta={isApiMode ? "Conclusão não equivale à assinatura da nota" : inProgressCount > 0 ? "Sessão em curso no consultório" : "Nenhuma consulta ativa neste minuto"}
-          icon={Clock}
-          tone="cyan"
         />
         <MetricCard
           label={isApiMode ? "Agendamentos pendentes" : "Pendências de evolução"}
           value={String(isApiMode ? agenda.filter((item) => item.status === "draft").length : reviewCount)}
           delta={isApiMode ? "Atendimentos com status agendado" : "Aguardando notas ou atenção imediata"}
-          icon={AlertTriangle}
-          tone="amber"
         />
-      </section>
+      </MetricStrip>
 
-      {/* Alternância Dual Ergonômica (Linha do Tempo vs Matriz Mensal - Lei de Hick) */}
+      {/* Alternância Dual Ergonômica (Linha do Tempo vs Matriz mensal - Lei de Hick) */}
       <section className="mt-6">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-button-default bg-background-primary-default p-2">
           <div className="flex items-center gap-2">
@@ -348,7 +342,7 @@ export function AgendaPage() {
               className="gap-2 text-body-medium"
             >
               <Clock className="h-4 w-4" />
-              Linha do Tempo Diária
+              Linha do tempo diária
             </Button>
             <Button
               variant={viewMode === "matrix" ? "default" : "ghost"}
@@ -357,7 +351,7 @@ export function AgendaPage() {
               className="gap-2 text-body-medium"
             >
               <Calendar className="h-4 w-4" />
-              Matriz Mensal
+              Matriz mensal
             </Button>
           </div>
 
@@ -519,9 +513,9 @@ export function AgendaPage() {
                     >
                       <span
                         className={cn(
-                          "inline-flex h-6 w-6 items-center justify-center rounded-md text-caption-1-medium",
-                          day.isToday && "bg-background-secondary-default text-text-primary text-body-bold",
-                          day.isSelected && "bg-accent-600 text-text-white text-body-bold",
+                          "inline-flex h-6 w-6 items-center justify-center rounded-md text-caption-1-medium tabular-nums",
+                          day.isToday && "bg-background-secondary-default text-text-primary text-body-semibold",
+                          day.isSelected && "bg-accent-600 text-text-white text-body-semibold",
                         )}
                       >
                         {day.date.getDate()}
@@ -553,8 +547,7 @@ export function AgendaPage() {
           {/* CABEÇALHO DO DIA SELECIONADO NA LINHA DO TEMPO */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-button-default pb-3 pt-1">
             <div>
-              <h2 className="text-title-3-bold capitalize text-text-primary flex items-center gap-2">
-                <Clock className="h-5 w-5 text-status-blue-text" />
+              <h2 className="text-title-3-semibold first-letter:uppercase text-text-primary">
                 {selectedDateLabel}
               </h2>
               <p className="text-caption-1-regular text-text-secondary mt-0.5">
@@ -565,35 +558,29 @@ export function AgendaPage() {
 
           {/* LISTA DA LINHA DO TEMPO CRONOLÓGICA (LEI DE JAKOB & FITTS) */}
           {isLoading ? <PageLoading label="Carregando agenda…" /> : isError ? <PageError description="Não foi possível carregar a agenda. Tente novamente." /> : filteredItems.length ? (
-            <div className="space-y-4">
+            <ul className="clinical-panel divide-y divide-separator-border">
               {filteredItems.map((item) => {
                 const conf = isApiMode && item.status === "completed" ? { ...statusConfig.completed, label: "Atendimento concluído", description: "Status do atendimento registrado. A assinatura da nota é uma ação separada." } : statusConfig[item.status] || statusConfig.draft;
                 const isHighRisk = (item.attentionIndex ?? 0) >= 80;
                 return (
-                  <Card
+                  <li
                     key={item.id}
                     className={cn(
-                      "transition-colors shadow-sm border",
-                      item.status === "in_progress" && "border-border-focus-ring bg-status-blue-background",
-                      isHighRisk && "border-border-error-default bg-status-rose-background",
-                      item.status === "needs_review" && !isHighRisk && "border-status-yellow-text bg-status-yellow-background",
+                      "p-4 first:rounded-t-3xl last:rounded-b-3xl",
+                      item.status === "in_progress" && "bg-status-blue-background",
+                      isHighRisk && "bg-status-rose-background",
+                      item.status === "needs_review" && !isHighRisk && "bg-status-yellow-background",
                     )}
                   >
-                    <CardContent className="p-5">
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                         {/* Bloco de Horário */}
-                        <div className="flex items-center gap-2.5 lg:w-32 shrink-0">
-                          <div className="rounded-md border border-border-button-default bg-background-secondary-default p-2 text-center">
-                            <Clock className="h-4 w-4 text-status-blue-text mx-auto mb-0.5" />
-                            <span className="text-body-bold text-text-primary">{item.time}</span>
-                          </div>
-                        </div>
+                        <p className="shrink-0 text-headline-semibold tabular-nums lg:w-20">{item.time}</p>
 
                         {/* Conteúdo Clínico */}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
-                              className="text-headline-bold text-text-primary hover:text-status-blue-text transition"
+                              className="focus-ring rounded-sm text-body-semibold text-text-primary underline-offset-2 hover:underline"
                               to={`/patients/${item.patientId}`}
                             >
                               {item.patientName}
@@ -610,16 +597,16 @@ export function AgendaPage() {
                             ) : null}
                           </div>
 
-                          <p className="mt-2 text-body-regular text-text-secondary">
-                            {item.complement || "Sessão de psicoterapia • Sem observações preliminares"}
+                          <p className="mt-1 text-body-regular text-text-secondary">
+                            {item.complement || "Sessão de psicoterapia, sem observações preliminares"}
                           </p>
 
-                          <p className="mt-1 text-caption-1-regular text-text-secondary italic">
+                          <p className="mt-0.5 text-caption-1-regular text-text-secondary">
                             {conf.description}
                           </p>
 
                           {/* Ações de Transição Rápida do Ciclo de Vida Clínico */}
-                          <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-border-button-default">
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
                             {!isApiMode && item.status === "draft" ? (
                               <Button
                                 size="sm"
@@ -628,7 +615,7 @@ export function AgendaPage() {
                                 onClick={() => handleUpdateStatus(item.id, "in_progress")}
                               >
                                 <Play className="h-3.5 w-3.5 text-status-blue-text" />
-                                Iniciar Consulta
+                                Iniciar consulta
                               </Button>
                             ) : null}
 
@@ -640,7 +627,7 @@ export function AgendaPage() {
                                 onClick={() => handleUpdateStatus(item.id, "needs_review")}
                               >
                                 <ClipboardPenLine className="h-3.5 w-3.5" />
-                                Encerrar & Evoluir Nota
+                                Encerrar e evoluir nota
                               </Button>
                             ) : null}
 
@@ -652,7 +639,7 @@ export function AgendaPage() {
                                 onClick={() => handleUpdateStatus(item.id, "completed")}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
-                                Assinar & Finalizar
+                                Assinar e finalizar
                               </Button>
                             ) : null}
 
@@ -668,17 +655,16 @@ export function AgendaPage() {
                               to={`/patients/${item.patientId}`}
                               size="small"
                             >
-                              <span>Acessar Prontuário</span>
+                              <span>Acessar prontuário</span>
                               <ArrowRight className="h-3.5 w-3.5" />
                             </ButtonLink>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           ) : (
             <EmptyState
               title="Nenhuma sessão para esta data"
@@ -691,17 +677,17 @@ export function AgendaPage() {
         <aside className="space-y-4">
           <h2 className="text-headline-semibold flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
-            Prioridades do Período
+            Prioridades do período
           </h2>
           {attentionItems.length > 0 ? (
-            attentionItems.map((item, index) => {
+            <ol className="clinical-panel divide-y divide-separator-border">
+            {attentionItems.map((item, index) => {
               const isSevere = (item.attentionIndex ?? 0) >= 80;
               return (
-                <Card key={item.id} className={isSevere ? "border-border-error-default" : undefined}>
-                  <CardContent className="p-4 space-y-2">
+                <li key={item.id} className="space-y-2 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-caption-1-semibold text-text-secondary uppercase tracking-wider">
+                        <span className="text-caption-1-medium text-text-secondary">
                           Prioridade {index + 1}
                         </span>
                         <Link
@@ -731,10 +717,10 @@ export function AgendaPage() {
                         Prontuário
                       </Link>
                     </div>
-                  </CardContent>
-                </Card>
+                </li>
               );
-            })
+            })}
+            </ol>
           ) : (
             <div className="rounded-lg border border-border-button-default p-4 text-center text-caption-1-regular text-text-secondary">
               Nenhuma sessão prioritária pendente no período.
@@ -755,11 +741,11 @@ export function AgendaPage() {
       />
 
       {isNewSessionOpen ? (
-        <Dialog open onClose={() => setIsNewSessionOpen(false)} busy={createSession.isPending} title="Agendar Nova Sessão Clínica">
+        <Dialog open onClose={() => setIsNewSessionOpen(false)} busy={createSession.isPending} title="Agendar nova sessão clínica">
             <div className="flex items-start justify-between">
               <div>
                 <h2 id="new-session-title" className="text-title-3-bold text-text-primary">
-                  Agendar Nova Sessão Clínica
+                  Agendar nova sessão clínica
                 </h2>
                 <p className="text-caption-1-regular text-text-secondary mt-0.5">
                   Preencha os dados do paciente e o horário para reserva na agenda.

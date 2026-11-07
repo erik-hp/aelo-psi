@@ -5,8 +5,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Brain,
-  CalendarClock,
-  CheckCircle2,
   Clock,
   FileText,
   Network,
@@ -17,6 +15,7 @@ import {
 } from "lucide-react";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { PatientVault } from "@/components/patients/PatientVault";
+import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SessionCard } from "@/components/sessions/SessionCard";
 import { Badge } from "@/components/ui/badge";
@@ -143,7 +142,7 @@ function SessionAnalysisBlock({
           variant="outline"
           size="sm"
           onClick={() => { setDraftReady(false); setPreview(null); setIsOpen((prev) => !prev); }}
-          className="h-7 text-caption-1-medium text-text-primary hover:bg-background-secondary-default"
+          className="h-7 text-caption-1-medium text-text-primary"
         >
           {isOpen ? "Ocultar editor de análise" : "Analisar sessão com IA"}
         </Button>
@@ -156,12 +155,12 @@ function SessionAnalysisBlock({
           </label>
           <Textarea
             id={`analysis-text-${session.id}`}
-            className="min-h-32 text-body-regular"
+            record
             value={content}
             onChange={(event) => { setContent(event.target.value); setPreview(null); }}
             placeholder="Insira aqui o texto do prontuário que será analisado pela IA assistiva…"
           />
-          {preview !== null ? <div className="rounded border p-3 text-caption-1-regular"><p>Texto preparado para a IA. Confira os identificadores antes de confirmar:</p><pre className="whitespace-pre-wrap break-words">{preview}</pre></div> : null}
+          {preview !== null ? <div className="rounded border p-3 text-caption-1-regular"><p>Texto preparado para a IA. Confira os identificadores antes de confirmar:</p><pre className="aelo-record mt-2 max-w-none whitespace-pre-wrap break-words">{preview}</pre></div> : null}
           <div className="flex flex-col gap-3 text-caption-1-regular text-text-secondary sm:flex-row sm:items-center sm:justify-between">
             <span>{draftError ? "Falha ao salvar o rascunho. Copie o texto antes de sair." : "Mínimo 30 caracteres para extração ontológica."}</span>
             <Button
@@ -172,7 +171,7 @@ function SessionAnalysisBlock({
                 if (!isApiMode || preview !== null) { mutation.mutate(); return; }
                 void clinicalService.previewAiText(patientId, content).then(setPreview).catch(() => notify({ type: "error", title: "Envio bloqueado", description: "Revise os identificadores da nota antes de solicitar a análise." }));
               }}
-              className="gap-1.5 shadow-sm"
+              className="gap-1.5"
             >
               <Send className="h-3.5 w-3.5" />
               {mutation.isPending ? "Processando…" : !isApiMode ? "Enviar para análise" : preview !== null ? "Confirmar envio à IA" : "Revisar texto para IA"}
@@ -255,85 +254,41 @@ export function PatientProfilePage() {
         <TabList showIndicator={false} aria-label="Seções do prontuário" className="grid w-full grid-cols-1 gap-1 rounded-xl bg-background-secondary-default p-1 sm:grid-cols-2 xl:grid-cols-4">
           <Tab id="overview" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <User className="h-4 w-4" />
-            Resumo Clínico
+            Resumo clínico
           </Tab>
           <Tab id="sessions" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <FileText className="h-4 w-4" />
-            Prontuários e Sessões
+            Prontuários e sessões
           </Tab>
           <Tab id="longitudinal" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <TrendingUp className="h-4 w-4" />
-            Evolução Longitudinal
+            Evolução longitudinal
           </Tab>
           <Tab id="vault" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <Network className="h-4 w-4" />
-            Cofre Cognitivo (Vault)
+            Cofre cognitivo (Vault)
           </Tab>
         </TabList>
 
         {/* ABA 1: RESUMO CLÍNICO */}
         <TabPanel id="overview" className="min-w-0 space-y-6">
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Idade</p>
-                <p className="mt-2 text-title-2-semibold">
-                  {data.patient.age === null ? "—" : `${data.patient.age} anos`}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Tempo em tratamento</p>
-                <p className="mt-2 text-title-2-semibold">{data.patient.treatmentDuration}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Periodicidade</p>
-                <p className="mt-2 text-title-2-semibold">{data.patient.sessionFrequency}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-caption-1-medium uppercase tracking-wider text-text-secondary">Risco clínico</p>
-                <div className="mt-3">
-                  <Badge
-                    variant={
-                      data.patient.riskLevel === "atenção"
-                        ? "warning"
-                        : data.patient.riskLevel === "baixo"
-                          ? "success"
-                          : "default"
-                    }
-                  >
-                    {data.patient.riskLevel}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+          <MetricStrip>
+            <MetricCard label="Idade" value={data.patient.age === null ? "—" : `${data.patient.age} anos`} />
+            <MetricCard label="Tempo em tratamento" value={data.patient.treatmentDuration} />
+            <MetricCard label="Periodicidade" value={data.patient.sessionFrequency} />
+            <MetricCard label="Sessões realizadas" value={completedSessions.length} />
+            <MetricCard label="Sessões agendadas" value={scheduledSessions.length} />
+            <MetricCard
+              label="Risco clínico"
+              value={
+                <Badge variant={data.patient.riskLevel === "atenção" ? "warning" : data.patient.riskLevel === "baixo" ? "success" : "default"}>
+                  {data.patient.riskLevel}
+                </Badge>
+              }
+            />
+          </MetricStrip>
 
-          <section className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardContent className="grid gap-4 p-5 sm:grid-cols-2">
-                <div>
-                  <p className="flex items-center gap-2 text-body-regular text-text-secondary">
-                    <CheckCircle2 className="h-4 w-4 text-status-lime-text" />
-                    Sessões realizadas
-                  </p>
-                  <p className="mt-2 text-title-2-semibold">{completedSessions.length}</p>
-                </div>
-                <div>
-                  <p className="flex items-center gap-2 text-body-regular text-text-secondary">
-                    <CalendarClock className="h-4 w-4 text-status-blue-text" />
-                    Sessões agendadas
-                  </p>
-                  <p className="mt-2 text-title-2-semibold">{scheduledSessions.length}</p>
-                </div>
-              </CardContent>
-            </Card>
-
+          <section>
             <Card>
               <CardContent className="p-5">
                 <p className="text-body-medium text-text-secondary">Próximas sessões</p>
@@ -361,26 +316,26 @@ export function PatientProfilePage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-headline-regular">
                 <Sparkles className="h-4 w-4 text-status-blue-text" />
-                Síntese Clínica Consolidada da IA Consultiva
+                Síntese clínica consolidada da IA consultiva
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-md border border-border-button-default p-3">
+                <div>
                   <p className="text-caption-1-regular text-text-secondary">Humor</p>
-                  <p className="mt-2 text-title-3-semibold">
+                  <p className="text-headline-semibold tabular-nums">
                     {analysis?.moodScore == null ? "—" : `${analysis.moodScore}%`}
                   </p>
                 </div>
-                <div className="rounded-md border border-border-button-default p-3">
+                <div>
                   <p className="text-caption-1-regular text-text-secondary">Estado emocional</p>
-                  <p className="mt-2 text-title-3-semibold">
+                  <p className="text-headline-semibold tabular-nums">
                     {analysis?.emotionalStateScore == null ? "—" : `${analysis.emotionalStateScore}%`}
                   </p>
                 </div>
-                <div className="rounded-md border border-border-button-default p-3">
+                <div>
                   <p className="text-caption-1-regular text-text-secondary">Encargo psicológico</p>
-                  <p className="mt-2 text-title-3-semibold">
+                  <p className="text-headline-semibold tabular-nums">
                     {analysis?.psychologicalBurdenScore == null ? "—" : `${analysis.psychologicalBurdenScore}%`}
                   </p>
                 </div>
@@ -389,9 +344,9 @@ export function PatientProfilePage() {
               <section className="space-y-2">
                 <h3 className="flex items-center gap-2 text-body-medium">
                   <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
-                  Cenários de Risco Identificados
+                  Cenários de risco identificados
                 </h3>
-                <ul className="list-inside list-disc space-y-1 text-body-regular text-text-secondary">
+                <ul className="aelo-record list-inside list-disc space-y-1 text-text-secondary">
                   {riskScenarios.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
@@ -399,7 +354,7 @@ export function PatientProfilePage() {
               </section>
 
               <section className="space-y-2">
-                <h3 className="text-body-medium">Maiores Pontos a Considerar</h3>
+                <h3 className="text-body-medium">Maiores pontos a considerar</h3>
                 <div className="flex flex-wrap gap-2">
                   {considerations.map((item) => (
                     <Badge key={item} variant="default">
@@ -416,7 +371,7 @@ export function PatientProfilePage() {
         <TabPanel id="sessions" className="min-w-0 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-button-default pb-3">
             <div>
-              <h2 className="text-headline-semibold">Histórico de Atendimentos e Prontuários</h2>
+              <h2 className="text-headline-semibold">Histórico de atendimentos e prontuários</h2>
               <p className="text-caption-1-regular text-text-secondary">
                 Evoluções documentais da psicoterapia com editor de análise colapsável sob demanda.
               </p>
@@ -424,23 +379,23 @@ export function PatientProfilePage() {
             <Badge variant="muted">{data.sessions.length} atendimentos</Badge>
           </div>
 
-          <div className="space-y-4">
+          <ol className="aelo-thread-list space-y-8">
             {data.sessions.map((session) => (
-              <div key={session.id} className="space-y-3">
+              <li key={session.id} className="aelo-thread-item space-y-3 pb-4">
                 <SessionCard
                   session={session}
                   notes={notes.filter((note) => note.sessionId === session.id)}
                 />
                 {isApiMode ? (user?.role === "PSYCHOLOGIST" && session.professionalId === user.id ? <ButtonLink to={`/editor?patient=${encodeURIComponent(patientId)}&session=${encodeURIComponent(session.id)}`}>Abrir editor desta sessão</ButtonLink> : <p className="text-caption-1-regular text-text-secondary">A edição desta sessão é restrita ao profissional responsável.</p>) : <SessionAnalysisBlock patientId={data.patient.id} session={session} />}
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </TabPanel>
 
         {/* ABA 3: EVOLUÇÃO LONGITUDINAL */}
         <TabPanel id="longitudinal" className="min-w-0 space-y-6">
           <div className="border-b border-border-button-default pb-3">
-            <h2 className="text-headline-semibold">Métricas e Evolução Longitudinal</h2>
+            <h2 className="text-headline-semibold">Métricas e Evolução longitudinal</h2>
             <p className="text-caption-1-regular text-text-secondary">
               Variação dos indicadores clínicos estimada ao longo do acompanhamento psicoterapêutico.
             </p>
@@ -448,19 +403,19 @@ export function PatientProfilePage() {
 
           {isApiMode ? <EmptyState title="Indicadores longitudinais indisponíveis" description="Esta visualização ainda não possui um pipeline validado conectado à API. Nenhum escore clínico foi estimado." /> : <div className="space-y-5">
             <ChartCard
-              title="Indicador de Humor"
+              title="Indicador de humor"
               description="Indicador estimado a partir dos prontuários analisados nas sessões."
               data={metrics}
               dataKey="mood"
             />
             <ChartCard
-              title="Estado Emocional"
+              title="Estado emocional"
               description="Variação da intensidade afetiva e estabilidade ao longo do acompanhamento."
               data={metrics}
               dataKey="emotionalState"
             />
             <ChartCard
-              title="Encargos Psicológicos"
+              title="Encargos psicológicos"
               description="Potenciais sobrecargas e encargos identificados nas narrativas clínicas."
               data={metrics}
               dataKey="psychologicalBurden"
