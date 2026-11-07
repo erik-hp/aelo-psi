@@ -61,11 +61,11 @@ describe("Sidebar Navigation and Zeigarnik Counters", () => {
     ]);
   });
 
-  it("renders semantic grouping sections: Atendimento Clínico and Governança & Gestão", () => {
+  it("renders semantic grouping sections: Atendimento clínico and Governança e gestão", () => {
     renderSidebar();
 
     expect(screen.getByText(/Atendimento Clínico/i)).toBeDefined();
-    expect(screen.getByText(/Governança & Gestão/i)).toBeDefined();
+    expect(screen.getByText(/Governança e gestão/i)).toBeDefined();
 
     expect(screen.getByRole("link", { name: /Dashboard/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Agenda/i })).toBeDefined();

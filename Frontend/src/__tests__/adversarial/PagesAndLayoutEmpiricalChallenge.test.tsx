@@ -193,7 +193,7 @@ describe("Empirical Challenge: Direct Route /editor and /notes Redirect", () => 
     renderWithProviders(<AppRoutes />, "/editor");
 
     // Must display NarrativeEditorPage directly
-    expect(await screen.findByText("Editor Narrativo de Prontuário")).toBeDefined();
+    expect(await screen.findByText("Editor narrativo de prontuário")).toBeDefined();
     expect(screen.getByRole("textbox", { name: /Nota narrativa da sessão/i })).toBeDefined();
     expect(screen.getByLabelText(/Título da nota clínica/i)).toBeDefined();
     expect(screen.getByRole("button", { name: /Template SOAP/i })).toBeDefined();
@@ -203,7 +203,7 @@ describe("Empirical Challenge: Direct Route /editor and /notes Redirect", () => 
   it("redirects /notes directly to /editor", async () => {
     renderWithProviders(<AppRoutes />, "/notes");
 
-    expect(await screen.findByText("Editor Narrativo de Prontuário")).toBeDefined();
+    expect(await screen.findByText("Editor narrativo de prontuário")).toBeDefined();
     expect(screen.getByRole("textbox", { name: /Nota narrativa da sessão/i })).toBeDefined();
   });
 
@@ -214,7 +214,7 @@ describe("Empirical Challenge: Direct Route /editor and /notes Redirect", () => 
 
     expect(await screen.findByText(/Acesso profissional/i)).toBeDefined();
     expect(screen.getByRole("button", { name: "Entrar" })).toBeDefined();
-    expect(screen.queryByText("Editor Narrativo de Prontuário")).toBeNull();
+    expect(screen.queryByText("Editor narrativo de prontuário")).toBeNull();
   });
 });
 
@@ -425,7 +425,7 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
 
     // Wait for query to resolve
     await waitFor(() => {
-      expect(screen.queryByText(/Pendências de Evolução/i)).toBeNull();
+      expect(screen.queryByText(/Pendências de evolução/i)).toBeNull();
     });
     expect(screen.queryByText(/prontuário aguarda evolução/i)).toBeNull();
   });
@@ -446,7 +446,7 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
 
     renderWithProviders(<Sidebar />);
 
-    expect(await screen.findByText(/Pendências de Evolução/i)).toBeDefined();
+    expect(await screen.findByText(/Pendências de evolução/i)).toBeDefined();
     expect(screen.getByText("1 prontuário aguarda evolução para fechamento ético do dia.")).toBeDefined();
   });
 
@@ -460,7 +460,7 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
 
     renderWithProviders(<Sidebar />);
 
-    expect(await screen.findByText(/Pendências de Evolução/i)).toBeDefined();
+    expect(await screen.findByText(/Pendências de evolução/i)).toBeDefined();
     expect(screen.getByText("4 prontuários aguardam evolução para fechamento ético do dia.")).toBeDefined();
 
     // The counter badges (one on the Agenda NavLink and one in the footer widget) should both show "4"
@@ -478,6 +478,6 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
     expect(screen.getByRole("link", { name: /Dashboard/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Agenda/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Editor Clínico/i })).toBeDefined();
-    expect(screen.queryByText(/Pendências de Evolução/i)).toBeNull();
+    expect(screen.queryByText(/Pendências de evolução/i)).toBeNull();
   });
 });

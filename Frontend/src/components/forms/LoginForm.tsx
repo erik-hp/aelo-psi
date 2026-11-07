@@ -28,7 +28,7 @@ export function LoginForm() {
   async function onSubmit(values: LoginFormValues) {
     try {
       await login(values);
-      notify({ type: "success", title: "Sessão iniciada", description: "Ambiente clínico carregado com segurança." });
+      notify({ type: "success", title: "Sessão iniciada" });
     } catch {
       notify({ type: "error", title: "Falha no login", description: "Verifique as credenciais e tente novamente." });
     }

@@ -105,14 +105,14 @@ describe("AuditPage & AuditTable Cryptographic Traceability and Semantic Categor
     await user.click(inspectBtn);
 
     // Modal de detalhes técnicos
-    expect(screen.getByRole("heading", { name: /Inspeção Técnica de Auditoria Imutável/i })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Inspeção técnica de auditoria/i })).toBeDefined();
     expect(screen.getByText(/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/)).toBeDefined();
     expect(screen.getAllByText("192.168.0.24").length).toBeGreaterThan(0);
 
     // Fechar modal
-    const closeBtn = screen.getByRole("button", { name: /Concluir Inspeção/i });
+    const closeBtn = screen.getByRole("button", { name: /Concluir inspeção/i });
     await user.click(closeBtn);
 
-    expect(screen.queryByRole("heading", { name: /Inspeção Técnica de Auditoria Imutável/i })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /Inspeção técnica de auditoria/i })).toBeNull();
   });
 });

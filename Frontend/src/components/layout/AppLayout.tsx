@@ -29,7 +29,7 @@ export function AppLayout() {
       <div className="min-w-0 lg:ps-72">
         <Header isSidebarOpen={isMobileSidebarOpen} onOpenSidebar={() => setIsMobileSidebarOpen(true)} />
         <main ref={mainRef} id="page-content" tabIndex={-1} className="mx-auto w-full min-w-0 max-w-[1600px] px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8">
-          {!isApiMode && <p role="status" className="mb-6 rounded-xl border border-status-yellow-text bg-status-yellow-background p-3 text-body-medium text-status-yellow-text">Modo demonstração · dados sintéticos. Alterações de demonstração não são registros clínicos persistidos.</p>}
+          {!isApiMode && <p role="status" className="mb-6 rounded-lg border border-status-yellow-text bg-status-yellow-background p-3 text-body-medium text-status-yellow-text">Modo demonstração com dados sintéticos. O que você altera aqui não vira registro clínico.</p>}
           <RouteErrorBoundary key={pathname}>
             <Suspense fallback={<PageLoading />}>
               <Outlet />

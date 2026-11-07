@@ -67,3 +67,10 @@ describe("BoardUI compatibility with existing forms", () => {
     expect(submit).not.toHaveBeenCalled();
   });
 });
+
+describe("Textarea for clinical narrative", () => {
+  it("marks the real field with the record typography", () => {
+    render(<Textarea aria-label="Nota sintética" record defaultValue="Texto sintético" />);
+    expect(screen.getByRole("textbox", { name: "Nota sintética" }).className).toContain("font-serif!");
+  });
+});

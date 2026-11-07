@@ -50,8 +50,8 @@ export function ClinicalSessionEditor({ patientId, sessionId, note, onDirtyChang
     <p className="text-body-regular text-text-secondary">Salve explicitamente antes de sair. A nota é registrada no servidor; não depende da IA e não é assinada por este botão.</p>
     {locked && <p role="status" className="text-body-medium text-status-yellow-text">Nota assinada: leitura disponível. O fluxo de retificação ainda não está disponível nesta tela.</p>}
     <label htmlFor="clinical-session-note" className="block text-body-medium">Nota da sessão</label>
-    <Textarea id="clinical-session-note" rows={14} maxLength={50000} value={content} onChange={(event) => setContent(event.target.value)} readOnly={locked || save.isPending} required placeholder="Escreva o registro desta sessão. Nenhum texto clínico é preenchido automaticamente." />
-    <p role="status" className="text-caption-1-regular text-text-secondary">{dirty ? "Alterações ainda não salvas." : noteId ? `Nota salva no servidor · versão ${version}.` : "Nenhuma nota salva nesta sessão."}</p>
+    <Textarea id="clinical-session-note" record rows={14} maxLength={50000} value={content} onChange={(event) => setContent(event.target.value)} readOnly={locked || save.isPending} required placeholder="Escreva o registro desta sessão. Nenhum texto clínico é preenchido automaticamente." />
+    <p role="status" className="text-caption-1-regular text-text-secondary">{dirty ? "Alterações ainda não salvas." : noteId ? `Nota salva no servidor, versão ${version}.` : "Nenhuma nota salva nesta sessão."}</p>
     {save.isError && <p role="alert" className="text-body-regular text-text-error-primary">{apiErrorMessage(save.error, "Falha ao salvar. O texto foi mantido para nova tentativa.")}</p>}
     <div className="flex flex-wrap gap-2">
       <Button type="submit" disabled={locked || save.isPending || !dirty || !content.trim()}>{save.isPending ? "Salvando…" : "Salvar nota"}</Button>

@@ -43,3 +43,11 @@ This project uses BoardUI (React + Tailwind CSS v4, source-owned components unde
 
 When unsure about a token, a component's API, or working example code, ask the BoardUI MCP server: `get_theme`, `get_component`, `get_usage_examples`.
 <!-- boardui:rules:end -->
+
+## AELO design system
+
+The AELO layer over BoardUI lives in `src/styles/aelo-tokens.css`, with the guide in `docs/design/AELO_DESIGN_SYSTEM.md` at the repository root. Keep using semantic tokens: change meanings there, never with literals in components.
+
+- `aelo-record` is for clinical narrative, and `aelo-page-title` for page titles. Everything else stays in the sans family.
+- The continuity thread (`aelo-nav-link`, `aelo-thread-list`, `aelo-thread-item`) marks only the current page and the sequence of sessions.
+- Run `npx vitest run src/styles/aelo-tokens.test.ts` after changing colors.

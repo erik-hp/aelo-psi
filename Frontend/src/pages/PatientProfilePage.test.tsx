@@ -114,9 +114,9 @@ describe("PatientProfilePage Clinical Tabs", () => {
     });
 
     // 4 Abas Clínicas presentes no DOM (Leis de Miller e Jakob)
-    const tabOverview = screen.getByRole("tab", { name: /Resumo Clínico/i });
-    const tabSessions = screen.getByRole("tab", { name: /Prontuários e Sessões/i });
-    const tabLongitudinal = screen.getByRole("tab", { name: /Evolução Longitudinal/i });
+    const tabOverview = screen.getByRole("tab", { name: /Resumo clínico/i });
+    const tabSessions = screen.getByRole("tab", { name: /Prontuários e sessões/i });
+    const tabLongitudinal = screen.getByRole("tab", { name: /Evolução longitudinal/i });
     const tabVault = screen.getByRole("tab", { name: /Cofre Cognitivo \(Vault\)/i });
 
     expect(tabOverview).toBeDefined();
@@ -124,14 +124,14 @@ describe("PatientProfilePage Clinical Tabs", () => {
     expect(tabLongitudinal).toBeDefined();
     expect(tabVault).toBeDefined();
 
-    // Inicialmente na aba "Resumo Clínico"
+    // Inicialmente na aba "Resumo clínico"
     expect(screen.getByText("Tempo em tratamento")).toBeDefined();
     expect(screen.getByText("8 meses")).toBeDefined();
 
-    // Navega para aba "Prontuários e Sessões"
+    // Navega para aba "Prontuários e sessões"
     fireEvent.click(tabSessions);
     await waitFor(() => {
-      expect(screen.getByText("Histórico de Atendimentos e Prontuários")).toBeDefined();
+      expect(screen.getByText("Histórico de atendimentos e prontuários")).toBeDefined();
       expect(screen.getByText("Sessão 14 - Reestruturação Cognitiva")).toBeDefined();
     });
 
@@ -141,15 +141,15 @@ describe("PatientProfilePage Clinical Tabs", () => {
     fireEvent.click(toggleBtn);
     expect(screen.getByText(/Ocultar editor de análise/i)).toBeDefined();
 
-    // Navega para aba "Evolução Longitudinal"
+    // Navega para aba "Evolução longitudinal"
     fireEvent.click(tabLongitudinal);
     await waitFor(() => {
-      expect(screen.getByText("Métricas e Evolução Longitudinal")).toBeDefined();
-      expect(screen.getByText("Indicador de Humor")).toBeDefined();
-      expect(screen.getByText("Estado Emocional")).toBeDefined();
+      expect(screen.getByText("Métricas e Evolução longitudinal")).toBeDefined();
+      expect(screen.getByText("Indicador de humor")).toBeDefined();
+      expect(screen.getByText("Estado emocional")).toBeDefined();
     });
 
-    // Navega para aba "Cofre Cognitivo (Vault)"
+    // Navega para aba "Cofre cognitivo (Vault)"
     fireEvent.click(tabVault);
     await waitFor(() => {
       expect(screen.getAllByText(/Cofre Cognitivo/i).length).toBeGreaterThan(1);
@@ -174,9 +174,9 @@ describe("PatientProfilePage Clinical Tabs", () => {
       expect(screen.getByText("Ana Beatriz Ramos")).toBeDefined();
     });
 
-    const tabOverview = screen.getByRole("tab", { name: /Resumo Clínico/i });
+    const tabOverview = screen.getByRole("tab", { name: /Resumo clínico/i });
     const tabVault = screen.getByRole("tab", { name: /Cofre Cognitivo \(Vault\)/i });
-    const tabSessions = screen.getByRole("tab", { name: /Prontuários e Sessões/i });
+    const tabSessions = screen.getByRole("tab", { name: /Prontuários e sessões/i });
 
     expect(tabOverview.getAttribute("aria-selected")).toBe("true");
 

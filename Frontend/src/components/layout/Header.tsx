@@ -1,5 +1,6 @@
-import { Bell, LogOut, Menu, ShieldCheck } from "lucide-react";
+import { Bell, LogOut, Menu } from "lucide-react";
 import { RiSearchLine } from "@remixicon/react";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,13 +12,15 @@ export interface HeaderProps {
   isSidebarOpen?: boolean;
 }
 
+const roleLabels: Record<string, string> = { ADMIN: "Administração", PSYCHOLOGIST: "Psicologia", INTERN: "Estágio" };
+
 export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
   const { user, logout } = useAuth();
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border-button-default bg-background-full backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-separator-border bg-background-full">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-8">
         <Button
           className="lg:hidden"
@@ -37,12 +40,10 @@ export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
           <Button size="icon" variant="ghost" aria-label="Notificações indisponíveis" title="Notificações ainda não implementadas" disabled>
             <Bell className="h-4 w-4" />
           </Button>
-          <div className="hidden items-center gap-3 rounded-md border border-border-button-default bg-background-primary-default px-3 py-2 sm:flex">
-            <ShieldCheck className="h-4 w-4 text-status-lime-text" />
-            <div>
-              <p className="text-caption-1-medium">{user?.name}</p>
-              <p className="text-caption-1-regular text-text-secondary">{user?.role}</p>
-            </div>
+          <ThemeToggle />
+          <div className="hidden px-2 sm:block">
+            <p className="text-caption-1-medium">{user?.name}</p>
+            <p className="text-caption-1-regular text-text-secondary">{user ? roleLabels[user.role] ?? user.role : null}</p>
           </div>
           <Button size="icon" variant="ghost" aria-label="Sair" onClick={logout}>
             <LogOut className="h-4 w-4" />

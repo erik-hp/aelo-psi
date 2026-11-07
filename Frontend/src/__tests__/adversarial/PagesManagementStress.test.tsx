@@ -127,7 +127,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
     );
 
     // Screen must not crash
-    expect(await screen.findByText("Dashboard Clínico")).toBeDefined();
+    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
     // Clinical sessions and Hero Card must remain visible and functional
     expect(await screen.findByRole("heading", { name: "Paciente Alpha", level: 2 })).toBeDefined();
     expect(screen.getAllByText(/10:00/).length).toBeGreaterThan(0);
@@ -148,7 +148,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
     );
 
     // Screen must not crash
-    expect(await screen.findByText("Dashboard Clínico")).toBeDefined();
+    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
     // Agenda error alert is displayed gracefully in Hero slot
     expect(await screen.findByText(/Não foi possível sincronizar a agenda imediata/i)).toBeDefined();
     // Agenda section alert is displayed
@@ -171,7 +171,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("Dashboard Clínico")).toBeDefined();
+    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
     expect(await screen.findByText(/Indicadores de pacientes temporariamente indisponíveis/i)).toBeDefined();
     expect(await screen.findByText(/Não foi possível sincronizar a agenda imediata/i)).toBeDefined();
     expect(await screen.findByText(/Dados financeiros temporariamente indisponíveis/i)).toBeDefined();
@@ -208,7 +208,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("Dashboard Clínico")).toBeDefined();
+    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
     const items = await screen.findAllByText("Paciente Sem Dados");
     expect(items.length).toBeGreaterThan(0);
     expect(screen.getByText(/Sem observações adicionais para este atendimento/i)).toBeDefined();
@@ -261,7 +261,7 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
     expect(await screen.findByText("Carlos Eduardo")).toBeDefined();
 
     // Toggle to Monthly Matrix
-    const matrixBtn = screen.getByRole("button", { name: /Matriz Mensal/i });
+    const matrixBtn = screen.getByRole("button", { name: /Matriz mensal/i });
     fireEvent.click(matrixBtn);
 
     expect(await screen.findByText(/Clique em um dia para selecionar e inspecionar/i)).toBeDefined();
@@ -273,7 +273,7 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
     fireEvent.click(allDayButtons[0]);
 
     // Should return to timeline mode
-    expect(await screen.findByRole("button", { name: /Linha do Tempo Diária/i })).toBeDefined();
+    expect(await screen.findByRole("button", { name: /Linha do tempo diária/i })).toBeDefined();
   });
 
   it("executes full lifecycle transition: draft -> in_progress -> needs_review -> completed", async () => {
@@ -288,22 +288,22 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
       </QueryClientProvider>,
     );
 
-    // 1. Initial draft status has "Iniciar Consulta" button
+    // 1. Initial draft status has "Iniciar consulta" button
     expect(await screen.findByText("Carlos Eduardo")).toBeDefined();
-    const startBtn = screen.getByRole("button", { name: /Iniciar Consulta/i });
+    const startBtn = screen.getByRole("button", { name: /Iniciar consulta/i });
     fireEvent.click(startBtn);
 
     // Toast feedback appears
     expect(await screen.findByText(/A sessão foi atualizada para "Em atendimento"/i)).toBeDefined();
 
-    // 2. Now status is in_progress, button is "Encerrar & Evoluir Nota"
-    const endBtn = await screen.findByRole("button", { name: /Encerrar & Evoluir Nota/i });
+    // 2. Now status is in_progress, button is "Encerrar e evoluir nota"
+    const endBtn = await screen.findByRole("button", { name: /Encerrar e evoluir nota/i });
     fireEvent.click(endBtn);
 
     expect(await screen.findByText(/A sessão foi atualizada para "Evolução pendente"/i)).toBeDefined();
 
-    // 3. Now status is needs_review, button is "Assinar & Finalizar"
-    const signButtons = await screen.findAllByRole("button", { name: /Assinar & Finalizar/i });
+    // 3. Now status is needs_review, button is "Assinar e finalizar"
+    const signButtons = await screen.findAllByRole("button", { name: /Assinar e finalizar/i });
     expect(signButtons.length).toBeGreaterThan(0);
     fireEvent.click(signButtons[0]);
 
@@ -326,7 +326,7 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
     const newBtn = await screen.findByRole("button", { name: /Nova sessão/i });
     await user.click(newBtn);
 
-    expect(screen.getByRole("heading", { name: /Agendar Nova Sessão Clínica/i })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Agendar nova sessão clínica/i })).toBeDefined();
 
     // Type spaces only
     const nameInput = screen.getByLabelText(/Nome do Paciente/i);
@@ -439,7 +439,7 @@ describe("Adversarial Stress Test: AuditTable & AuditPage Technical Inspection",
     await user.click(inspectButtons[2]);
 
     // Modal must be open
-    expect(screen.getByRole("heading", { name: /Inspeção Técnica de Auditoria Imutável/i })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Inspeção técnica de auditoria/i })).toBeDefined();
 
     // A missing hash must never be represented as a verified value.
     expect(screen.getByText(/Hash não informado pelo servidor/)).toBeDefined();
@@ -449,10 +449,10 @@ describe("Adversarial Stress Test: AuditTable & AuditPage Technical Inspection",
     expect(screen.queryByText(/PASSED_CRYPTOGRAPHIC_VERIFICATION/)).toBeNull();
 
     // Close modal
-    const closeBtn = screen.getByRole("button", { name: /Concluir Inspeção/i });
+    const closeBtn = screen.getByRole("button", { name: /Concluir inspeção/i });
     await user.click(closeBtn);
 
-    expect(screen.queryByRole("heading", { name: /Inspeção Técnica de Auditoria Imutável/i })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /Inspeção técnica de auditoria/i })).toBeNull();
   });
 
   it("filters events by role in AuditPage including PSYCHOLOGIST, INTERN and ADMIN", async () => {

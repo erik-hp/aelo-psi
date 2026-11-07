@@ -6,10 +6,9 @@ export function NotFoundPage() {
   return (
     <main className="grid min-h-screen place-items-center bg-background-full p-6 text-center">
       <div>
-        <p className="text-body-medium text-status-blue-text">404</p>
-        <h1 className="mt-3 text-title-1-semibold">Página não encontrada</h1>
+        <h1 className="aelo-page-title">Página não encontrada</h1>
         <p className="mt-3 max-w-md text-body-regular text-text-secondary">
-          A rota solicitada não existe ou não está disponível para o perfil atual.
+          Este endereço não existe ou não está disponível para o seu perfil.
         </p>
         <ButtonLink
           to="/dashboard"

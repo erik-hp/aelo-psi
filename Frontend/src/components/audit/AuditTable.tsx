@@ -66,8 +66,8 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
         columns={[
           {
             key: "date",
-            header: "Data / Hora",
-            render: (event) => <span className="font-mono text-caption-1-regular text-text-secondary">{event.date}</span>,
+            header: "Data e hora",
+            render: (event) => <span className="text-caption-1-regular tabular-nums text-text-secondary">{event.date}</span>,
           },
           {
             key: "actor",
@@ -93,7 +93,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
           },
           {
             key: "action",
-            header: "Ação Auditada",
+            header: "Ação auditada",
             render: (event) => {
               const cat = getEventCategory(event);
               return (
@@ -141,13 +141,13 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
 
       {/* MODAL / DRAWER DE DETALHES TÉCNICOS DO EVENTO DE AUDITORIA */}
       {activeEvent ? (
-        <Dialog open onClose={() => setActiveEvent(null)} title="Inspeção Técnica de Auditoria Imutável" size="xl">
+        <Dialog open onClose={() => setActiveEvent(null)} title="Inspeção técnica de auditoria" size="xl">
             <div className="flex items-start justify-between border-b border-border-button-default pb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-status-lime-text" />
                   <h2 id="audit-detail-title" className="text-title-3-bold text-text-primary">
-                    Inspeção Técnica de Auditoria Imutável
+                    Inspeção técnica de auditoria
                   </h2>
                 </div>
                 <p className="text-caption-1-regular text-text-secondary font-mono">
@@ -167,7 +167,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             {/* Metadados Principais */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-caption-1-regular">
               <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
-                <span className="text-text-secondary">Classificação & Gravidade</span>
+                <span className="text-text-secondary">Classificação e gravidade</span>
                 <div>
                   <Badge variant={getEventCategory(activeEvent).variant} className="text-caption-1-regular">
                     {getEventCategory(activeEvent).label}
@@ -176,28 +176,28 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
               </div>
 
               <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
-                <span className="text-text-secondary">Usuário Responsável & Perfil</span>
+                <span className="text-text-secondary">Usuário responsável e perfil</span>
                 <p className="text-body-semibold text-text-primary">
-                  {activeEvent.actor} • <Badge variant="muted">{activeEvent.role}</Badge>
+                  {activeEvent.actor}, <Badge variant="muted">{activeEvent.role}</Badge>
                 </p>
               </div>
 
               <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
-                <span className="text-text-secondary">Data e Fuso Horário</span>
+                <span className="text-text-secondary">Data e fuso horário</span>
                 <p className="text-body-semibold text-text-primary">{activeEvent.date}</p>
               </div>
 
               <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
-                <span className="text-text-secondary">Origem do Tráfego (IP)</span>
+                <span className="text-text-secondary">Origem do tráfego (IP)</span>
                 <p className="font-mono text-text-primary">{activeEvent.ip}</p>
               </div>
             </div>
 
             {/* Ação e Entidade */}
             <div className="rounded-lg border border-border-button-default p-3.5 bg-background-secondary-default space-y-1">
-              <span className="text-caption-1-regular text-text-secondary">Ação Realizada</span>
+              <span className="text-caption-1-regular text-text-secondary">Ação realizada</span>
               <p className="text-body-semibold text-text-primary">{activeEvent.action}</p>
-              <span className="text-caption-1-regular text-text-secondary mt-2 block">Entidade Afetada</span>
+              <span className="text-caption-1-regular text-text-secondary mt-2 block">Entidade afetada</span>
               <p className="text-caption-1-regular text-text-primary font-mono">{activeEvent.entity}</p>
             </div>
 
@@ -205,7 +205,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-caption-1-semibold text-text-primary">
                 <KeyRound className="h-3.5 w-3.5 text-status-lime-text" />
-                Hash Criptográfico de Integridade (SHA-256):
+                Hash de integridade (SHA-256):
               </div>
               <div className="rounded-md border border-status-lime-text bg-status-lime-background p-2.5 font-mono text-caption-1-regular break-all text-status-lime-text select-all">
                 {activeEvent.sha256 || "Hash não informado pelo servidor"}
@@ -219,7 +219,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-caption-1-semibold text-text-primary">
                 <FileCode2 className="h-3.5 w-3.5 text-status-blue-text" />
-                Payload de Rastreabilidade Estruturado:
+                Dados de rastreabilidade:
               </div>
               <pre className="max-h-48 overflow-y-auto rounded-lg border border-border-button-default bg-background-secondary-default p-3 text-caption-1-regular font-mono text-text-primary">
                 {JSON.stringify(
@@ -240,7 +240,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
 
             <div className="flex justify-end pt-3 border-t border-border-button-default">
               <Button onClick={() => setActiveEvent(null)}>
-                Concluir Inspeção
+                Concluir inspeção
               </Button>
             </div>
         </Dialog>

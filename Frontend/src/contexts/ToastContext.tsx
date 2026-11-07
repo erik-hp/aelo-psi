@@ -19,7 +19,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed end-4 top-4 z-[120] flex w-[min(92vw,380px)] flex-col gap-3" aria-live="polite">
+      <div className="fixed bottom-4 end-4 z-[120] flex w-[min(92vw,380px)] flex-col gap-3" aria-live="polite">
         {toasts.map((toast) => (
           <div key={toast.id} className="clinical-panel flex gap-3 p-4">
             {toast.type === "error" ? (

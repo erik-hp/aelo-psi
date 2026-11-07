@@ -38,12 +38,12 @@ export function ClinicalEditorPage() {
     if (notes.isLoading) return <PageLoading />;
     if (notes.isError) return <PageError description="Não foi possível consultar a nota. Confira sua permissão de acesso." />;
     return <Card><CardContent className="p-5">
-      <h2 className="mb-4 text-headline-semibold">{selectedPatient.name} · {session.date}</h2>
+      <h2 className="mb-4 text-headline-semibold">{selectedPatient.name}, {session.date}</h2>
       <ClinicalSessionEditor key={`${patientId}:${sessionId}:${note?.id ?? "new"}`} patientId={patientId} sessionId={sessionId} note={note} onDirtyChange={setDirty} />
     </CardContent></Card>;
   }
   return <>
-    <PageHeader title="Editor Narrativo de Prontuário" description="Selecione o paciente e uma sessão sob sua responsabilidade para registrar a nota clínica." action={<ButtonLink to="/patients">Pacientes</ButtonLink>} />
+    <PageHeader title="Editor narrativo de prontuário" description="Selecione o paciente e uma sessão sob sua responsabilidade para registrar a nota clínica." action={<ButtonLink to="/patients">Pacientes</ButtonLink>} />
     {patients.isLoading ? <PageLoading /> : patients.isError ? <PageError description="Não foi possível carregar os pacientes." /> : !patients.data?.length ? <EmptyState title="Cadastre um paciente para começar" description="Depois do cadastro, agende uma sessão e retorne ao editor." /> : <>
       <div className="mb-6 grid gap-4 md:grid-cols-2">
         <div className="space-y-2"><label htmlFor="editor-patient">Paciente</label><Select id="editor-patient" disabled={dirty} value={patientId} onChange={(event) => setParams(event.target.value ? { patient: event.target.value } : {})}><option value="">Selecione um paciente</option>{patients.data.map((patient) => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</Select></div>

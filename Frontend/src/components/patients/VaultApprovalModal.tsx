@@ -102,7 +102,7 @@ export function VaultApprovalModal({
                 onClick={() => setJustification(quickText)}
                 className="rounded-full border border-border-button-default bg-background-secondary-default px-2.5 py-1 text-left text-caption-1-regular text-text-secondary transition-colors hover:border-border-focus-ring hover:bg-background-secondary-default hover:text-text-primary"
               >
-                + {quickText.length > 45 ? `${quickText.slice(0, 42)}...` : quickText}
+                + {quickText.length > 45 ? `${quickText.slice(0, 42)}…` : quickText}
               </button>
             ))}
           </div>
@@ -121,7 +121,7 @@ export function VaultApprovalModal({
             rows={4}
             placeholder="Descreva a fundamentação técnica para homologação deste checkpoint do cofre cognitivo…"
             aria-label="Justificativa clínica"
-            className="text-body-regular"
+            record
           />
           <div className="flex items-center justify-between text-caption-1-regular text-text-secondary">
             <span>Mínimo de 10 caracteres para validação ética.</span>
@@ -147,7 +147,7 @@ export function VaultApprovalModal({
             type="button"
             disabled={busy || !isValid || (requireHash && !verifiedHashShape)}
             onClick={() => onConfirm(justification.trim())}
-            className="gap-2 px-5 text-body-semibold shadow-md"
+            className="gap-2 px-5 text-body-semibold"
           >
             <CheckCircle2 className="h-4 w-4" />
             Assinar aprovação

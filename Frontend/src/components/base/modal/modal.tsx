@@ -68,7 +68,7 @@ export type ModalSize = "sm" | "md" | "lg" | "xl";
 const styles = sortCx({
   overlay: "group/modal fixed inset-x-0 top-0 z-100 flex h-(--visual-viewport-height) items-center justify-center p-4 sm:p-6",
   backdrop: [
-    "absolute inset-0 bg-black/70",
+    "absolute inset-0 bg-overlay",
     "transition-opacity duration-300 ease-out",
     "group-data-[entering]/modal:opacity-0 group-data-[exiting]/modal:opacity-0",
   ].join(" "),
