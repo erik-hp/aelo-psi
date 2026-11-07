@@ -96,3 +96,50 @@ def test_readiness_rejects_missing_required_model(monkeypatch):
         asyncio.run(ai_module.health_ready())
     assert error.value.status_code == 503
     assert error.value.detail["status"] == "not_ready"
+
+
+def graph_of(nodes, edges):
+    return ai_module.VaultExtraction(
+        nodes=[{"kind": kind, "label": label, "evidence": evidence} for kind, label, evidence in nodes],
+        edges=[{"source": source, "target": target, "relation": relation, "evidence": evidence, "confidence": 0.8} for source, target, relation, evidence in edges],
+    )
+
+
+NOTE_TEXT = "Relata insônia desde a demissão e evita a casa antiga."
+
+
+def test_invalid_concept_is_dropped_without_losing_the_rest_of_the_note():
+    extraction = graph_of(
+        [("symptom", "insônia", "insônia"), ("event", "evitação da casa", "evita a casa antiga"), ("event", "demissão", "demissão")],
+        [(0, 2, "associated", "insônia desde a demissão"), (0, 1, "associated", "insônia desde a demissão")],
+    )
+    kept = ai_module.literal_graph(extraction, NOTE_TEXT)
+    assert [node.label for node in kept.nodes] == ["insônia", "demissão"]
+    assert [(edge.source, edge.target) for edge in kept.edges] == [(0, 1)]
+
+
+def test_concept_without_literal_evidence_is_never_kept():
+    extraction = graph_of([("symptom", "insônia", "frase que a nota não contém")], [])
+    assert ai_module.literal_graph(extraction, NOTE_TEXT).nodes == []
+
+
+def test_invented_concept_and_unsupported_types_are_dropped():
+    extraction = graph_of(
+        [("symptom", "depressão maior", "insônia"), ("diagnosis", "insônia", "insônia"), ("symptom", "insônia", "insônia"), ("event", "demissão", "demissão")],
+        [(2, 3, "causes", "insônia desde a demissão"), (2, 3, "associated", "trecho inventado"), (2, 2, "associated", "insônia")],
+    )
+    kept = ai_module.literal_graph(extraction, NOTE_TEXT)
+    assert [node.label for node in kept.nodes] == ["insônia", "demissão"]
+    assert kept.edges == []
+
+
+def test_extraction_prompt_requires_exact_copies(monkeypatch):
+    captured = {}
+
+    async def fake_generate(prompt):
+        captured.update(prompt)
+        return "{}"
+
+    monkeypatch.setattr(ai_module, "generate_json", fake_generate)
+    asyncio.run(ai_module.ollama_vault(ai_module.ContextItem(note_id="n", created_at="2026-01-01", text=NOTE_TEXT)))
+    assert "exact" in captured["schema"]["nodes"][0]["label"]

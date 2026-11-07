@@ -53,6 +53,10 @@ Tecnicamente é viável. O bloqueio atual é de governança, segurança e norma 
 | Servidor próprio com GPU | Mantém os dados sob controle da clínica, com custo e operação próprios. Não gera conformidade automática. |
 | Pseudonimizar e enviar excertos | Rejeitada por ora, pelos fundamentos 3, 4, 7 e 8. |
 
+## Uso já realizado
+
+Em 06/11/2026, 20 notas totalmente sintéticas foram enviadas ao Claude em avaliação isolada, por decisão do autor e dentro da alternativa aceitável acima. Nenhum dado real foi enviado, e o sistema continua sem qualquer rota de envio externo.
+
 ## Consequências
 
 O projeto preserva a hipótese H2 do TCC e evita depender de fornecedor. Em troca, aceita a capacidade do hardware local e precisa medir latência e qualidade reais. Execução local também não é conformidade automática: criptografia, acesso, backup e RIPD continuam necessários.

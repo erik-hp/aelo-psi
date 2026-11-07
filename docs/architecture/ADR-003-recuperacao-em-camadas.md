@@ -55,6 +55,12 @@ Experimento sintético com 20 pacientes e 60 sessões, usando o código real de 
 
 Limites conhecidos: paráfrase não é reconhecida pela busca lexical, não há redução de palavras à raiz, e a seleção decifra notas e rótulos na aplicação, com tempo ainda não medido em histórico longo.
 
+### Medição com modelo real
+
+Em 20 notas sintéticas com Claude (`sonnet`), a primeira rodada achou 43 de 44 conceitos, mas a validação manteve só 15: o prompt pedia conceito resumido e a regra exigia cópia literal. Depois de pedir cópia exata e descartar só o item inválido, foram 44 de 44, com 59 de 59 conceitos aceitos. As notas são curtas e explícitas, o gabarito é do mesmo autor e o prompt foi ajustado após a primeira rodada. Isso valida o caminho técnico, não a qualidade clínica, e não vale para o modelo local.
+
+Rótulos são cópias literais. Paráfrases como "evitação da casa antiga" são recusadas de propósito, pois seriam interpretação gravada como conceito.
+
 ## Alternativas
 
 | Alternativa | Avaliação |
@@ -68,7 +74,7 @@ Limites conhecidos: paráfrase não é reconhecida pela busca lexical, não há 
 
 ## Próximos passos
 
-1. Medir a extração com modelo real em conjunto sintético de referência.
+1. Ampliar o conjunto sintético, com notas longas e implícitas, e medir o modelo local escolhido.
 2. Classificar relevância para ordenar, com revisão humana.
 3. Adicionar vetores por trecho, com busca exata filtrada por clínica e paciente. Índice HNSW global não é indicado, e `tsvector` em claro desfaria a criptografia.
 4. Para o TCC2, comparar só estrutura com estrutura + texto, estratificando pela idade da evidência, com Recall@k, MRR e precisão de citação. Não foi encontrado teste equivalente em psicoterapia.

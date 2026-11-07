@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** medir a extração com `llama3.1` real em conjunto sintético de referência; depois OP-00/UX-01. G0 permanece bloqueado.
+- **Próxima tarefa:** ampliar o conjunto sintético com notas longas e implícitas e medir o modelo local escolhido; depois OP-00/UX-01. G0 permanece bloqueado.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -335,6 +335,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Incidente: apagar a branch do #15 no merge fechou o #16, que a usava como base. A branch foi restaurada, o #16 reaberto e redirecionado, sem perda de conteúdo.
 - Daqui em diante, branch nova só quando realmente necessária; ajuste pequeno de documentação vai direto em `main`, a pedido do autor.
 - A integração não altera o gate: **G0 continua BLOQUEADO**. Ambientes existentes precisam aplicar a migração `ai_analysis.0013`. Com `DEBUG=False`, senha forte do banco e origens explícitas passam a ser exigidas.
+
+## Extração medida com modelo real, via Claude — 06/11/2026 — EM REVISÃO
+
+- A pedido do autor, a medição usou o Claude em vez do `llama3.1`, com o download interrompido. Foram 20 notas sintéticas fixas e 44 conceitos de gabarito definidos antes da primeira execução, em `Backend/tests/evaluate_extraction.py`. Cada nota foi para um `claude -p` novo (modelo `sonnet`), sem ferramentas, sem projeto e em pasta vazia. Uso compatível com a ADR-004: somente dados sintéticos, em avaliação isolada do produto. Nenhuma rota do sistema envia dados ao Claude.
+- **Defeito revelado:** o modelo achou 43 de 44 conceitos, mas a validação rejeitou 14 das 20 notas, restando 15 conceitos. O prompt pedia "short concept" e a validação exigia cópia literal, descartando a nota inteira por um rótulo. Os testes anteriores usavam respostas simuladas e não podiam mostrar isso.
+- **Correção:** o prompt exige cópia exata, sem paráfrase; `literal_graph` descarta só o conceito ou a relação sem âncora na nota. A garantia foi mantida: rótulos interpretativos não entram. Se nada proposto sobreviver, a falha continua explícita (503).
+- **Resultado após a correção:** 20 de 20 notas com grafo, 59 de 59 conceitos e 37 de 37 relações aceitos, 44 de 44 conceitos do gabarito, mediana de cerca de 4 s por nota. Backend 185 aprovados/2 ignorados, Ruff sem erros.
+- **Limites:** notas curtas e explícitas, gabarito do mesmo autor das notas e prompt ajustado depois da primeira medição: não é taxa real. O resultado **não vale para `llama3.1`**, modelo do produto, ainda não medido. **G0 continua BLOQUEADO**.
 
 ## Pendências de decisão
 
