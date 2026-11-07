@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "declared_data_classification": "synthetic",
+  "notes": [
+    {"id": "nota-01", "patient_id": "ficticio-A", "version": 1, "text": "Registro sintético: personagem fictício relata sono irregular após troca de turno."},
+    {"id": "nota-02", "patient_id": "ficticio-A", "version": 1, "text": "Registro sintético: personagem fictício descreve maior regularidade no descanso."},
+    {"id": "nota-03", "patient_id": "ficticio-B", "version": 1, "text": "Registro sintético: outra personagem participou de atividade de lazer."}
+  ],
+  "cases": [
+    {
+      "id": "recuperacao-historica-A",
+      "patient_id": "ficticio-A",
+      "gold_note_ids": ["nota-01", "nota-02"],
+      "retrieved_note_ids": ["nota-02", "nota-01"],
+      "claims": [
+        {"text": "Trecho literal relacionado ao descanso", "source": {"note_id": "nota-02", "version": 1, "excerpt": "maior regularidade no descanso"}}
+      ]
+    }
+  ]
+}
