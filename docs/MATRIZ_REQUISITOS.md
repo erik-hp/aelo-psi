@@ -47,7 +47,7 @@ Ver [Plano Mestre](PLANO_MESTRE_IMPLEMENTACAO.md) e [registro](REGISTRO_EXECUCAO
 
 ## Regras de atualização
 
-Continuação F0-02 (09/11/2026): RF-01/RNF-02/RNF-08 recebem correção de vazamento nos seletores HTML e de enumeração por relações/filtros, código `18c13ea`, [PR #24](https://github.com/erik-hp/aelo-psi/pull/24). Dez falhas reproduzidas antes da correção; 164 casos novos aprovados; suíte completa 455 aprovados/2 ignorados, Ruff/check/migrations aprovados. [Cobertura e limites](validation/F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md). **EM REVISÃO**, sem promoção dos critérios integrais ou de G0.
+Continuação F0-02 (09/11/2026): RF-01/RNF-02/RNF-08 recebem correção de vazamento nos seletores HTML e de enumeração por relações/filtros, código `18c13ea`, [PR #24](https://github.com/erik-hp/aelo-psi/pull/24). Dez falhas reproduzidas antes da correção; 164 casos novos aprovados; suíte completa SQLite 455 aprovados/2 ignorados e PostgreSQL/pgvector local 457 aprovados; Ruff/Bandit/check/migrations aprovados. CI de `b3ca6ef` incompleta por falhas de inicialização, com smoke/carga remotos aprovados. [Cobertura e limites](validation/F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md). **EM REVISÃO**, sem promoção dos critérios integrais ou de G0.
 
 Evidência incremental F0-02 (09/11/2026): RF-01/RNF-02/RNF-08 recebem 79 cenários de autorização em `Backend/tests/test_authorization_matrix.py`, código `0dbb833`, [PR #24](https://github.com/erik-hp/aelo-psi/pull/24). Suíte combinada: 291 aprovados/2 ignorados. [Matriz executada e limites](validation/F0_AUTHORIZATION_MATRIX_2026-11-09.md). **EM REVISÃO**; listagens/mutações e demais critérios integrais ainda exigem consolidação. Não promove requisitos completos nem G0.
 

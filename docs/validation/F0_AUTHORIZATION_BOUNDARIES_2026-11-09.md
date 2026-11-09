@@ -50,14 +50,28 @@ Dentro de `Backend`:
 | `.venv/Scripts/python.exe -m pytest tests/test_authorization_actions.py tests/test_authorization_boundaries.py -q -p no:cacheprovider --tb=short`, após ampliar/corrigir os testes | 164 aprovados |
 | `.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider --tb=short` | **455 aprovados, 2 ignorados**, 1 aviso Starlette/httpx |
 | `.venv/Scripts/python.exe -m ruff check .` | Sem erros |
+| `.venv/Scripts/python.exe -m bandit -r apps ai_service services config -x '**/migrations/**' -ll -q` | Código de saída 0, sem achados no nível configurado |
 | `.venv/Scripts/python.exe manage.py check --settings=config.settings_test` | Sem problemas |
 | `.venv/Scripts/python.exe manage.py makemigrations --check --dry-run --settings=config.settings_test` | Nenhuma alteração |
 
 Na raiz, `git diff --check` passou após retirar uma linha vazia excedente da fixture compartilhada. A primeira versão dos testes ampliados comparava UUID Python com string; as expectativas foram corrigidas para verificar o JSON HTTP. Essas falhas de teste não são contabilizadas como defeitos do produto.
 
+### PostgreSQL/pgvector local e CI desta continuação
+
+O SHA `b3ca6ef` não obteve CI completa: [baseline](https://github.com/erik-hp/aelo-psi/actions/runs/42672100113), [dependências](https://github.com/erik-hp/aelo-psi/actions/runs/42672100535) e [segredos](https://github.com/erik-hp/aelo-psi/actions/runs/42672100495) terminaram em falha sem jobs. [Qualidade](https://github.com/erik-hp/aelo-psi/actions/runs/42672100090) terminou em falha com somente o job `security-smoke` executado e aprovado, incluindo carga curta e nova verificação após a carga. Não foram executados seus jobs backend/frontend/segredos. API e CLI não expuseram a causa; o CLI do baseline indicou possível problema no processamento do workflow. A tentativa de reexecutar os jobs falhos recebeu HTTP 403, `This workflow run cannot be retried`. Não houve alteração em `.github/` entre `32d57e6` e `b3ca6ef`. Causa não demonstrada; não tratar como regressão de teste nem como CI aprovada.
+
+Para verificar o banco-alvo, foi executada uma pilha local **separada**:
+
+```powershell
+docker compose -p aelo-f002-boundaries-20261109 -f Backend/docker-compose.test.yml run --build --rm backend_test
+docker compose -p aelo-f002-boundaries-20261109 -f Backend/docker-compose.test.yml down
+```
+
+Resultado: migrações aprovadas e **457 testes aprovados**, nenhum ignorado, 1 aviso Starlette/httpx. O banco usou `tmpfs`, sem portas publicadas; a pilha foi encerrada depois. Isso comprova a suíte PostgreSQL/pgvector local no código desta entrega, sem substituir os checks remotos que não iniciaram. Docker precisou de execução aprovada fora do sandbox por bloqueio do socket/configuração do cliente.
+
 ## Limites e próxima tarefa
 
-Resultados locais usam SQLite e autenticação forçada para isolar autorização. HTML foi renderizado pela própria API, sem inspeção visual em navegador. Não repetir alegações de PostgreSQL, JWT/TLS, concorrência ou modelo real com base nesses resultados; conferir a CI do SHA final antes de merge. Frontend não foi alterado nem retestado localmente nesta continuação.
+Os casos de autorização usam autenticação forçada para isolar a política, executados em SQLite e depois PostgreSQL/pgvector. HTML foi renderizado pela própria API, sem inspeção visual em navegador. Não inferir validação TLS, concorrência completa ou modelo real; conferir a CI do SHA final antes de merge. Frontend não foi alterado nem retestado localmente nesta continuação. A falha de inicialização dos workflows é pendência F0-05.
 
 O incremento destacado de listagens/filtros, mutações, concessões e revisão/download está implementado e verificado nos cenários acima. Isso não prova cobertura exaustiva de toda a API nem encerra RF-01/RNF-02. Permanecem revisão independente, concorrência/revogação em execução e consolidação dos controles de implantação.
 
