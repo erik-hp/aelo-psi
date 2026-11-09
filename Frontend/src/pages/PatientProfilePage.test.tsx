@@ -35,7 +35,6 @@ const mockPatientData = {
     sessionFrequency: "Semanal" as const,
     lastSession: "14/04/2026",
     nextSession: "21/04/2026",
-    riskLevel: "atenção" as const,
     therapist: "Dra. Helena",
     tags: ["TCC", "Ansiedade"],
   },
@@ -62,7 +61,7 @@ const mockPatientData = {
       moodScore: 70,
       emotionalStateScore: 65,
       psychologicalBurdenScore: 40,
-      riskScenarios: ["Risco de esgotamento ocupacional."],
+      documentaryInconsistencies: ["Conferir o período relatado na sessão."],
       considerations: ["Melhora no autorregistro"],
       attentionPoints: ["Fadiga noturna"],
       patterns: ["Pensamento dicotômico"],
@@ -127,6 +126,9 @@ describe("PatientProfilePage Clinical Tabs", () => {
     // Inicialmente na aba "Resumo clínico"
     expect(screen.getByText("Tempo em tratamento")).toBeDefined();
     expect(screen.getByText("8 meses")).toBeDefined();
+    expect(screen.getByText("Possíveis inconsistências documentais para revisão")).toBeDefined();
+    expect(screen.getByText("Conferir o período relatado na sessão.")).toBeDefined();
+    expect(screen.queryByText(/Risco clínico|Cenários de risco/i)).toBeNull();
 
     // Navega para aba "Prontuários e sessões"
     fireEvent.click(tabSessions);

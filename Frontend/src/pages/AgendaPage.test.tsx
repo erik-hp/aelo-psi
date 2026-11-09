@@ -1,6 +1,6 @@
 import { localDateKey } from "@/lib/dates";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
@@ -12,6 +12,7 @@ vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "synthetic-pro
 vi.mock("@/services/clinicalService", () => ({
   clinicalService: {
     getAgenda: vi.fn(),
+    getPatients: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -46,7 +47,6 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
         time: "09:00",
         status: "draft",
         complement: "Primeira consulta de acolhimento",
-        attentionIndex: null,
       },
       {
         id: "s-2",
@@ -56,7 +56,6 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
         time: "10:30",
         status: "in_progress",
         complement: "Sessão em andamento",
-        attentionIndex: null,
       },
       {
         id: "s-3",
@@ -66,7 +65,6 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
         time: "14:00",
         status: "needs_review",
         complement: "Sessão realizada, aguardando notas",
-        attentionIndex: 82,
       },
     ]);
   });
@@ -88,6 +86,29 @@ describe("AgendaPage Dual View, Clinical Lifecycle, and New Session Modal", () =
     expect(await screen.findByText(/Clique em um dia para selecionar e inspecionar/i)).toBeDefined();
     expect(screen.getByText("Dom")).toBeDefined();
     expect(screen.getByText("Seg")).toBeDefined();
+  });
+
+  it("lists only documentary reviews chronologically, without ranking legacy scores", async () => {
+    const base = { date: today, complement: "Registro sintético", status: "needs_review" as const };
+    vi.mocked(clinicalService.getAgenda).mockResolvedValue([
+      { ...base, id: "later", patientId: "later", patientName: "Revisão posterior", time: "14:00", ...{ attentionIndex: 99 } },
+      { ...base, id: "earlier", patientId: "earlier", patientName: "Revisão anterior", time: "08:00", ...{ attentionIndex: null } },
+      { ...base, id: "scheduled", patientId: "scheduled", patientName: "Somente agendada", time: "07:00", status: "draft", ...{ attentionIndex: 100 } },
+    ]);
+    renderAgendaPage();
+    const aside = await screen.findByRole("complementary");
+    expect(await within(aside).findByText("Revisão anterior")).toBeDefined();
+    expect(within(aside).queryByText("Somente agendada")).toBeNull();
+    const links = within(aside).getAllByRole("link").filter((link) => link.textContent?.startsWith("Revisão"));
+    expect(links.map((link) => link.textContent)).toEqual(["Revisão anterior", "Revisão posterior"]);
+    expect(screen.queryByText(/Índice 99|Atenção 99|Prioridade 1/i)).toBeNull();
+  });
+
+  it.each([401, 403, 500])("keeps documentary reviews unavailable on HTTP %s", async (status) => {
+    vi.mocked(clinicalService.getAgenda).mockRejectedValue(new Error(`HTTP ${status}`));
+    renderAgendaPage();
+    expect(await screen.findByText("Não foi possível carregar as revisões documentais.")).toBeDefined();
+    expect(screen.queryByText("Nenhuma revisão documental pendente no período.")).toBeNull();
   });
 
   it("models full clinical lifecycle and transitions session status (waiting -> in_progress -> needs_review -> completed)", async () => {

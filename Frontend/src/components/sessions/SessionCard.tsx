@@ -31,7 +31,6 @@ export function SessionCard({ session, notes = [] }: { session: TherapySession; 
               <FileText className="h-4 w-4 text-text-secondary" aria-hidden="true" />
               Prontuário da sessão
             </div>
-            {note.attentionIndex !== null ? <Badge variant={note.attentionIndex >= 80 ? "warning" : "muted"}>Atenção {note.attentionIndex}</Badge> : null}
           </div>
           <p className="aelo-record mt-2">{note.content}</p>
           {note.complement ? <p className="aelo-record mt-2 text-text-secondary">{note.complement}</p> : null}

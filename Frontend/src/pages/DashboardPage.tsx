@@ -8,7 +8,6 @@ import {
   Clock,
   ClockAlert,
   FileEdit,
-  ShieldAlert,
   Users,
 } from "lucide-react";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
@@ -73,10 +72,6 @@ export function DashboardPage() {
   // Próxima sessão do dia (Hero Card)
   const nextSession = actualTodaySessions.find((item) => item.status === "draft" || item.status === "needs_review") || (isApiMode ? upcoming[0] : displayedSessions[0]);
 
-  // Efeito Von Restorff: Segregação visual de alertas críticos vs avisos administrativos
-  const criticalRiskAlerts = agenda.filter((item) => (item.attentionIndex ?? 0) >= 80);
-  const administrativePending = agenda.filter((item) => item.status === "needs_review" && (item.attentionIndex ?? 0) < 80);
-
   // Efeito Zeigarnik: Prontuários e sessões com evolução pendente
   const openRecords = agenda.filter((item) => item.status === "needs_review");
 
@@ -138,9 +133,6 @@ export function DashboardPage() {
                   <p className="text-body-medium text-text-secondary">
                     {isUsingUpcomingFallback ? "Próxima sessão" : "Próxima sessão do dia"}: {nextSession.time}, {shortDate(nextSession.date)}
                   </p>
-                  {nextSession.attentionIndex !== null && nextSession.attentionIndex >= 80 ? (
-                    <Badge variant="critical">Atenção prioritária: {nextSession.attentionIndex}</Badge>
-                  ) : null}
                 </div>
 
                 <div>
@@ -195,9 +187,9 @@ export function DashboardPage() {
               delta={isUsingUpcomingFallback ? "Próximas na agenda" : `${actualTodaySessions.length} programadas hoje`}
             />
             <MetricCard
-              label={isApiMode ? "Análises registradas" : "Alertas clínicos severos"}
-              value={String(isApiMode ? dashboard?.analyses.length ?? 0 : criticalRiskAlerts.length)}
-              delta={isApiMode ? "Sugestões assistivas para revisão" : criticalRiskAlerts.length > 0 ? "Ideação / Risco imediato" : "Sem alertas críticos ativos"}
+              label="Análises registradas"
+              value={String(dashboard?.analyses.length ?? 0)}
+              delta="Sugestões assistivas para revisão"
             />
             <MetricCard
               label="Repasse financeiro"
@@ -241,9 +233,8 @@ export function DashboardPage() {
             ) : displayedSessions.length > 0 ? (
               <ul className="divide-y divide-separator-border">
                 {displayedSessions.map((session) => {
-                  const isHighRisk = (session.attentionIndex ?? 0) >= 80;
                   return (
-                    <li key={session.id} className={isHighRisk ? "rounded-md bg-status-rose-background p-3" : "py-3"}>
+                    <li key={session.id} className="py-3">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-body-semibold">
@@ -271,11 +262,6 @@ export function DashboardPage() {
                           >
                             {statusLabel[session.status] || session.status}
                           </Badge>
-                          {session.attentionIndex !== null ? (
-                            <Badge variant={isHighRisk ? "critical" : "muted"}>
-                              Atenção {session.attentionIndex}
-                            </Badge>
-                          ) : null}
                         </div>
                       </div>
                       <p className="mt-2 text-body-regular text-text-secondary">
@@ -301,55 +287,12 @@ export function DashboardPage() {
       {/* Grid Inferior: Segregação de Alertas (Von Restorff), Pendências Zeigarnik e Financeiro */}
       <section className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Indicadores indisponíveis não equivalem à ausência de risco. */}
-        {isApiMode ? <Card><CardHeader><CardTitle>Avaliação clínica</CardTitle></CardHeader><CardContent><p className="text-body-regular text-text-secondary">A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.</p></CardContent></Card> : <Card className="border-border-button-default">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-headline-regular flex items-center gap-2 text-text-primary">
-                <ShieldAlert className="h-4 w-4 text-text-error-primary" />
-                Alertas clínicos de alto risco
-              </CardTitle>
-              {criticalRiskAlerts.length > 0 ? (
-                <Badge variant="critical" showIcon={false}>{criticalRiskAlerts.length}</Badge>
-              ) : null}
-            </div>
-            <p className="text-caption-1-regular text-text-secondary mt-1">
-              Indicadores com índice de atenção severo (ideação, crise, automutilação).
-            </p>
-          </CardHeader>
+        <Card>
+          <CardHeader><CardTitle>Avaliação clínica</CardTitle></CardHeader>
           <CardContent>
-            {agendaQuery.isLoading ? (
-              <LoadingSkeleton className="h-28" />
-            ) : criticalRiskAlerts.length > 0 ? (
-              <div className="space-y-3">
-                {criticalRiskAlerts.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-md border border-border-error-default bg-status-rose-background p-3.5 space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <Link
-                        className="text-body-semibold hover:underline text-text-error-primary"
-                        to={`/patients/${item.patientId}`}
-                      >
-                        {item.patientName}
-                      </Link>
-                      <Badge variant="critical">Índice {item.attentionIndex}</Badge>
-                    </div>
-                    <p className="text-caption-1-regular text-text-secondary">{item.complement}</p>
-                    <p className="text-caption-1-regular text-text-secondary">
-                      Sessão em {shortDate(item.date)} às {item.time}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2.5 rounded-md border border-status-lime-text bg-status-lime-background p-4 text-caption-1-regular text-text-secondary">
-                <CheckCircle2 className="h-4 w-4 text-status-lime-text shrink-0" />
-                <span>Nenhum alerta clínico de alto risco ativo no momento.</span>
-              </div>
-            )}
+            <p className="text-body-regular text-text-secondary">A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.</p>
           </CardContent>
-        </Card>}
+        </Card>
 
         {/* Bloco 2: Pendências Clínicas e Prontuários em Aberto (Efeito Zeigarnik) */}
         {isApiMode ? <Card><CardHeader><CardTitle>Registros das sessões</CardTitle></CardHeader><CardContent><p className="text-body-regular text-text-secondary">Consulte e salve as notas no Editor Clínico. Concluir um atendimento não assina sua nota.</p><ButtonLink to="/editor" className="mt-4">Abrir editor clínico</ButtonLink></CardContent></Card> : <Card className="border-border-button-default">
@@ -364,12 +307,14 @@ export function DashboardPage() {
               ) : null}
             </div>
             <p className="text-caption-1-regular text-text-secondary mt-1">
-              Atendimentos realizados aguardando registro de notas ou assinatura ética (CFP nº 01/2009).
+              Sessões com evolução documental pendente de revisão pelo profissional.
             </p>
           </CardHeader>
           <CardContent>
             {agendaQuery.isLoading ? (
               <LoadingSkeleton className="h-28" />
+            ) : agendaQuery.isError ? (
+              <p role="alert" className="text-body-regular text-text-error-primary">Não foi possível consultar as pendências documentais.</p>
             ) : openRecords.length > 0 ? (
               <ul className="divide-y divide-separator-border">
                 {openRecords.map((item) => (
@@ -394,19 +339,10 @@ export function DashboardPage() {
                   </li>
                 ))}
               </ul>
-            ) : administrativePending.length > 0 ? (
-              <div className="space-y-3">
-                {administrativePending.map((item) => (
-                  <div key={item.id} className="rounded-md border border-border-button-default p-3 text-caption-1-regular">
-                    <p className="text-body-medium text-text-primary">{item.patientName}</p>
-                    <p className="text-text-secondary mt-1">{item.complement}</p>
-                  </div>
-                ))}
-              </div>
             ) : (
               <div className="flex items-center gap-2.5 rounded-md border border-status-lime-text bg-status-lime-background p-4 text-caption-1-regular text-text-secondary">
                 <CheckCircle2 className="h-4 w-4 text-status-lime-text shrink-0" />
-                <span>Expediente regularizado. Todos os prontuários recentes foram formalizados.</span>
+                <span>Nenhuma evolução documental pendente na agenda consultada.</span>
               </div>
             )}
           </CardContent>

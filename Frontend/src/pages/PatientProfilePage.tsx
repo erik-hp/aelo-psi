@@ -235,9 +235,9 @@ export function PatientProfilePage() {
   const analysis = data.analyses[0];
   const completedSessions = data.sessions.filter((session) => session.status === "completed");
   const scheduledSessions = patientAgenda.filter((item) => item.status === "draft");
-  const riskScenarios = analysis?.riskScenarios?.length
-    ? analysis.riskScenarios
-    : ["Sem cenário crítico consolidado nos prontuários analisados."];
+  const documentaryInconsistencies = analysis?.documentaryInconsistencies?.length
+    ? analysis.documentaryInconsistencies
+    : ["Nenhuma inconsistência documental registrada. Isso não constitui avaliação clínica."];
   const considerations = analysis?.considerations?.length
     ? analysis.considerations
     : analysis?.attentionPoints ?? [];
@@ -279,12 +279,8 @@ export function PatientProfilePage() {
             <MetricCard label="Sessões realizadas" value={completedSessions.length} />
             <MetricCard label="Sessões agendadas" value={scheduledSessions.length} />
             <MetricCard
-              label="Risco clínico"
-              value={
-                <Badge variant={data.patient.riskLevel === "atenção" ? "warning" : data.patient.riskLevel === "baixo" ? "success" : "default"}>
-                  {data.patient.riskLevel}
-                </Badge>
-              }
+              label="Situação cadastral"
+              value={data.patient.status === "inactive" ? "Inativo" : "Ativo"}
             />
           </MetricStrip>
 
@@ -297,7 +293,7 @@ export function PatientProfilePage() {
                     scheduledSessions.map((item) => (
                       <Badge
                         key={item.id}
-                        variant={(item.attentionIndex ?? 0) >= 80 ? "warning" : "muted"}
+                        variant="muted"
                       >
                         <Clock className="mr-1 h-3.5 w-3.5" />
                         {item.date} às {item.time}
@@ -344,10 +340,10 @@ export function PatientProfilePage() {
               <section className="space-y-2">
                 <h3 className="flex items-center gap-2 text-body-medium">
                   <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
-                  Cenários de risco identificados
+                  Possíveis inconsistências documentais para revisão
                 </h3>
                 <ul className="aelo-record list-inside list-disc space-y-1 text-text-secondary">
-                  {riskScenarios.map((item) => (
+                  {documentaryInconsistencies.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>

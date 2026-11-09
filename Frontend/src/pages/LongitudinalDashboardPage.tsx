@@ -22,7 +22,7 @@ export function LongitudinalDashboardPage() {
     <>
       <PageHeader
         title="Longitudinal por paciente"
-        description="Métricas narrativas, frequência de sessões, aderência e atenção calculadas individualmente para cada paciente."
+        description="Visualizações narrativas demonstrativas por paciente. Os indicadores ainda dependem de validação metodológica."
       />
       <div className="mb-5 max-w-sm">
         <Select value={patientId} onChange={(event) => setSelectedPatientId(event.target.value)} aria-label="Selecionar paciente">
@@ -34,7 +34,6 @@ export function LongitudinalDashboardPage() {
         <ChartCard title="Tendência clínica" description="Intensidade ansiosa no período do paciente." data={data} dataKey="anxiety" />
         <ChartCard title="Aderência terapêutica" description="Presença e tarefas combinadas para este paciente." data={data} dataKey="adherence" />
         <ChartCard title="Métrica narrativa" description="Coerência e organização narrativa por mês." data={data} dataKey="narrative" />
-        <ChartCard title="Índice de atenção IA" description="Leitura assistiva das notas e prontuários do paciente." data={data} dataKey="attention" />
       </div>}
     </>
   );

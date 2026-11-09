@@ -174,7 +174,7 @@ export function AgendaPage() {
         isToday: key === today,
         isSelected: key === selectedDate,
         sessionCount: items.length,
-        highAttention: items.some((item) => (item.attentionIndex ?? 0) >= 80 || item.status === "needs_review"),
+        hasPendingReview: items.some((item) => item.status === "needs_review"),
       };
     });
   }, [selectedDate, sessionsByDate, today, visibleMonth]);
@@ -189,14 +189,14 @@ export function AgendaPage() {
       .sort((a, b) => a.time.localeCompare(b.time));
   }, [agenda, search, selectedDate, status]);
 
-  const attentionItems = useMemo(() => {
+  const reviewItems = useMemo(() => {
     return [...agenda]
-      .filter((item) => item.attentionIndex !== null || item.status === "needs_review")
-      .sort((a, b) => (b.attentionIndex ?? 0) - (a.attentionIndex ?? 0))
+      .filter((item) => item.status === "needs_review")
+      .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`) || a.id.localeCompare(b.id))
       .slice(0, 4);
   }, [agenda]);
 
-  const reviewCount = agenda.filter((item) => item.status === "needs_review" || (item.attentionIndex ?? 0) >= 80).length;
+  const reviewCount = agenda.filter((item) => item.status === "needs_review").length;
   const inProgressCount = agenda.filter((item) => item.status === "in_progress").length;
 
   const selectedDateLabel = parseLocalDate(selectedDate).toLocaleDateString("pt-BR", {
@@ -282,7 +282,6 @@ export function AgendaPage() {
       time: newTime,
       status: "draft",
       complement: `${newModality}${newComplement ? `: ${newComplement}` : ""}`,
-      attentionIndex: null,
     };
 
     setLocalSessions((prev) => [newSessionItem, ...prev]);
@@ -327,7 +326,7 @@ export function AgendaPage() {
         <MetricCard
           label={isApiMode ? "Agendamentos pendentes" : "Pendências de evolução"}
           value={String(isApiMode ? agenda.filter((item) => item.status === "draft").length : reviewCount)}
-          delta={isApiMode ? "Atendimentos com status agendado" : "Aguardando notas ou atenção imediata"}
+          delta={isApiMode ? "Atendimentos com status agendado" : "Aguardando registro ou revisão documental"}
         />
       </MetricStrip>
 
@@ -502,7 +501,7 @@ export function AgendaPage() {
                         "focus-ring min-h-20 rounded-md border border-border-button-default bg-background-full p-2 text-left transition hover:border-border-focus-ring hover:bg-background-secondary-default",
                         !day.isCurrentMonth && "opacity-35",
                         day.isSelected && "border-border-focus-ring bg-status-blue-background shadow-sm",
-                        day.highAttention && "border-status-yellow-text",
+                        day.hasPendingReview && "border-status-yellow-text",
                       )}
                       type="button"
                       onClick={() => {
@@ -530,7 +529,7 @@ export function AgendaPage() {
                               key={idx}
                               className={cn(
                                 "h-1 flex-1 rounded-full",
-                                day.highAttention ? "bg-status-yellow-background" : "bg-accent-600",
+                                day.hasPendingReview ? "bg-status-yellow-background" : "bg-accent-600",
                               )}
                             />
                           ))}
@@ -561,15 +560,13 @@ export function AgendaPage() {
             <ul className="clinical-panel divide-y divide-separator-border">
               {filteredItems.map((item) => {
                 const conf = isApiMode && item.status === "completed" ? { ...statusConfig.completed, label: "Atendimento concluído", description: "Status do atendimento registrado. A assinatura da nota é uma ação separada." } : statusConfig[item.status] || statusConfig.draft;
-                const isHighRisk = (item.attentionIndex ?? 0) >= 80;
                 return (
                   <li
                     key={item.id}
                     className={cn(
                       "p-4 first:rounded-t-3xl last:rounded-b-3xl",
                       item.status === "in_progress" && "bg-status-blue-background",
-                      isHighRisk && "bg-status-rose-background",
-                      item.status === "needs_review" && !isHighRisk && "bg-status-yellow-background",
+                      item.status === "needs_review" && "bg-status-yellow-background",
                     )}
                   >
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
@@ -590,11 +587,6 @@ export function AgendaPage() {
                               {conf.label}
                             </Badge>
 
-                            {item.attentionIndex !== null ? (
-                              <Badge variant={isHighRisk ? "critical" : "muted"}>
-                                Atenção {item.attentionIndex}
-                              </Badge>
-                            ) : null}
                           </div>
 
                           <p className="mt-1 text-body-regular text-text-secondary">
@@ -673,22 +665,21 @@ export function AgendaPage() {
           )}
         </div>
 
-        {/* Coluna Lateral: Prioridades e Alertas Clínicos do Período */}
+        {/* Revisões documentais em ordem cronológica. */}
         <aside className="space-y-4">
           <h2 className="text-headline-semibold flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
-            Prioridades do período
+            Revisões documentais do período
           </h2>
-          {attentionItems.length > 0 ? (
+          {isLoading ? <PageLoading label="Carregando revisões…" /> : isError ? <PageError description="Não foi possível carregar as revisões documentais." /> : reviewItems.length > 0 ? (
             <ol className="clinical-panel divide-y divide-separator-border">
-            {attentionItems.map((item, index) => {
-              const isSevere = (item.attentionIndex ?? 0) >= 80;
+            {reviewItems.map((item) => {
               return (
                 <li key={item.id} className="space-y-2 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span className="text-caption-1-medium text-text-secondary">
-                          Prioridade {index + 1}
+                          Evolução pendente
                         </span>
                         <Link
                           className="mt-0.5 block text-body-semibold hover:text-status-blue-text transition"
@@ -697,15 +688,10 @@ export function AgendaPage() {
                           {item.patientName}
                         </Link>
                       </div>
-                      {item.attentionIndex !== null ? (
-                        <Badge variant={isSevere ? "critical" : "warning"}>
-                          Índice {item.attentionIndex}
-                        </Badge>
-                      ) : null}
                     </div>
 
                     <p className="text-caption-1-regular text-text-secondary line-clamp-2">
-                      {item.complement || "Acompanhamento longitudinal prioritário."}
+                      {item.complement || "Registro da sessão aguardando revisão."}
                     </p>
 
                     <div className="flex items-center justify-between pt-1 text-caption-1-regular text-text-secondary">
@@ -723,7 +709,7 @@ export function AgendaPage() {
             </ol>
           ) : (
             <div className="rounded-lg border border-border-button-default p-4 text-center text-caption-1-regular text-text-secondary">
-              Nenhuma sessão prioritária pendente no período.
+              Nenhuma revisão documental pendente no período.
             </div>
           )}
         </aside>

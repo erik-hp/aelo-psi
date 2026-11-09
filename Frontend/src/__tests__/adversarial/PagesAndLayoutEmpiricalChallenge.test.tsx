@@ -407,7 +407,6 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
         time: "10:00",
         status: "completed",
         complement: "Concluído",
-        attentionIndex: null,
       },
       {
         id: "s-2",
@@ -417,7 +416,6 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
         time: "11:00",
         status: "draft",
         complement: "Aguardando",
-        attentionIndex: 50,
       },
     ]);
 
@@ -440,7 +438,6 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
         time: "10:00",
         status: "needs_review",
         complement: "Pendente",
-        attentionIndex: 75,
       },
     ]);
 
@@ -450,21 +447,21 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
     expect(screen.getByText("1 prontuário aguarda evolução para fechamento ético do dia.")).toBeDefined();
   });
 
-  it("renders plural grammatical form and aggregate badge count when multiple reviews or high attention index items are pending", async () => {
+  it("counts documentary reviews only, ignoring legacy attention scores", async () => {
     vi.mocked(clinicalService.getAgenda).mockResolvedValue([
-      { id: "s-1", patientId: "p-1", patientName: "P1", date: "2026-05-28", time: "09:00", status: "needs_review", complement: "", attentionIndex: null },
-      { id: "s-2", patientId: "p-2", patientName: "P2", date: "2026-05-28", time: "10:00", status: "needs_review", complement: "", attentionIndex: 40 },
-      { id: "s-3", patientId: "p-3", patientName: "P3", date: "2026-05-28", time: "11:00", status: "draft", complement: "", attentionIndex: 90 }, // AttentionIndex >= 80
-      { id: "s-4", patientId: "p-4", patientName: "P4", date: "2026-05-28", time: "14:00", status: "completed", complement: "", attentionIndex: 85 }, // AttentionIndex >= 80
+      { id: "s-1", patientId: "p-1", patientName: "P1", date: "2026-05-28", time: "09:00", status: "needs_review", complement: "" },
+      { id: "s-2", patientId: "p-2", patientName: "P2", date: "2026-05-28", time: "10:00", status: "needs_review", complement: "" },
+      { id: "s-3", patientId: "p-3", patientName: "P3", date: "2026-05-28", time: "11:00", status: "draft", complement: "", ...{ attentionIndex: 90 } }, // Legacy field must be ignored
+      { id: "s-4", patientId: "p-4", patientName: "P4", date: "2026-05-28", time: "14:00", status: "completed", complement: "", ...{ attentionIndex: 90 } }, // Legacy field must be ignored
     ]);
 
     renderWithProviders(<Sidebar />);
 
     expect(await screen.findByText(/Pendências de evolução/i)).toBeDefined();
-    expect(screen.getByText("4 prontuários aguardam evolução para fechamento ético do dia.")).toBeDefined();
+    expect(screen.getByText("2 prontuários aguardam evolução para fechamento ético do dia.")).toBeDefined();
 
-    // The counter badges (one on the Agenda NavLink and one in the footer widget) should both show "4"
-    const badges = screen.getAllByText("4");
+    // Scheduled/completed records are not reviews, regardless of old scores.
+    const badges = screen.getAllByText("2");
     expect(badges.length).toBe(2);
   });
 

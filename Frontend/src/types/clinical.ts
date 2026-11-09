@@ -1,4 +1,4 @@
-export type PatientStatus = "active" | "watch" | "inactive";
+export type PatientStatus = "active" | "inactive";
 export type SessionStatus = "draft" | "completed" | "needs_review" | "cancelled" | "missed" | "in_progress";
 export type AnalysisStatus = "pending" | "validated" | "rejected";
 
@@ -11,7 +11,6 @@ export interface Patient {
   sessionFrequency: "Semanal" | "Quinzenal" | "Mensal" | "Não informada";
   lastSession: string;
   nextSession: string;
-  riskLevel: "baixo" | "moderado" | "atenção" | "não avaliado";
   therapist: string;
   tags: string[];
 }
@@ -39,7 +38,7 @@ export interface AIAnalysis {
   emotionalStateScore: number | null;
   psychologicalBurdenScore: number | null;
   patterns: string[];
-  riskScenarios: string[];
+  documentaryInconsistencies: string[];
   considerations: string[];
   longitudinalEvolution: string;
   attentionPoints: string[];
@@ -68,7 +67,6 @@ export interface PatientNote {
   title: string;
   content: string;
   complement?: string;
-  attentionIndex: number | null;
 }
 
 export interface PatientLongitudinalMetric {
@@ -77,7 +75,6 @@ export interface PatientLongitudinalMetric {
   anxiety: number;
   adherence: number;
   narrative: number;
-  attention: number;
   mood: number;
   emotionalState: number;
   psychologicalBurden: number;
@@ -93,7 +90,6 @@ export interface AgendaItem {
   time: string;
   status: SessionStatus;
   complement: string;
-  attentionIndex: number | null;
 }
 
 export interface FinancialRecord {

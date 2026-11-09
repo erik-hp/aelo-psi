@@ -64,7 +64,6 @@ export function mapPatient(patient: ApiPatient): Patient {
     sessionFrequency: "Não informada",
     lastSession: "-",
     nextSession: "-",
-    riskLevel: "não avaliado",
     therapist: "Não informado",
     tags: [patient.internal_code],
   };
@@ -105,7 +104,7 @@ export function mapAnalysis(analysis: ApiAnalysis): AIAnalysis {
     emotionalStateScore: metric("emotional_state"),
     psychologicalBurdenScore: metric("psychological_burden"),
     patterns: analysis.patterns ?? [],
-    riskScenarios: analysis.possible_inconsistencies ?? [],
+    documentaryInconsistencies: analysis.possible_inconsistencies ?? [],
     considerations: analysis.behavioral_changes ?? [],
     longitudinalEvolution: analysis.longitudinal_evolution ?? "",
     attentionPoints: analysis.attention_points ?? [],

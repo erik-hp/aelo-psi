@@ -42,7 +42,6 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
           sessionFrequency: "Semanal",
           lastSession: "2026-05-20",
           nextSession: "2026-05-28",
-          riskLevel: "atenção",
           therapist: "Dra. Marina Costa",
           tags: ["Ansiedade"],
         },
@@ -72,7 +71,7 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
         time: "14:00",
         status: "draft",
         complement: "Sessão focada em reestruturação cognitiva",
-        attentionIndex: 85,
+        ...{ attentionIndex: 85 }, // Legacy payloads must never trigger clinical ranking.
       },
       {
         id: "s-2",
@@ -82,7 +81,6 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
         time: "15:30",
         status: "needs_review",
         complement: "Evolução pendente pós-consulta",
-        attentionIndex: 40,
       },
     ]);
 
@@ -125,12 +123,19 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
     expect(await screen.findByText(/Dados financeiros temporariamente indisponíveis/i)).toBeDefined();
   });
 
-  it("segregates high-risk clinical alerts from normal administrative reviews (Von Restorff)", async () => {
+  it("shows documentary reviews without classifying patient risk, including legacy scores", async () => {
     renderDashboardPage();
 
-    expect(await screen.findByText(/Alertas clínicos de alto risco/i)).toBeDefined();
-    expect(await screen.findByText(/Índice 85/i)).toBeDefined();
+    expect(await screen.findByText("A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.")).toBeDefined();
+    expect(screen.queryByText(/Alertas clínicos|Ideação|Risco imediato|Índice 85|Atenção prioritária/i)).toBeNull();
     expect(screen.getByText(/Pendências de evolução/i)).toBeDefined();
+  });
+
+  it.each([401, 403, 500])("does not infer patient safety when agenda fails with %s", async (status) => {
+    vi.mocked(clinicalService.getAgenda).mockRejectedValue(new Error(`HTTP ${status}`));
+    renderDashboardPage();
+    expect(await screen.findByText(/Não foi possível sincronizar a agenda imediata/i)).toBeDefined();
+    expect(screen.queryByText(/Sem alertas críticos|Nenhum alerta clínico/i)).toBeNull();
   });
 
   it("renders Zeigarnik open records section with actionable 'Evoluir' button", async () => {
