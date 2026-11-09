@@ -6,7 +6,7 @@
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** F0-02, consolidar cobertura endpoint × papel × ação e reproduzir/corrigir lacunas; seguir F0-04/F0-05 e validação F0-06 antes da decisão G0. Comparação de modelos locais e inspeção API/UX permanecem pendentes, após contenção de riscos.
+- **Próxima tarefa:** F0-04, validar implantação/TLS/proxy e falhas fechadas; consolidar F0-05 e validação responsável F0-06 antes da decisão G0. F0-02 recebeu a continuação de listagens/filtros/mutações/grants/revisão/download, mas revisão independente e concorrência continuam pendentes. Comparação de modelos locais e inspeção API/UX seguem em aberto.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -386,6 +386,15 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Executados: matriz 79 aprovados; suíte backend completa **291 aprovados/2 ignorados**, 1 aviso Starlette/httpx; Ruff do novo arquivo sem erros. Frontend permanece em 220 aprovados/build aprovado/lint 0 erros e 9 avisos. Comandos, cobertura efetiva e limites em [F0_AUTHORIZATION_MATRIX_2026-11-09.md](validation/F0_AUTHORIZATION_MATRIX_2026-11-09.md).
 - CI do SHA anterior `ab65768`: quatro workflows aprovados, incluindo PostgreSQL/pgvector e smoke/carga curta. Não equivale à verificação do commit final com os novos testes, que deve ser conferido antes do merge. Falha intermitente histórica do smoke ainda sem causa identificada.
 - Cérebro: mapa/índice/log publicados em `main`, commit `29a32bb`; complemento desta matriz registrado em seguida. Código no PR #24, sem merge. **G0 BLOQUEADO**. Próximo incremento F0-02: completar listagens/filtros, mutações, grants, revisão/assinatura e download, antes de F0-04/F0-05/F0-06.
+
+## Continuação F0-02 — correção de seletores/filtros e ações — 09/11/2026 — EM REVISÃO
+
+- Pedido do autor: prosseguir para o próximo passo destacado. Base `32d57e6`, mesma branch e [PR #24](https://github.com/erik-hp/aelo-psi/pull/24) confirmado aberto/em rascunho; sem mudanças versionadas preexistentes na aplicação. RF-01/RNF-02/RNF-08.
+- Reproduzidas dez falhas: seletores HTML exibiam nomes de pacientes de outra clínica; POST de relações e filtros permitiam distinguir IDs não autorizados existentes de inexistentes. Corrigidos os querysets das relações nos serializers e a validação/renderização de filtros pelo backend escopado. Respostas autorizadas preservadas; filtro não autorizado agora recebe 400 como inexistente. Sem migração, nova dependência ou mudança de stack.
+- Código `18c13ea`. Adicionados 164 cenários para fronteiras, listagens/filtros, mutações por grant/autoria, concessão/revogação, diretório operacional, revisão com assinatura real e download/adulteração de checkpoint; fixtures compartilhadas com os 79 cenários anteriores.
+- Executados: direcionados 164 aprovados; suíte completa **455 aprovados/2 ignorados**, 1 aviso Starlette/httpx; Ruff completo, Django check e migrations em settings isolados aprovados; diff check aprovado. HTML renderizado pela API, sem inspeção visual. Frontend não alterado/retestado localmente. [Relatório](validation/F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md).
+- Verificações remotas anteriores em `32d57e6` passaram nos quatro workflows; o SHA final desta continuação deve ser conferido antes de merge. Não confundir testes locais SQLite/force_authenticate com PostgreSQL, JWT/TLS ou concorrência.
+- Mapa/índice/log no Cérebro atualizados. Incremento destacado implementado e verificado, requisito integral **EM REVISÃO**; F1-03 continua pendente, pois a assinatura exercitada é a da revisão de IA. **G0 permanece BLOQUEADO**. Próximo item: F0-04.
 
 ## Pendências de decisão
 

@@ -1,5 +1,7 @@
 # F0-02 — matriz incremental de autorização clínica
 
+> Esta é a primeira entrega, de 79 casos. A continuação com correções reais de seletores/filtros e 164 casos novos está em [F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md](F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md). O total backend atual é 455 aprovados/2 ignorados; os resultados abaixo preservam o histórico daquela entrega.
+
 Data: 09/11/2026. Código `0dbb833`, [PR #24](https://github.com/erik-hp/aelo-psi/pull/24), branch `fix/f0-03-sem-classificacao-risco`. Requisitos RF-01/RNF-02/RNF-08. **EM REVISÃO; não libera G0.**
 
 Implementado `Backend/tests/test_authorization_matrix.py`: 72 combinações de leitura (8 endpoints × 9 identidades) e 7 tentativas de processamento sem autorização de escrita. Dados sintéticos persistidos, views/serializers DRF reais e nenhuma chamada a modelo externo. Os controles existentes passaram: não foi necessário alterar autorização de produção nesta entrega.
