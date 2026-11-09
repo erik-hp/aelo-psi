@@ -47,6 +47,8 @@ Ver [Plano Mestre](PLANO_MESTRE_IMPLEMENTACAO.md) e [registro](REGISTRO_EXECUCAO
 
 ## Regras de atualização
 
+Evidência incremental F0-01/F0-03 (09/11/2026): RNF-03/RNF-06/RNF-08 recebem remoção de risco automático e escore de atenção da demonstração, revisão por estado documental e correção do nome interno de inconsistências. Código `d8ff5f6`; frontend 220 testes aprovados, build/lint aprovados; baseline backend 212 aprovados/2 ignorados. [Relatório e limitações](validation/F0_2026-11-09.md). **EM REVISÃO**, sem promoção dos critérios integrais ou gates. Mapa das 42 tarefas registrado no Cérebro; os estados da tabela representam aceite completo, não ausência de código parcial.
+
 Adendo de estabilização (06/11/2026): RNF-06/RNF-08 recebem o [plano de investigação de UX/navegação](validation/PLANO_REVISAO_UX_NAVEGACAO.md), e RF-01/RNF-02/RNF-03/RNF-08 o [plano de avaliação do Strix](security/PLANO_AVALIACAO_STRIX.md). Somente pesquisa inicial e planejamento; testes ativos, benchmark prático e redesign pendentes. O marco funcional de 80% não indica cobertura de segurança nem muda o estado de nenhum requisito/gate.
 
 Proposta operacional SC-OP-01 (06/11/2026): [PLANO_OPERACIONAL_CLINICA.md](PLANO_OPERACIONAL_CLINICA.md) relaciona OP-00–OP-11 aos requisitos existentes e distingue refinamentos F0/F1 de ampliações ainda não aprovadas. Pesquisa documental, sem nova implementação, resultado quantitativo ou mudança dos estados de aceite. Requisitos de financeiro/comunicação/portal não foram adicionados como aprovados.

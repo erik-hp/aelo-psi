@@ -1,5 +1,7 @@
 # F0-01 — Linha de base técnica e limites de verificação
 
+> Registro histórico de 17/10/2026. Baseline incremental atual em [F0_2026-11-09.md](F0_2026-11-09.md); inventário e limitações abaixo descrevem aquela sessão, não o estado atual. G0 continua bloqueado.
+
 **Data:** 17/10/2026 · **Branch:** `fix/f0-baseline-tenant-ai-integrity`  
 **Status:** EM REVISÃO — aguardando GitHub Actions, testes e inspeção de regressões.
 

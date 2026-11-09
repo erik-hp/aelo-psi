@@ -1,12 +1,12 @@
 # Registro de execução e decisões — AELO-PSI (TCC2)
 
-**Atualizado em:** 06/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
+**Atualizado em:** 09/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
 
 ## Estado geral
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** comparar outros modelos locais no mesmo conjunto sintético, já que `llama3.1` não atendeu em CPU; depois inspeção em navegador real e OP-00/UX-01. G0 permanece bloqueado.
+- **Próxima tarefa:** F0-02, consolidar cobertura endpoint × papel × ação e reproduzir/corrigir lacunas; seguir F0-04/F0-05 e validação F0-06 antes da decisão G0. Comparação de modelos locais e inspeção API/UX permanecem pendentes, após contenção de riscos.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -371,6 +371,14 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Prompt de análise agora descreve o formato e exige citação literal, o que antes faltava para qualquer modelo. Iniciador local em `Backend/scripts/run_ai_claude.py`, pois o CLI só existe no computador do autor, não nos containers.
 - **Ensaio real com dados sintéticos:** 13 notas, 18 conceitos e 29 relações gerados pela leitura automática, sem falhas; prévia mascarou nome e telefone; análise em 12 s, em revisão humana; a sessão 1, fora da janela de 10, foi citada como fonte. Em navegador, salvar, revisar e confirmar concluiu em 14 s. Com o serviço parado, 13 leituras e a análise falharam de forma explícita.
 - **Limites:** sem assinatura da revisão em navegador. Conjunto pequeno, não mede qualidade clínica. Não vale para modelo local. `Backend/.env` local aponta para o serviço no computador; para Ollama, reverter `AI_SERVICE_URL`. **G0 continua BLOQUEADO**.
+
+## Mapa de pendências e incremento F0-03 — 09/11/2026 — EM REVISÃO
+
+- Pedido do autor: criar mapa no Cérebro e prosseguir conforme o plano. Bases confirmadas: AELO `main` em `10200cc` e Cérebro `main` em `84e5c20`; nenhum PR aberto encontrado na consulta inicial. Preferências locais e arquivos pessoais preservados.
+- Criado `1 - TCC/wiki/outputs/mapa_implementacao_aelo_2026-11-09.md`, com as 42 tarefas, requisitos, dependências, evidências parciais e aceites faltantes; índice/log atualizados no repositório separado. Verificação `MAP_CHECK_OK` passou.
+- Código `d8ff5f6`, branch `fix/f0-03-sem-classificacao-risco`: removidos risco automático e índice numérico de atenção da demonstração/contratos internos. Revisão depende exclusivamente do estado documental e segue ordem cronológica; inconsistências de texto não são chamadas de risco. Estados de erro/vazio preservados. Sem migração/alteração HTTP.
+- Baseline F0-01: backend 212 aprovados/2 ignorados; frontend 211 aprovados. Seis falhas reproduzidas antes da correção. Após correção: frontend 220 aprovados/30 arquivos, lint 0 erros/9 avisos e build aprovado. Django check/migrations em settings isolados e Compose config passaram. Comandos e limites em [F0_2026-11-09.md](validation/F0_2026-11-09.md).
+- Não houve nesta rodada PostgreSQL real, smoke HTTP, modelo real, inspeção visual ou revisão profissional. Indicadores demonstrativos remanescentes precisam de revisão F4; critérios integrais RNF-03/RNF-06/RNF-08 não foram promovidos. **G0 permanece BLOQUEADO**. Próximo item: F0-02.
 
 ## Pendências de decisão
 
