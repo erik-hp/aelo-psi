@@ -380,6 +380,13 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Baseline F0-01: backend 212 aprovados/2 ignorados; frontend 211 aprovados. Seis falhas reproduzidas antes da correção. Após correção: frontend 220 aprovados/30 arquivos, lint 0 erros/9 avisos e build aprovado. Django check/migrations em settings isolados e Compose config passaram. Comandos e limites em [F0_2026-11-09.md](validation/F0_2026-11-09.md).
 - Não houve nesta rodada PostgreSQL real, smoke HTTP, modelo real, inspeção visual ou revisão profissional. Indicadores demonstrativos remanescentes precisam de revisão F4; critérios integrais RNF-03/RNF-06/RNF-08 não foram promovidos. **G0 permanece BLOQUEADO**. Próximo item: F0-02.
 
+## Continuação F0-02 — matriz de autorização — 09/11/2026 — EM REVISÃO
+
+- Código `0dbb833`, continuação no [PR #24](https://github.com/erik-hp/aelo-psi/pull/24). RF-01/RNF-02/RNF-08: implementados 79 cenários de autorização para notas/sessões/análises/jobs/grafo/checkpoints/FHIR e negação de processamento sem escrita. Nove identidades, incluindo estagiário, admin, sem grant, revogado e outra clínica. Todos passaram; nenhum controle de produção foi alterado sem falha reproduzida.
+- Executados: matriz 79 aprovados; suíte backend completa **291 aprovados/2 ignorados**, 1 aviso Starlette/httpx; Ruff do novo arquivo sem erros. Frontend permanece em 220 aprovados/build aprovado/lint 0 erros e 9 avisos. Comandos, cobertura efetiva e limites em [F0_AUTHORIZATION_MATRIX_2026-11-09.md](validation/F0_AUTHORIZATION_MATRIX_2026-11-09.md).
+- CI do SHA anterior `ab65768`: quatro workflows aprovados, incluindo PostgreSQL/pgvector e smoke/carga curta. Não equivale à verificação do commit final com os novos testes, que deve ser conferido antes do merge. Falha intermitente histórica do smoke ainda sem causa identificada.
+- Cérebro: mapa/índice/log publicados em `main`, commit `29a32bb`; complemento desta matriz registrado em seguida. Código no PR #24, sem merge. **G0 BLOQUEADO**. Próximo incremento F0-02: completar listagens/filtros, mutações, grants, revisão/assinatura e download, antes de F0-04/F0-05/F0-06.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
