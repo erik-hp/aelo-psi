@@ -4,50 +4,10 @@ Uses synthetic persisted records and real DRF views/serializers. Authentication
 is forced to isolate object authorization; JWT lifecycle has a separate suite.
 """
 
-import hashlib
-
 import pytest
 from rest_framework.test import APIClient
 
-from apps.ai_analysis.models import AIAnalysis, AnalysisJob, VaultCheckpoint, VaultJob
-from apps.patients.models import PatientAccess
-from apps.users.models import User, UserRole
-
-
-@pytest.fixture
-def clinical_scope(records):
-    patient, owner = records["patient"], records["owner"]
-    actors = {name: records[name] for name in ("owner", "reader", "editor", "outsider")}
-    for name, role in (
-        ("intern", UserRole.INTERN),
-        ("admin", UserRole.ADMIN),
-        ("ungranted", UserRole.PSYCHOLOGIST),
-        ("revoked", UserRole.PSYCHOLOGIST),
-    ):
-        actors[name] = User.objects.create_user(username=name, role=role, clinic=patient.clinic)
-    for name in ("intern", "revoked"):
-        PatientAccess.objects.create(patient=patient, user=actors[name], granted_by=owner)
-    PatientAccess.objects.filter(patient=patient, user=actors["revoked"]).delete()
-    actors["anonymous"] = None
-    analysis = AIAnalysis.objects.create(patient=patient, note=records["note"], requested_by=owner)
-    analysis_job = AnalysisJob.objects.create(patient=patient, note=records["note"], requested_by=owner)
-    vault_job = VaultJob.objects.create(analysis=analysis)
-    text = "Synthetic checkpoint evidence"
-    checkpoint = VaultCheckpoint.objects.create(
-        patient=patient, analysis=analysis, markdown=text,
-        content_sha256=hashlib.sha256(text.encode()).hexdigest(),
-    )
-    paths = {
-        "note": f"/api/clinical-notes/{records['note'].pk}/",
-        "session": f"/api/sessions/{records['session'].pk}/",
-        "analysis": f"/api/analysis/{analysis.pk}/",
-        "analysis-job": f"/api/analysis/jobs/{analysis_job.pk}/",
-        "vault": f"/api/vault/patients/{patient.pk}/",
-        "vault-job": f"/api/vault/jobs/{vault_job.pk}/",
-        "checkpoint": f"/api/vault/checkpoints/{checkpoint.pk}/",
-        "fhir": f"/api/patients/{patient.pk}/fhir/",
-    }
-    return actors, paths
+from apps.ai_analysis.models import AnalysisJob
 
 
 @pytest.mark.django_db

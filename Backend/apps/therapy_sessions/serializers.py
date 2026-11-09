@@ -1,10 +1,16 @@
 from rest_framework import serializers
 from apps.patients.models import Patient
-from apps.patients.access import can_access_patient
+from apps.patients.access import accessible_patients, can_access_patient
 from .models import TherapySession
 
 
 class TherapySessionSerializer(serializers.ModelSerializer):
+    def get_fields(self):
+        fields = super().get_fields()
+        user = getattr(self.context.get("request"), "user", None)
+        fields["patient"].queryset = accessible_patients(user, clinical=True, write=True)
+        return fields
+
     class Meta:
         model = TherapySession
         fields = (
