@@ -1,12 +1,12 @@
 # Registro de execução e decisões — AELO-PSI (TCC2)
 
-**Atualizado em:** 09/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
+**Atualizado em:** 16/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
 
 ## Estado geral
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** F0-04, validar implantação/TLS/proxy e falhas fechadas; consolidar F0-05 e validação responsável F0-06 antes da decisão G0. F0-02 recebeu a continuação de listagens/filtros/mutações/grants/revisão/download, mas revisão independente e concorrência continuam pendentes. Comparação de modelos locais e inspeção API/UX seguem em aberto.
+- **Próxima tarefa:** F0-05, diagnosticar a CI incompleta e validar o SHA de entrega; consolidar F0-06 e revisão independente F0-02 antes da decisão G0. F0-04 recebeu ensaio HTTPS/proxy/sessão em pilha sintética e F0-02 recebeu dois testes reais de concorrência; implantação no servidor alvo e cobertura integral continuam em revisão. [Validação da área 1](validation/F0_AREA1_2026-11-16.md). Comparação de modelos locais e inspeção API/UX seguem em aberto.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -418,3 +418,11 @@ O registro não é histórico de conversa: é histórico auditável de artefatos
 - **F6-04 (preparação do protocolo, não execução da avaliação):** `services/metrics/evidence_benchmark.py` mede Recall@k por IDs de notas ouro e validade **literal** de citações (mesmo paciente, versão e trecho existente); detecta referências estrangeiras/desconhecidas, sem inferência clínica ou rede. Exige classificação sintética declarada, sem verificá-la independentemente. Incluído dataset estritamente sintético e documentação do esquema.
 - **Verificação local isolada:** `cd Backend && python -m pytest tests/test_tcc2_evidence_benchmark.py -q` em cópia de trabalho com os novos arquivos: **11 testes passaram**. CLI com `--input tests/fixtures/tcc2_evidence_synthetic.json --strict` retornou código 0 e contagens esperadas para um caso artificial. Não foram executadas aqui a suíte integrada Django, frontend, PostgreSQL, Ollama nem GitHub Actions desta branch; os resultados do fixture **não** são desempenho do GraphRAG real.
 - **Estado:** `EM REVISÃO`; G0/G1 **continuam BLOQUEADOS**, sem autorização para pacientes reais, coleta humana ou alegações de conformidade. Próxima tarefa de segurança: revisar gates F0 e ambiente local antes de expandir a avaliação de modelos.
+
+## Área 1 — validação de segurança e execução — 16/11/2026 — EM REVISÃO
+
+- Pedido do autor: validar a área 1. Base `dd2e2a7`; PR #24 confirmado aberto/em rascunho, sem merge. Código no commit local `0f37c98`, branch `validation/f0-area1-tls`, sem push/novo PR nesta rodada; foco F0-04 e evidências F0-01/F0-02/F0-05/F0-06; RF-01/RNF-02/RNF-03/RNF-05/RNF-08. Preparação preexistente da apresentação preservada. Pilha sintética e sua CA removidas após os ensaios.
+- Dez casos novos reproduziram inicialização HTTPS com origens inseguras ou segredos reutilizados; corrigidos, com 29 testes de configuração aprovados. Smoke HTTPS reproduziu duplicação de cabeçalhos e ausência de HSTS na página frontend; Caddy corrigido e teste completo aprovado com CA local descartável, sem instalar confiança no host. Excluídos backup Git/histórico e arquivos locais de ambiente dos contextos Docker; backup confirmado em imagem antiga, que permanece intacta e exige reconstrução antes de implantação.
+- Executados: **473 testes PostgreSQL/pgvector aprovados**, nenhum ignorado; dois casos reais de concorrência/revogação com auditoria íntegra; **220 testes frontend aprovados**, build/lint aprovados (9 avisos existentes); Ruff/Bandit aprovados; pip-audit/npm audit sem vulnerabilidades conhecidas; Gitleaks do histórico `--all` com código 0 e saída suprimida; dois contextos Docker aprovados. Django deploy check sem erros, com avisos W005/W021; migrations sem alterações; API UID 10001. [Comandos, falhas iniciais e limites](validation/F0_AREA1_2026-11-16.md).
+- CI de `dd2e2a7` conferida novamente: dependências aprovado; baseline/qualidade/segredos incompletos ou em falha. Anotações consultadas não explicam os jobs não iniciados; causa e cota não comprovadas. Nova etapa HTTPS preparada no workflow, sem execução remota nesta rodada.
+- Inventário/RIPD técnico atualizado para refletir cookies, criptografia, auditoria e Vault existentes; responsáveis, finalidades/bases, retenção/incidentes e aprovação humana continuam pendentes. Não houve validação independente, servidor alvo, certificado público ou prontuário real. Área 1 **EM REVISÃO; G0 BLOQUEADO**. Próxima tarefa F0-05, seguida da consolidação responsável F0-06 e revisão independente F0-02.

@@ -1,7 +1,7 @@
 # F0-06 — Inventário inicial dos dados e riscos de privacidade (RIPD: rascunho)
 
 **Estado:** rascunho técnico de Design Science Research; **não** é RIPD validado, aprovação jurídica, parecer do CFP nem autorização de tratamento real.  
-**Data:** 17/10/2026. **Escopo:** módulos presentes na `main` após o PR #2 e arquitetura pretendida MTLI; distinguir implementação de proposta. Somente dados **sintéticos** devem ser utilizados no desenvolvimento atual.
+**Data inicial:** 17/10/2026. **Revisão técnica:** 16/11/2026, base `dd2e2a7` e incremento local `validation/f0-area1-tls`. **Escopo:** módulos inspecionados e ensaio sintético da [área 1](../validation/F0_AREA1_2026-11-16.md); distinguir implementação de aceite integral. Somente dados **sintéticos** devem ser utilizados no desenvolvimento atual. A atualização técnica não atribui responsáveis nem valida bases legais.
 
 ## 1. Objetivo e atores
 
@@ -20,12 +20,12 @@ O AELO-PSI apoia a administração e documentação assistida de psicoterapia; o
 
 | Fonte → destino | Conteúdo | Proteção existente | Lacunas/gates |
 | --- | --- | --- | --- |
-| Navegador → API Django | Identidade, senha/token, cadastro, notas, agenda | JWT, auth no servidor, escopo por paciente, HTTPS a configurar | Token JWT em storage de sessão ainda é acessível em XSS; política CSP e cookies HttpOnly avaliar |
-| Django → PostgreSQL | Dados de usuários, pacientes, sessões, notas, versões | Banco relacional; permissão aplicada no ORM de APIs | **Notas em plaintext**, backup cifrado e chaves pendentes ADR-002 |
+| Navegador → API Django | Identidade, senha/token, cadastro, notas, agenda | Access token em memória; refresh em cookie HttpOnly/Secure/SameSite Strict; origem/cabeçalho de sessão, rotação/blacklist; CSP e HTTPS testados em pilha sintética | XSS ainda permite agir na sessão; DNS/certificado público/servidor alvo pendentes; sem homologação clínica |
+| Django → PostgreSQL | Dados de usuários, pacientes, sessões, notas, versões | Escopo no servidor; campos clínicos e histórico cifrados com AES-GCM, testes de adulteração/rotação; identificadores operacionais não cifrados por esses campos | Chaves configuradas no ambiente; backup cifrado, restauração e segregação operacional ainda exigem validação F1/F5 |
 | Django → FastAPI → Ollama | Identificadores e trechos desidentificados para síntese | Serviço local, token interno, checagem de fonte | NER não comprovado; contexto narrativo ainda identificável; avaliação de prompt injection pendente |
-| Django → AuditLog | Quem consultou/alterou qual objeto, horário/IP | Metadados por allowlist e eventos READ/LIST | Integridade contra alteração, retenção, segregação e exportações pendentes |
+| Django → AuditLog | Quem consultou/alterou qual objeto, horário/IP | Metadados por allowlist, User-Agent descartado, READ/LIST/negações, cadeia HMAC e triggers PostgreSQL; testes na suíte executada | Cobertura integral, proteção contra DBA privilegiado, retenção e governança da chave permanecem em revisão |
 | Browser → interfaces gráficas | Gráficos/indicadores e sínteses | Métricas simuladas removidas do modo API | Resultados por IA não são diagnóstico; UX de incerteza e validação pendentes |
-| Memória MTLI futura | Chunks, embeddings, vínculos, snapshots | ADR-001 proposta | **Não implementada**: requer G0/G1, segurança e consentimentos/bases aplicáveis |
+| Memória derivada parcial (Vault) | Nós, relações, evidências, checkpoints e jobs por paciente; campo vetorial | Labels/evidências/checkpoints cifrados, permissões e proveniência parciais; existem código e testes, sem aceite F2/F3 | Embeddings/metadados não são cobertos integralmente pela criptografia de campos; não há aceite completo de chunks, revisão temporal ou reconstrução; G0/G1 não liberados |
 
 ## 3. Categorias e finalidades a confirmar
 
@@ -42,7 +42,7 @@ Registrar base legal concreta por atividade e art. 11 da LGPD para dados sensív
 | ID | Evento adverso | Consequência | Tratamento exigido | Estado |
 | --- | --- | --- | --- | --- |
 | PRIV-01 | Leitura cruzada de pacientes ou clínicas | Violação de sigilo | Teste BOLA/IDOR, grant por paciente, revisão independente | Parcial |
-| PRIV-02 | Leitura direta do banco/backup | Exposição de narrativa | Envelope encryption, segredo KMS/Vault, restauração | Pendente F1 |
+| PRIV-02 | Leitura direta do banco/backup | Exposição de narrativa | Campos cifrados existentes; falta consolidar segregação de chaves, proteção dos demais dados e restauração | Parcial; F1/F5 em revisão |
 | PRIV-03 | Prompt ou embedding reidentificável | Identificação indireta | Minimização, avaliação de NER/contexto e retenção | Pendente F2 |
 | PRIV-04 | Token exfiltrado por XSS | Acesso indevido | Sessão curta, CSP, sanitização, política de cookies segura | Parcial |
 | PRIV-05 | Log conter narrativa inadvertidamente | Vazamento secundário | Allowlist, revisão automática, retenção e controle de consulta | Parcial |
