@@ -1,0 +1,12 @@
+# Invoke with either Backend or Frontend as the build context.
+FROM scratch AS source
+COPY . /context
+
+FROM caddy:2-alpine
+RUN --mount=from=source,source=/context,target=/context \
+    test ! -e /context/.git && \
+    test ! -e /context/.git-backup-before-monorepo && \
+    test ! -e /context/.env && \
+    test ! -e /context/node_modules && \
+    test ! -e /context/.venv && \
+    echo BUILD_CONTEXT_SECURITY_OK

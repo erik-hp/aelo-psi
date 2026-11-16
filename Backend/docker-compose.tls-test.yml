@@ -1,0 +1,87 @@
+# Synthetic, isolated TLS validation. No ports are published on the host.
+services:
+  db_tls:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: aelo_tls_test
+      POSTGRES_USER: aelo_tls_test
+      POSTGRES_PASSWORD: synthetic-tls-database-password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aelo_tls_test -d aelo_tls_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  migrate_tls:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment: &tls_environment
+      DJANGO_SECRET_KEY: synthetic-tls-django-secret-do-not-deploy-12345678901234567890
+      AELO_SECURITY_SCENARIO: "1"
+      CLINICAL_DATA_KEYS: MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=
+      AUDIT_LOG_HMAC_KEY: synthetic-tls-audit-key-do-not-deploy-12345678901234567890
+      AI_SERVICE_TOKEN: synthetic-tls-ai-key-do-not-deploy-12345678901234567890
+      POSTGRES_DB: aelo_tls_test
+      POSTGRES_USER: aelo_tls_test
+      POSTGRES_PASSWORD: synthetic-tls-database-password
+      POSTGRES_HOST: db_tls
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: web-tls-security
+      DJANGO_REQUIRE_HTTPS: "True"
+      DJANGO_TRUST_PROXY_HEADERS: "True"
+      DJANGO_HSTS_SECONDS: "31536000"
+      CORS_ALLOWED_ORIGINS: https://web-tls-security
+      CSRF_TRUSTED_ORIGINS: https://web-tls-security
+    command: sh -c "python manage.py migrate && python manage.py seed_security_scenario"
+    depends_on:
+      db_tls:
+        condition: service_healthy
+
+  api_tls:
+    build: .
+    environment: *tls_environment
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60
+    networks:
+      default:
+        aliases: [api]
+    depends_on:
+      migrate_tls:
+        condition: service_completed_successfully
+
+  web_tls:
+    build:
+      context: ../Frontend
+      dockerfile: Dockerfile.production
+    environment:
+      AELO_DOMAIN: web-tls-security
+    command: caddy run --config /etc/caddy/Caddyfile.tls-test --adapter caddyfile
+    volumes:
+      - ./docker/Caddyfile.tls-test:/etc/caddy/Caddyfile.tls-test:ro
+      - tls_test_ca:/data
+    tmpfs:
+      - /config
+    networks:
+      default:
+        aliases: [web-tls-security]
+    depends_on:
+      - api_tls
+
+  tls_smoke:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      AELO_TLS_BASE_URL: https://web-tls-security
+      AELO_TLS_HTTP_URL: http://web-tls-security:8080
+      AELO_TLS_CA_FILE: /tls-ca/caddy/pki/authorities/local/root.crt
+    volumes:
+      - tls_test_ca:/tls-ca:ro
+    command: python -m tests.live_tls_smoke
+    depends_on:
+      - web_tls
+
+volumes:
+  tls_test_ca:

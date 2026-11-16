@@ -93,3 +93,46 @@ def test_automatic_reading_never_starts_in_https_deployment():
     )
     assert result.returncode != 0
     assert "AELO_SYNTHETIC_DATA_ONLY" in result.stderr
+
+
+def tls_settings(**overrides):
+    return load_settings(**{
+        "DJANGO_REQUIRE_HTTPS": "True",
+        "DJANGO_ALLOWED_HOSTS": "aelo.example.test",
+        "CLINICAL_DATA_KEYS": "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
+        "AUDIT_LOG_HMAC_KEY": "synthetic-independent-audit-key-1234567890",
+        "AI_SERVICE_TOKEN": "synthetic-independent-ai-token-1234567890",
+        "CORS_ALLOWED_ORIGINS": "https://aelo.example.test",
+        "CSRF_TRUSTED_ORIGINS": "https://aelo.example.test",
+        **overrides,
+    })
+
+
+def test_https_configuration_with_independent_secrets_is_accepted():
+    assert tls_settings().returncode == 0
+
+
+@pytest.mark.parametrize("name", ["CLINICAL_DATA_KEYS", "AUDIT_LOG_HMAC_KEY", "AI_SERVICE_TOKEN"])
+def test_https_refuses_missing_service_secrets(name):
+    assert tls_settings(**{name: ""}).returncode != 0
+
+
+@pytest.mark.parametrize("name", ["CORS_ALLOWED_ORIGINS", "CSRF_TRUSTED_ORIGINS"])
+@pytest.mark.parametrize("origin", ["http://aelo.example.test", "https://*.example.test", "https://user:pass@aelo.example.test"])
+def test_https_refuses_unsafe_browser_origins(name, origin):
+    result = tls_settings(**{name: origin})
+    assert result.returncode != 0, f"HTTPS startup accepted unsafe {name}"
+    assert name in result.stderr
+
+
+@pytest.mark.parametrize("first,second", [
+    ("AUDIT_LOG_HMAC_KEY", "AI_SERVICE_TOKEN"),
+    ("DJANGO_SECRET_KEY", "AUDIT_LOG_HMAC_KEY"),
+    ("DJANGO_SECRET_KEY", "AI_SERVICE_TOKEN"),
+    ("CLINICAL_DATA_KEYS", "AUDIT_LOG_HMAC_KEY"),
+])
+def test_https_refuses_reusing_a_secret_for_another_purpose(first, second):
+    value = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=" if first == "CLINICAL_DATA_KEYS" else "synthetic-shared-secret-should-be-refused-12345678901234567890"
+    result = tls_settings(**{first: value, second: value})
+    assert result.returncode != 0, "HTTPS startup accepted secrets reused for different purposes"
+    assert "independent" in result.stderr
