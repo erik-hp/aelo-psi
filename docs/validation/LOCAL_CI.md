@@ -34,6 +34,7 @@ Hashes detectam alterações nos artefatos em relação ao manifesto local; não
 | Dependências | Locks Python com versões e hashes; recusa de inputs/locks alterados sem regenerar; pip-audit incluindo ferramentas CI; npm audit completo no nível moderate |
 | Segredos | Gitleaks da árvore do commit e de todo o histórico disponível, ambos bloqueantes, sem rede no scanner, saída de achados suprimida |
 | Próprio executor | Testes de sucesso, recusa, falha/timeout, usuário root, proteção de saída do scanner, adulteração de relatório e alteração de dependências |
+| Inventário F0-06 | Comparação de 28 modelos/235 campos declarados com o catálogo revisado, sem consultar dados do banco; schema novo/desatualizado bloqueia a execução |
 
 Os workflows remotos são preservados. A indisponibilidade deles é registrada separadamente; o executor local passa a ser o caminho de execução autorizado enquanto durar a restrição. Não replica o ambiente gerenciado do GitHub nem o isolamento de uma máquina independente: são containers Linux no computador de desenvolvimento. O protocolo é automatizado e reexecutável por outro revisor.
 

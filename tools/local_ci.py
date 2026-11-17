@@ -225,6 +225,7 @@ def run_pipeline(ref, output_base):
         pipeline.run("python-ruff", compose("test", "run", "--rm", "--no-deps", "backend_test", "python", "-m", "ruff", "check", "."))
         pipeline.run("python-bandit", backend("python", "-m", "bandit", "-r", "apps", "ai_service", "services", "config", "-x", "**/migrations/**", "-ll", "-q"))
         pipeline.run("python-package-consistency", backend("python", "-m", "pip", "check"))
+        pipeline.run("privacy-inventory", backend("python", "scripts/audit_data_inventory.py", "--check"))
         pipeline.run("postgres-ready", compose("test", "up", "-d", "--wait", "db_test"), timeout=180)
         pipeline.run("django-migrate", backend("python", "manage.py", "migrate", "--noinput"))
         pipeline.run("django-check", backend("python", "manage.py", "check"))

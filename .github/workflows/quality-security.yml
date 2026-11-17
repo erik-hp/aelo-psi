@@ -31,6 +31,8 @@ jobs:
         run: docker compose -f Backend/docker-compose.test.yml run --build --rm backend_test
       - name: Python dependency audit
         run: docker compose -f Backend/docker-compose.test.yml run --rm --no-deps backend_test python -m pip_audit -r requirements/base.txt -r requirements/ai.txt
+      - name: Check privacy inventory without querying patient records
+        run: docker compose -f Backend/docker-compose.test.yml run --rm --no-deps backend_test python scripts/audit_data_inventory.py --check
       - name: Python static checks
         run: |
           docker compose -f Backend/docker-compose.test.yml run --rm --no-deps backend_test python -m ruff check .
