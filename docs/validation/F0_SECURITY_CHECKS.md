@@ -2,6 +2,8 @@
 
 **Data:** 17/10/2026 · **Estado:** entrega incremental; não é aprovação G0.
 
+**Atualização de 17/11/2026:** locks/hashes e [executor local integral por commit](LOCAL_CI.md) implementados e verificados, com [42 etapas aprovadas](F0_LOCAL_CI_2026-11-17.md). Essa decisão autorizada contorna a cota GitHub e resolve a pendência de execução automatizada coberta; não exige aguardá-la nem promove G0. As pendências originais abaixo são históricas e devem ser confrontadas com essa evidência.
+
 ## Implementação
 
 - `.github/workflows/secret-scanning.yml`: Gitleaks v8.30.1 em container Docker, executado com `--network none`, volume de checkout somente leitura, `--redact` e sem imprimir saída de detecção. A árvore atual é **bloqueante**; o histórico Git completo é **informativo** e exige análise privada caso exista alerta ou erro.

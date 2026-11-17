@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "executor": "local-docker",
+  "commit": "759f9dd83e8b86e29c8e93eeb41dd90abbe1857b",
+  "status": "passed",
+  "started_utc": "2026-11-17T03:36:48.201323+00:00",
+  "finished_utc": "2026-11-17T03:44:18.653787+00:00",
+  "duration_seconds": 450.45,
+  "github_actions_used": false,
+  "local_manifest": "reports/local-ci/20261117t033643z-eb4b53-759f9dd83e8b/manifest.json",
+  "manifest_sha256": "1886a13bf10f2a51aaf576a047b08c58aacfe1f9c580b8410ed0c78f50bb7ac9",
+  "source_archive_sha256": "6689004f8b07ba977e986fbe033565acab4b1d5a598e37c41160a31777a65a2a",
+  "sha256sums_sha256": "7db8a54ef9df47b8693975352b12fe6547fcd228c8341efbab393f6ba7ca6c3d",
+  "runner_tests": 11,
+  "backend_pytest": {
+    "tests": 473,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "django_app_tests": 48,
+  "ai_unittest": 8,
+  "frontend": {
+    "numTotalTests": 220,
+    "numPassedTests": 220,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "load": {
+    "users": 10,
+    "duration": "30s",
+    "http_requests": 510,
+    "failed_requests": 0,
+    "thresholds_passed": true
+  },
+  "steps": [
+    {
+      "name": "runner-tests",
+      "status": "passed",
+      "seconds": 0.61,
+      "exit_code": 0
+    },
+    {
+      "name": "requirements-locks",
+      "status": "passed",
+      "seconds": 0.1,
+      "exit_code": 0
+    },
+    {
+      "name": "docker-version",
+      "status": "passed",
+      "seconds": 0.09,
+      "exit_code": 0
+    },
+    {
+      "name": "secrets-tree",
+      "status": "passed",
+      "seconds": 1.53,
+      "exit_code": 0
+    },
+    {
+      "name": "secrets-history",
+      "status": "passed",
+      "seconds": 18.65,
+      "exit_code": 0
+    },
+    {
+      "name": "build-test",
+      "status": "passed",
+      "seconds": 36.49,
+      "exit_code": 0
+    },
+    {
+      "name": "build-api",
+      "status": "passed",
+      "seconds": 50.08,
+      "exit_code": 0
+    },
+    {
+      "name": "build-ai",
+      "status": "passed",
+      "seconds": 12.98,
+      "exit_code": 0
+    },
+    {
+      "name": "build-frontend",
+      "status": "passed",
+      "seconds": 60.78,
+      "exit_code": 0
+    },
+    {
+      "name": "build-web",
+      "status": "passed",
+      "seconds": 24.58,
+      "exit_code": 0
+    },
+    {
+      "name": "python-ruff",
+      "status": "passed",
+      "seconds": 1.41,
+      "exit_code": 0
+    },
+    {
+      "name": "python-bandit",
+      "status": "passed",
+      "seconds": 1.68,
+      "exit_code": 0
+    },
+    {
+      "name": "python-package-consistency",
+      "status": "passed",
+      "seconds": 1.13,
+      "exit_code": 0
+    },
+    {
+      "name": "postgres-ready",
+      "status": "passed",
+      "seconds": 3.02,
+      "exit_code": 0
+    },
+    {
+      "name": "django-migrate",
+      "status": "passed",
+      "seconds": 3.59,
+      "exit_code": 0
+    },
+    {
+      "name": "django-check",
+      "status": "passed",
+      "seconds": 1.89,
+      "exit_code": 0
+    },
+    {
+      "name": "django-migration-drift",
+      "status": "passed",
+      "seconds": 1.72,
+      "exit_code": 0
+    },
+    {
+      "name": "backend-tests",
+      "status": "passed",
+      "seconds": 90.28,
+      "exit_code": 0
+    },
+    {
+      "name": "django-app-tests",
+      "status": "passed",
+      "seconds": 5.78,
+      "exit_code": 0
+    },
+    {
+      "name": "ai-compile",
+      "status": "passed",
+      "seconds": 1.03,
+      "exit_code": 0
+    },
+    {
+      "name": "ai-unit-tests",
+      "status": "passed",
+      "seconds": 1.57,
+      "exit_code": 0
+    },
+    {
+      "name": "nonroot-api",
+      "status": "passed",
+      "seconds": 0.32,
+      "exit_code": 0
+    },
+    {
+      "name": "nonroot-ai",
+      "status": "passed",
+      "seconds": 0.3,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-lint",
+      "status": "passed",
+      "seconds": 3.82,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-tests",
+      "status": "passed",
+      "seconds": 14.75,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-build",
+      "status": "passed",
+      "seconds": 16.22,
+      "exit_code": 0
+    },
+    {
+      "name": "python-audit",
+      "status": "passed",
+      "seconds": 17.34,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-audit",
+      "status": "passed",
+      "seconds": 1.49,
+      "exit_code": 0
+    },
+    {
+      "name": "caddy-config",
+      "status": "passed",
+      "seconds": 0.6,
+      "exit_code": 0
+    },
+    {
+      "name": "compose-development-config",
+      "status": "passed",
+      "seconds": 0.15,
+      "exit_code": 0
+    },
+    {
+      "name": "compose-tls-config",
+      "status": "passed",
+      "seconds": 0.13,
+      "exit_code": 0
+    },
+    {
+      "name": "http-stack",
+      "status": "passed",
+      "seconds": 13.54,
+      "exit_code": 0
+    },
+    {
+      "name": "http-smoke",
+      "status": "passed",
+      "seconds": 4.22,
+      "exit_code": 0
+    },
+    {
+      "name": "http-load",
+      "status": "passed",
+      "seconds": 34.84,
+      "exit_code": 0
+    },
+    {
+      "name": "http-after-load",
+      "status": "passed",
+      "seconds": 4.19,
+      "exit_code": 0
+    },
+    {
+      "name": "tls-stack",
+      "status": "passed",
+      "seconds": 8.9,
+      "exit_code": 0
+    },
+    {
+      "name": "tls-smoke",
+      "status": "passed",
+      "seconds": 2.28,
+      "exit_code": 0
+    },
+    {
+      "name": "tls-deploy-check",
+      "status": "passed",
+      "seconds": 1.73,
+      "exit_code": 0
+    },
+    {
+      "name": "image-identities",
+      "status": "passed",
+      "seconds": 0.2,
+      "exit_code": 0
+    },
+    {
+      "name": "cleanup-tls",
+      "status": "passed",
+      "seconds": 2.61,
+      "exit_code": 0
+    },
+    {
+      "name": "cleanup-http",
+      "status": "passed",
+      "seconds": 2.33,
+      "exit_code": 0
+    },
+    {
+      "name": "cleanup-test",
+      "status": "passed",
+      "seconds": 1.09,
+      "exit_code": 0
+    }
+  ]
+}
