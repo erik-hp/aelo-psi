@@ -7,8 +7,8 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/base.txt requirements/base.txt
-RUN pip install --no-cache-dir -r requirements/base.txt
+COPY requirements/base.linux-py312.lock requirements/base.linux-py312.lock
+RUN pip install --no-cache-dir --require-hashes -r requirements/base.linux-py312.lock
 
 COPY . .
 

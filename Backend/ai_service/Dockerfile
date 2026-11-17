@@ -4,8 +4,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
-COPY requirements/ai.txt requirements/ai.txt
-RUN pip install --no-cache-dir -r requirements/ai.txt
+COPY requirements/ai.linux-py312.lock requirements/ai.linux-py312.lock
+RUN pip install --no-cache-dir --require-hashes -r requirements/ai.linux-py312.lock
 
 COPY ai_service /app/ai_service
 RUN useradd --system --uid 10001 --home-dir /nonexistent --shell /usr/sbin/nologin aelo

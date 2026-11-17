@@ -21,3 +21,5 @@ Frontend/*.tsbuildinfo
 .DS_Store
 .idea/
 .vscode/
+reports/local-ci/
+tools/**/__pycache__/

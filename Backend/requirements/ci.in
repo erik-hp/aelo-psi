@@ -1,0 +1,5 @@
+# Linux/Python 3.12 containers only. Regenerate with scripts/compile_requirements.py.
+-c base.linux-py312.lock
+-c ai.linux-py312.lock
+-r dev.txt
+-r ai.txt
