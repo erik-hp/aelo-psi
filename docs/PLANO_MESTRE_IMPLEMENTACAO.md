@@ -95,7 +95,7 @@ Django REST Framework (domínio, permissões, trilha, versão, APIs)
 | F0-03 | Remover fallback clínico fictício da IA e valores simulados dos dados reais do front-end, mantendo mocks **apenas** em modo demo claramente sinalizado | Ausência de `fallback_analysis` devolvendo números; erro `FAILED` exibido; análises reais sem números arbitrários |
 | F0-04 | Remover seed automática do comando de inicialização e credenciais fixas, endurecer `DEBUG`, chaves, cookies/tokens, throttling e exposição de portas | Bootstrap manual de desenvolvimento sem senha padrão, configurações de produção que falham fechadas, testes de login/refresh |
 | F0-05 | Instalar scaffolding de teste/CI e revisão: lint, typecheck, pytest, migrations check, dependências e varredura de segredos | Pipeline reproduzível em PR; critérios de falha bem definidos |
-| F0-06 | Definir inventário/fluxo de dados e rascunho do RIPD, papéis controlador/operador, bases legais, retenção e incidentes a validar | Mapa de dados e riscos em `docs/privacy/`; pendências de validação jurídica explícitas |
+| F0-06 | Definir inventário/fluxo de dados e rascunho do RIPD, papéis controlador/operador, bases legais, retenção e incidentes a validar | [Mapa/RIPD](privacy/F0_DATA_MAP_RIPD_DRAFT.md), [decisões/retenção/incidentes](privacy/F0_GOVERNANCE_DECISIONS.md) e catálogo verificável de metadados; pendências de validação jurídica/profissional explícitas, sem presumir aprovação |
 
 **Gate G0:** risco de acesso cruzado corrigido e testado; ausência de análises falsificadas; aplicação inicial reproduzível ou bloqueadores documentados; testes mínimos executados. **Sem G0, não iniciar indexação de conteúdo clínico.**
 
