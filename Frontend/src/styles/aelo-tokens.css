@@ -68,6 +68,7 @@
   --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-800) 100%);
   --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-800) 0%, var(--color-accent-900) 100%);
   --aelo-button-primary-surface: var(--color-accent-700);
+  --aelo-on-primary: var(--color-white);
   /* Ghost means no fill until the pointer arrives. */
   --color-button-ghost-background: transparent;
   --color-button-ghost-hover: var(--color-accent-50);
@@ -86,37 +87,40 @@
 .dark {
   color-scheme: dark;
   --shadow-xs: 0 0 0 0 transparent;
-  --color-background-full: var(--color-neutral-925);
-  --color-background-primary-default: var(--color-neutral-900);
-  --color-background-secondary-default: var(--color-neutral-800);
-  --color-background-secondary-hover: var(--color-neutral-700);
-  --color-text-primary: var(--color-neutral-50);
-  --color-text-secondary: var(--color-neutral-300);
-  --color-text-tertiary: var(--color-neutral-400);
-  --color-text-placeholder: var(--color-neutral-400);
+  /* Dark palette from the DESIGN.md "AELO - Modo escuro": graphite surfaces, slate and brass accents. */
+  --color-background-full: #15181d;
+  --color-background-primary-default: #20252d;
+  --color-background-secondary-default: #252b34;
+  --color-background-secondary-hover: #2d3948;
+  --color-text-primary: #eceff3;
+  --color-text-secondary: #b8c2ce;
+  --color-text-tertiary: #a3aebc;
+  --color-text-placeholder: #a3aebc;
   --color-text-error-primary: #fda29b;
-  --color-border-button-default: var(--color-neutral-700);
-  --color-border-button-hover: var(--color-neutral-500);
-  --color-separator-border: var(--color-neutral-800);
-  --color-border-focus-ring: var(--color-accent-300);
-  --gradient-button-primary-default: linear-gradient(180deg, var(--color-accent-600) 0%, var(--color-accent-700) 100%);
-  --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-800) 100%);
-  --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-800) 0%, var(--color-accent-900) 100%);
-  --aelo-button-primary-surface: var(--color-accent-700);
+  --color-border-button-default: #3a434f;
+  --color-border-button-hover: #738397;
+  --color-separator-border: #3a434f;
+  --color-border-focus-ring: #a5bbd2;
+  --aelo-primary: #a5bbd2;
+  --gradient-button-primary-default: linear-gradient(180deg, var(--aelo-primary) 0%, var(--aelo-primary) 100%);
+  --gradient-button-primary-hover: linear-gradient(180deg, #b8cbdd 0%, #b8cbdd 100%);
+  --gradient-button-primary-active: linear-gradient(180deg, #8ea8c2 0%, #8ea8c2 100%);
+  --aelo-button-primary-surface: var(--aelo-primary);
+  --aelo-on-primary: #18232e;
   --color-button-ghost-background: transparent;
-  --color-button-ghost-hover: var(--color-neutral-800);
-  --color-button-ghost-active: var(--color-neutral-700);
+  --color-button-ghost-hover: #2d3948;
+  --color-button-ghost-active: #3a434f;
   --color-button-ghost-disabled: transparent;
-  --color-button-ghost-foreground: var(--color-accent-300);
+  --color-button-ghost-foreground: #a5bbd2;
   /* Same selector weight as :root, so every light override needs its dark value here. */
   --color-status-lime-background: color-mix(in srgb, var(--color-lime-950) 60%, transparent);
   --color-status-yellow-background: color-mix(in srgb, var(--color-yellow-950) 60%, transparent);
   --color-status-rose-background: color-mix(in srgb, var(--color-rose-950) 60%, transparent);
   --color-status-blue-background: color-mix(in srgb, var(--color-blue-950) 60%, transparent);
   --color-status-rose-text: var(--color-rose-400);
-  --aelo-field-border: var(--color-neutral-400);
-  --aelo-thread: var(--color-accent-300);
-  --aelo-thread-end: #87b9f9;
+  --aelo-field-border: #738397;
+  --aelo-thread: #86a7c4;
+  --aelo-thread-end: #c3a26a;
 }
 
 @layer components {

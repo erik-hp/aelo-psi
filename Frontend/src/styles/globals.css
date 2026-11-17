@@ -8,14 +8,14 @@
 
 /* Categorical graph colors shared by Cytoscape and its DOM legend. */
 @theme static {
-  --color-vault-event: rgb(96, 165, 250);
-  --color-vault-symptom: rgb(248, 113, 113);
-  --color-vault-context: rgb(251, 191, 36);
-  --color-vault-intervention: rgb(52, 211, 153);
+  --color-vault-event: #6e9bd1;
+  --color-vault-symptom: #e67f74;
+  --color-vault-context: #d9a93f;
+  --color-vault-intervention: #5fb58a;
   --color-vault-node-text: rgb(15, 23, 42);
   --color-vault-symptom-text: rgb(255, 255, 255);
-  --color-vault-community: rgb(148, 163, 184);
-  --color-vault-edge: rgb(148, 163, 184);
+  --color-vault-community: #8b9bb0;
+  --color-vault-edge: #7d8ea3;
 }
 
 :root {
@@ -24,7 +24,7 @@
 
 @layer base {
   :root {
-    --font-inter: "Atkinson Hyperlegible Next Variable", ui-sans-serif, system-ui, sans-serif;
+    --font-inter: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
     --background: 168 16% 94%;
     --foreground: 214 51% 9%;
     --card: 0 0% 100%;

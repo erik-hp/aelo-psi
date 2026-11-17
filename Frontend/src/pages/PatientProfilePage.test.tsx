@@ -116,7 +116,7 @@ describe("PatientProfilePage Clinical Tabs", () => {
     const tabOverview = screen.getByRole("tab", { name: /Resumo clínico/i });
     const tabSessions = screen.getByRole("tab", { name: /Prontuários e sessões/i });
     const tabLongitudinal = screen.getByRole("tab", { name: /Evolução longitudinal/i });
-    const tabVault = screen.getByRole("tab", { name: /Cofre Cognitivo \(Vault\)/i });
+    const tabVault = screen.getByRole("tab", { name: /Memória clínica/i });
 
     expect(tabOverview).toBeDefined();
     expect(tabSessions).toBeDefined();
@@ -151,10 +151,10 @@ describe("PatientProfilePage Clinical Tabs", () => {
       expect(screen.getByText("Estado emocional")).toBeDefined();
     });
 
-    // Navega para aba "Cofre cognitivo (Vault)"
+    // Navega para aba "Memória clínica"
     fireEvent.click(tabVault);
     await waitFor(() => {
-      expect(screen.getAllByText(/Cofre Cognitivo/i).length).toBeGreaterThan(1);
+      expect(screen.getAllByText(/Memória clínica/i).length).toBeGreaterThan(1);
     });
   });
 
@@ -177,7 +177,7 @@ describe("PatientProfilePage Clinical Tabs", () => {
     });
 
     const tabOverview = screen.getByRole("tab", { name: /Resumo clínico/i });
-    const tabVault = screen.getByRole("tab", { name: /Cofre Cognitivo \(Vault\)/i });
+    const tabVault = screen.getByRole("tab", { name: /Memória clínica/i });
     const tabSessions = screen.getByRole("tab", { name: /Prontuários e sessões/i });
 
     expect(tabOverview.getAttribute("aria-selected")).toBe("true");

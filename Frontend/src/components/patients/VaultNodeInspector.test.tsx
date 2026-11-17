@@ -44,7 +44,7 @@ const mockGraph: VaultGraph = {
 describe("VaultNodeInspector", () => {
   it("renders empty state placeholder when no node is selected", () => {
     render(<VaultNodeInspector graph={mockGraph} nodeId={null} />);
-    expect(screen.getByText(/Nenhum nó selecionado/i)).toBeDefined();
+    expect(screen.getByText(/Nenhum conceito selecionado/i)).toBeDefined();
   });
 
   it("renders node details, kind badge, and Gestalt proximity evidence quote when node is selected", () => {

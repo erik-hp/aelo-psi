@@ -397,6 +397,12 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Validação complementar executada em projeto Docker sintético isolado `aelo-f002-boundaries-20261109`: migrações e **457 testes PostgreSQL/pgvector aprovados**, nenhum ignorado; pilha encerrada ao final. Bandit local sem achados no nível configurado. Isso não substitui os jobs remotos faltantes; a falha de inicialização fica registrada em F0-05.
 - Mapa/índice/log no Cérebro atualizados. Incremento destacado implementado e verificado, requisito integral **EM REVISÃO**; F1-03 continua pendente, pois a assinatura exercitada é a da revisão de IA. **G0 permanece BLOQUEADO**. Próximo item: F0-04.
 
+## Preparação da apresentação do TCC2 — 09/11/2026 — EM REVISÃO
+
+Preparação documental solicitada pelo autor (F7-01/F7-04; VAL-04/RNF-08): criado `1 - TCC/wiki/outputs/guia_apresentacao_tcc2_15_20_minutos.md`, com estudo, roteiro de 18 minutos adaptável a 15/20, falas por slide, demonstração/contingência e perguntas da banca; índice/log do Cérebro atualizados. Base técnica `dd2e2a7`, PR #24 confirmado aberto/em rascunho. Material local de preparação, ainda sujeito à revisão do autor/orientador; não é avaliação científica ou aprovação de defesa. Sem alteração de código, novo teste de aplicação ou promoção de gate. O limite de CI foi informado pelo autor, sem inspeção independente da cota. A implementação F0-04 permanece pendente; o pedido atual mudou o foco para apresentação.
+
+Verificação documental local: `DOC_CHECK_OK` confirmou 12 slides, intervalos contínuos até 18:00, versões de 15:00/20:00, 19 perguntas, links internos/fontes existentes e inclusão no índice/log; `git diff --check` sem erros nos documentos alterados. Nenhum build ou teste da aplicação foi repetido. Arquivos desta preparação ainda locais, sem novo commit/push ou disparo de CI.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
@@ -442,3 +448,9 @@ O registro não é histórico de conversa: é histórico auditável de artefatos
 - Limites documentados: AAD apenas modelo/campo; token de infraestrutura sem criptografia clínica; exportações legíveis; retenção de cópias e chaves não homologada; destinos/sincronização a confirmar. Não foi executada exploração, purga, consulta de banco real ou comunicação a terceiros. Referências oficiais consultadas; situação consolidada de CFP 001/2009 ainda não confirmada, sem alegação de prazo/aderência final.
 - **Pipeline local integral: 43 etapas aprovadas em 269,85 s, SHA `415615387c4e5b2c534a8e90df4b2abaa3bdbdd6`**. Backend 478 aprovados/zero ignorados (5 novos), frontend 220 e executor 11; builds, auditorias, HTTP/carga/HTTPS e limpeza aprovados. Manifesto conferido por `--verify`; projetos/CA encerrados. [Relatório](validation/F0_PRIVACY_2026-11-17.md), [evidência](validation/evidence/f0-06-2026-11-17.json), [governança](privacy/F0_GOVERNANCE_DECISIONS.md).
 - Entrega técnica concluída; requisito/governança **EM REVISÃO**, sem designar agentes reais, aprovar bases legais, pesquisa humana ou operação clínica. **G0 não liberado**. Próximo item: revisão independente F0-02 e consolidação documentada de G0, preservando as decisões humanas necessárias.
+
+## Vault e tokens de interface — 17/11/2026 — EM REVISÃO
+
+- Base `f01e9ee`, branch `validation/f0-area1-tls`. Commit das alterações locais de frontend: grafo do Vault (Cytoscape com d3-force), tokens/tipografia (Instrument Sans) e ajustes de testes. Sem alteração de API, autorização ou dados.
+- Executados: `npm test` (**220 aprovados/30 arquivos**), `npm run build` (aprovado; aviso de chunk) e `npm run lint` (**0 erros/9 avisos**). Backend e CI local não foram repetidos; sem inspeção visual no navegador.
+- Passos restantes para concluir o projeto: [PROXIMOS_PASSOS.md](PROXIMOS_PASSOS.md). **G0 continua BLOQUEADO**.

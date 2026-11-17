@@ -266,7 +266,7 @@ export function PatientProfilePage() {
           </Tab>
           <Tab id="vault" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <Network className="h-4 w-4" />
-            Cofre cognitivo (Vault)
+            Memória clínica
           </Tab>
         </TabList>
 

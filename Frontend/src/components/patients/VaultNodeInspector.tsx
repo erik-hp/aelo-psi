@@ -31,9 +31,9 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
     return (
       <div className="flex min-h-[380px] flex-col items-center justify-center rounded-lg border border-dashed border-border-button-default p-6 text-center text-body-regular text-text-secondary">
         <MousePointerClick className="mb-2 h-8 w-8 text-text-secondary" />
-        <p className="text-body-medium text-text-primary">Nenhum nó selecionado</p>
+        <p className="text-body-medium text-text-primary">Nenhum conceito selecionado</p>
         <p className="mt-1 max-w-xs text-caption-1-regular">
-          Clique em qualquer entidade no grafo para inspecionar as evidências literais citadas pelo paciente e sua rastreabilidade no prontuário.
+          Clique em qualquer conceito no mapa para inspecionar as evidências literais citadas pelo paciente e sua rastreabilidade no prontuário.
         </p>
       </div>
     );
