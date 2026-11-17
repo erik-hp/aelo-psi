@@ -106,6 +106,8 @@ vi.mock("cytoscape", () => {
     fit: vi.fn(),
     on: vi.fn(),
     destroy: vi.fn(),
+    nodes: vi.fn(() => []),
+    batch: vi.fn((run: () => void) => run()),
   };
   const fn = Object.assign(vi.fn(() => mockCy), { use: vi.fn() });
   return {

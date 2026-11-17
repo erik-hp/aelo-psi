@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { queryClient } from "@/lib/queryClient";
 import { initializeTheme } from "@/store/themeStore";
-import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
+import "@fontsource-variable/instrument-sans/index.css";
 import "@fontsource-variable/source-serif-4/wght.css";
 import "@/styles/globals.css";
 

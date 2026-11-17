@@ -51,7 +51,7 @@ describe.each([["light", ":root"], ["dark", ".dark"]])("Contrast of the %s theme
   it("keeps primary button text readable", () => {
     const gradient = theme["--gradient-button-primary-default"];
     const lightestStop = gradient.match(/var\((--[\w-]+)\) 0%/)?.[1] as string;
-    expect(contrast(primitives["--color-white"], resolve(theme, lightestStop))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(resolve(theme, "--aelo-on-primary"), resolve(theme, lightestStop))).toBeGreaterThanOrEqual(4.5);
   });
 });
 

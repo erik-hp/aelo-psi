@@ -1,0 +1,8 @@
+{
+    local_certs
+    skip_install_trust
+    http_port 8080
+}
+
+# Exercise the production routing and headers with a disposable local CA.
+import /etc/caddy/Caddyfile

@@ -59,6 +59,8 @@ vi.mock("cytoscape", () => {
     fit: vi.fn(),
     on: vi.fn(),
     destroy: vi.fn(),
+    nodes: vi.fn(() => []),
+    batch: vi.fn((run: () => void) => run()),
   };
   const fn = Object.assign(vi.fn(() => mockCy), { use: vi.fn() });
   return {
@@ -71,7 +73,7 @@ describe("VaultCytoscapeSkeleton", () => {
   it("renders loading skeleton with pulse effect and accessibility text", () => {
     render(<VaultCytoscapeSkeleton />);
     expect(
-      screen.getByText(/Renderizando topologia conceitual do grafo…/i),
+      screen.getByText(/Montando o mapa de conceitos…/i),
     ).toBeDefined();
   });
 });
@@ -93,12 +95,11 @@ describe("VaultCytoscapeCanvas", () => {
     render(<VaultCytoscapeCanvas graph={mockGraph} onSelectNode={onSelectNode} />);
 
     // Legend
-    expect(screen.getByText("Legenda dos Nós:")).toBeDefined();
+    expect(screen.getByText("Legenda:")).toBeDefined();
     expect(screen.getByText("Conceito")).toBeDefined();
     expect(screen.getByText("Sintoma")).toBeDefined();
     expect(screen.getByText("Tema / Contexto")).toBeDefined();
     expect(screen.getByText("Intervenção")).toBeDefined();
-    expect(screen.getByText("Comunidade (Leiden)")).toBeDefined();
 
     // Floating controls
     const zoomInBtn = screen.getByRole("button", { name: /Aumentar zoom/i });
@@ -196,7 +197,7 @@ describe("VaultCytoscapeCanvas", () => {
     });
   });
 
-  it("handles node selection event and ignores community cluster taps", () => {
+  it("handles node selection event", () => {
     const onSelectNode = vi.fn();
     render(<VaultCytoscapeCanvas graph={mockGraph} onSelectNode={onSelectNode} />);
 
@@ -208,9 +209,5 @@ describe("VaultCytoscapeCanvas", () => {
     tapHandler({ target: { id: () => "node-1" } });
     expect(onSelectNode).toHaveBeenCalledWith("node-1");
 
-    // Simulating tap on a community boundary node
-    onSelectNode.mockClear();
-    tapHandler({ target: { id: () => "community-0" } });
-    expect(onSelectNode).not.toHaveBeenCalled();
   });
 });

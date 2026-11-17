@@ -31,6 +31,8 @@ jobs:
         run: docker compose -f Backend/docker-compose.test.yml run --build --rm backend_test
       - name: Python dependency audit
         run: docker compose -f Backend/docker-compose.test.yml run --rm --no-deps backend_test python -m pip_audit -r requirements/base.txt -r requirements/ai.txt
+      - name: Check privacy inventory without querying patient records
+        run: docker compose -f Backend/docker-compose.test.yml run --rm --no-deps backend_test python scripts/audit_data_inventory.py --check
       - name: Python static checks
         run: |
           docker compose -f Backend/docker-compose.test.yml run --rm --no-deps backend_test python -m ruff check .
@@ -76,10 +78,14 @@ jobs:
           persist-credentials: false
       - name: Live HTTP security checks on synthetic data
         run: docker compose -p aelo-security-ci -f Backend/docker-compose.security.yml run --build --rm security_smoke
+      - name: HTTPS, proxy and session checks with a disposable local CA
+        run: docker compose -p aelo-tls-ci -f Backend/docker-compose.tls-test.yml run --build --rm tls_smoke
       - name: Short load regression with ten synthetic users
         run: docker compose -p aelo-security-ci -f Backend/docker-compose.security.yml run --rm -e VUS=10 -e DURATION=30s load_security run --quiet /scripts/clinic_small.js
       - name: Verify authorization and draft state after load
         run: docker compose -p aelo-security-ci -f Backend/docker-compose.security.yml run --rm --no-deps security_smoke
       - name: Stop isolated security stack
         if: always()
-        run: docker compose -p aelo-security-ci -f Backend/docker-compose.security.yml down
+        run: |
+          docker compose -p aelo-security-ci -f Backend/docker-compose.security.yml down
+          docker compose -p aelo-tls-ci -f Backend/docker-compose.tls-test.yml down --volumes

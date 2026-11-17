@@ -1,0 +1,329 @@
+{
+  "schema": 1,
+  "commit": "415615387c4e5b2c534a8e90df4b2abaa3bdbdd6",
+  "status": "passed",
+  "executor": "local-docker",
+  "started_utc": "2026-11-17T04:04:41.956602+00:00",
+  "finished_utc": "2026-11-17T04:09:11.808856+00:00",
+  "duration_seconds": 269.85,
+  "github_actions_used": false,
+  "local_manifest": "reports/local-ci/20261117t040440z-f5fe7d-415615387c4e/manifest.json",
+  "manifest_sha256": "4418a2537095638ee46b4e18fb4318dcee6c37da549eed1e964f0b2719cf319c",
+  "source_archive_sha256": "89a0502450b6008742ffff41551ae26ab6c2aadf3e2242fa859f9f0f3d860c15",
+  "inventory_sha256": "2df537f10c95c870d1d4dda30f3d790a6cc3e2399cd96673b440463ae7315a9c",
+  "inventory": {
+    "models": 28,
+    "scopes": {
+      "framework": 7,
+      "domain": 21
+    },
+    "fields": 235,
+    "protection": {
+      "not_field_encrypted": 210,
+      "aes_gcm_field": 21,
+      "vector_not_field_encrypted": 1,
+      "session_blob_not_field_encrypted": 1,
+      "bearer_token_not_field_encrypted": 1,
+      "password_hash": 1
+    },
+    "record_values_exported": false,
+    "database_access_forbidden": true
+  },
+  "backend_pytest": {
+    "tests": 478,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "numTotalTests": 220,
+    "numPassedTests": 220,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "governance_decisions": [
+    "GOV-01",
+    "GOV-02",
+    "GOV-03",
+    "GOV-04",
+    "GOV-05",
+    "GOV-06",
+    "GOV-07",
+    "GOV-08",
+    "GOV-09",
+    "GOV-10"
+  ],
+  "retention_decisions": [
+    "RET-01",
+    "RET-02",
+    "RET-03",
+    "RET-04",
+    "RET-05",
+    "RET-06",
+    "RET-07",
+    "RET-08",
+    "RET-09"
+  ],
+  "local_links_checked": 8,
+  "steps": [
+    {
+      "name": "runner-tests",
+      "status": "passed",
+      "seconds": 0.72,
+      "exit_code": 0
+    },
+    {
+      "name": "requirements-locks",
+      "status": "passed",
+      "seconds": 0.11,
+      "exit_code": 0
+    },
+    {
+      "name": "docker-version",
+      "status": "passed",
+      "seconds": 0.08,
+      "exit_code": 0
+    },
+    {
+      "name": "secrets-tree",
+      "status": "passed",
+      "seconds": 7.59,
+      "exit_code": 0
+    },
+    {
+      "name": "secrets-history",
+      "status": "passed",
+      "seconds": 10.64,
+      "exit_code": 0
+    },
+    {
+      "name": "build-test",
+      "status": "passed",
+      "seconds": 2.61,
+      "exit_code": 0
+    },
+    {
+      "name": "build-api",
+      "status": "passed",
+      "seconds": 1.99,
+      "exit_code": 0
+    },
+    {
+      "name": "build-ai",
+      "status": "passed",
+      "seconds": 0.97,
+      "exit_code": 0
+    },
+    {
+      "name": "build-frontend",
+      "status": "passed",
+      "seconds": 1.59,
+      "exit_code": 0
+    },
+    {
+      "name": "build-web",
+      "status": "passed",
+      "seconds": 0.99,
+      "exit_code": 0
+    },
+    {
+      "name": "python-ruff",
+      "status": "passed",
+      "seconds": 1.39,
+      "exit_code": 0
+    },
+    {
+      "name": "python-bandit",
+      "status": "passed",
+      "seconds": 1.94,
+      "exit_code": 0
+    },
+    {
+      "name": "python-package-consistency",
+      "status": "passed",
+      "seconds": 1.23,
+      "exit_code": 0
+    },
+    {
+      "name": "privacy-inventory",
+      "status": "passed",
+      "seconds": 2.73,
+      "exit_code": 0
+    },
+    {
+      "name": "postgres-ready",
+      "status": "passed",
+      "seconds": 3.02,
+      "exit_code": 0
+    },
+    {
+      "name": "django-migrate",
+      "status": "passed",
+      "seconds": 3.92,
+      "exit_code": 0
+    },
+    {
+      "name": "django-check",
+      "status": "passed",
+      "seconds": 1.86,
+      "exit_code": 0
+    },
+    {
+      "name": "django-migration-drift",
+      "status": "passed",
+      "seconds": 1.89,
+      "exit_code": 0
+    },
+    {
+      "name": "backend-tests",
+      "status": "passed",
+      "seconds": 91.29,
+      "exit_code": 0
+    },
+    {
+      "name": "django-app-tests",
+      "status": "passed",
+      "seconds": 5.3,
+      "exit_code": 0
+    },
+    {
+      "name": "ai-compile",
+      "status": "passed",
+      "seconds": 0.89,
+      "exit_code": 0
+    },
+    {
+      "name": "ai-unit-tests",
+      "status": "passed",
+      "seconds": 1.46,
+      "exit_code": 0
+    },
+    {
+      "name": "nonroot-api",
+      "status": "passed",
+      "seconds": 0.29,
+      "exit_code": 0
+    },
+    {
+      "name": "nonroot-ai",
+      "status": "passed",
+      "seconds": 0.33,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-lint",
+      "status": "passed",
+      "seconds": 3.94,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-tests",
+      "status": "passed",
+      "seconds": 14.02,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-build",
+      "status": "passed",
+      "seconds": 15.6,
+      "exit_code": 0
+    },
+    {
+      "name": "python-audit",
+      "status": "passed",
+      "seconds": 20.09,
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-audit",
+      "status": "passed",
+      "seconds": 1.72,
+      "exit_code": 0
+    },
+    {
+      "name": "caddy-config",
+      "status": "passed",
+      "seconds": 0.56,
+      "exit_code": 0
+    },
+    {
+      "name": "compose-development-config",
+      "status": "passed",
+      "seconds": 0.14,
+      "exit_code": 0
+    },
+    {
+      "name": "compose-tls-config",
+      "status": "passed",
+      "seconds": 0.14,
+      "exit_code": 0
+    },
+    {
+      "name": "http-stack",
+      "status": "passed",
+      "seconds": 11.9,
+      "exit_code": 0
+    },
+    {
+      "name": "http-smoke",
+      "status": "passed",
+      "seconds": 2.09,
+      "exit_code": 0
+    },
+    {
+      "name": "http-load",
+      "status": "passed",
+      "seconds": 33.67,
+      "exit_code": 0
+    },
+    {
+      "name": "http-after-load",
+      "status": "passed",
+      "seconds": 1.58,
+      "exit_code": 0
+    },
+    {
+      "name": "tls-stack",
+      "status": "passed",
+      "seconds": 8.68,
+      "exit_code": 0
+    },
+    {
+      "name": "tls-smoke",
+      "status": "passed",
+      "seconds": 2.25,
+      "exit_code": 0
+    },
+    {
+      "name": "tls-deploy-check",
+      "status": "passed",
+      "seconds": 1.66,
+      "exit_code": 0
+    },
+    {
+      "name": "image-identities",
+      "status": "passed",
+      "seconds": 0.18,
+      "exit_code": 0
+    },
+    {
+      "name": "cleanup-tls",
+      "status": "passed",
+      "seconds": 2.46,
+      "exit_code": 0
+    },
+    {
+      "name": "cleanup-http",
+      "status": "passed",
+      "seconds": 2.71,
+      "exit_code": 0
+    },
+    {
+      "name": "cleanup-test",
+      "status": "passed",
+      "seconds": 1.15,
+      "exit_code": 0
+    }
+  ]
+}

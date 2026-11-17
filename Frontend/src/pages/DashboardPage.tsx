@@ -179,7 +179,7 @@ export function DashboardPage() {
             <MetricCard
               label="Pacientes ativos"
               value={String(activePatients)}
-              delta={`${dashboard?.patients.length ?? 0} cadastrados no cofre`}
+              delta={`${dashboard?.patients.length ?? 0} cadastrados no sistema`}
             />
             <MetricCard
               label="Sessões do dia"

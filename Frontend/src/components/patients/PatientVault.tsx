@@ -64,10 +64,10 @@ export function PatientVault({
           <div>
             <CardTitle className="flex items-center gap-2 text-title-3-regular">
               <Network className="h-5 w-5 text-status-blue-text" />
-              Cofre cognitivo (Vault)
+              Memória clínica
             </CardTitle>
             <p className="mt-1 text-caption-1-regular text-text-secondary">
-              Estruturação longitudinal em grafo de conhecimento (GraphRAG) a partir de trechos literais do prontuário.
+              Conceitos e relações extraídos de trechos literais das notas, organizados ao longo das sessões.
             </p>
           </div>
           {latest && (
@@ -89,21 +89,21 @@ export function PatientVault({
         <TabList
           showIndicator={false}
           className="grid grid-cols-1 gap-2 sm:grid-cols-2"
-          aria-label="Visões do Cofre Cognitivo"
+          aria-label="Visões da memória clínica"
         >
           <Tab id="graph" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
             <GitBranch className="h-3.5 w-3.5" />
-            Topologia do grafo cognitivo
+            Mapa de conceitos
           </Tab>
 
           <Tab id="timeline" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
             <History className="h-3.5 w-3.5" />
-            Histórico de checkpoints clínicos
+            Checkpoints revisados
           </Tab>
         </TabList>
 
-          <TabPanel id="graph" aria-label="Grafo do Vault" className="min-w-0 space-y-3">
-            {isLoading ? <PageLoading label="Carregando cofre…" /> : isError ? <PageError description="Não foi possível carregar o cofre. Nenhum dado de demonstração foi usado." /> : nodes.length ? (
+          <TabPanel id="graph" aria-label="Mapa de conceitos" className="min-w-0 space-y-3">
+            {isLoading ? <PageLoading label="Carregando memória clínica…" /> : isError ? <PageError description="Não foi possível carregar a memória clínica. Nenhum dado de demonstração foi usado." /> : nodes.length ? (
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
                 <Suspense
                   fallback={
@@ -115,7 +115,7 @@ export function PatientVault({
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <div className="h-10 w-10 rounded-full border-2 border-border-focus-ring border-t-border-focus-ring animate-spin" />
                         <p className="text-caption-1-regular text-text-secondary">
-                          Renderizando topologia conceitual do grafo…
+                          Montando o mapa de conceitos…
                         </p>
                       </div>
                       <div className="flex gap-4">
@@ -133,16 +133,16 @@ export function PatientVault({
             ) : (
               <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-border-button-default p-8 text-center text-body-regular text-text-secondary">
                 <Network className="mb-2 h-8 w-8 text-text-secondary" />
-                <p className="text-body-medium text-text-primary">O grafo ainda não possui entidades extraídas.</p>
+                <p className="text-body-medium text-text-primary">Ainda não há conceitos extraídos.</p>
                 <p className="mt-1 text-caption-1-regular">
-                  Envie anotações clínicas na aba de Prontuários para gerar a análise assistiva e estruturar o cofre cognitivo.
+                  Envie anotações clínicas na aba de Prontuários para gerar a análise assistiva e montar o mapa de conceitos.
                 </p>
               </div>
             )}
 
             {!!graph?.communities.length && (
               <p className="text-caption-1-regular text-text-secondary">
-                {graph.communities.length} comunidades detectadas via algoritmo de Leiden. Agrupamentos algorítmicos possuem caráter estritamente consultivo e não configuram diagnóstico autônomo (CFP nº 009/2024).
+                {graph.communities.length} grupos de conceitos. Os agrupamentos apoiam a leitura e não configuram diagnóstico (CFP nº 009/2024).
               </p>
             )}
           </TabPanel>

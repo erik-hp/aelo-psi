@@ -36,7 +36,7 @@ describe("AuditPage & AuditTable Cryptographic Traceability and Semantic Categor
         actor: "Dra. Marina Costa",
         role: "ADMIN",
         action: "Assinatura digital de checkpoint clínico com chave P-256",
-        entity: "Paciente p-1002 (Cofre Cognitivo)",
+        entity: "Paciente p-1002 (Memória clínica)",
         date: "2026-05-28 15:32",
         ip: "192.168.0.24",
         sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

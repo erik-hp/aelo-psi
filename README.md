@@ -176,6 +176,8 @@ npm run lint
 npm run build
 ```
 
+Para executar os checks de qualidade sem depender da cota GitHub Actions, use `python tools/local_ci.py` na raiz, com Docker Linux e Python 3.12+. O executor valida o commit, usa somente dados sintéticos e grava evidências em `reports/local-ci/`. Veja [pré-requisitos, cobertura e limites](docs/validation/LOCAL_CI.md). Alterações não commitadas ficam fora da execução.
+
 **Não foi executada uma verificação de build neste documento.** Se algum comando falhar, registrar o problema em F0-01 antes de alterar dependências em lote.
 
 ### 6.4. Segurança de demonstração

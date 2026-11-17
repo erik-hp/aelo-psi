@@ -17,7 +17,13 @@ O Compose local vincula somente a API a `127.0.0.1:8000`. PostgreSQL, serviço d
 
 Configure um domínio real em `AELO_DOMAIN`, DNS para o servidor e portas 80/443. Atualize a senha do PostgreSQL existente no banco e no `.env` antes de usar o overlay. Então execute `docker compose -f docker-compose.yml -f docker-compose.tls.yml up --build`. O overlay compila o frontend com API na mesma origem, usa Caddy para HTTPS e força `DEBUG=False`, cookies seguros, redirecionamento HTTPS e HSTS. Django recusa o modo HTTPS com a senha padrão do banco ou sem os segredos essenciais. O [Caddy documenta a emissão automática de HTTPS](https://caddyserver.com/docs/automatic-https).
 
-Não habilite `DJANGO_TRUST_PROXY_HEADERS` quando a API estiver acessível por um proxy que não controle os cabeçalhos encaminhados. O overlay mantém a porta 8000 acessível somente no host local. Docker e a sintaxe do Caddy foram verificados em desenvolvimento; certificados reais, TLS e o Compose de produção ainda precisam de teste no servidor Linux alvo.
+Não habilite `DJANGO_TRUST_PROXY_HEADERS` quando a API estiver acessível por um proxy que não controle os cabeçalhos encaminhados. O overlay mantém a porta 8000 acessível somente no host local. Em modo HTTPS, a inicialização recusa segredos reutilizados entre Django, auditoria, IA e chaves clínicas; origens CORS/CSRF configuradas devem ser HTTPS exatas, sem credenciais ou curingas. O Caddy aplica HSTS de um ano às respostas HTTPS e consolida os cabeçalhos depois da resposta do upstream. Subdomínios e preload não são habilitados automaticamente.
+
+Em 16/11/2026 foi executado um ensaio HTTPS com CA local descartável, validação de certificado/hostname, proxy e sessão. Certificados públicos, DNS e o Compose de produção ainda precisam de teste no servidor Linux alvo. Imagens locais anteriores podem conter `.git-backup-before-monorepo`: as exclusões de build foram corrigidas, mas imagens antigas devem ser reconstruídas antes de qualquer implantação. Nenhum arquivo desse backup foi publicado ou apagado nesta validação.
+
+### Reproduzir a validação HTTPS sintética
+
+Na pasta `Backend`, execute `docker compose -p aelo-tls-validation -f docker-compose.tls-test.yml run --build --rm tls_smoke`. A pilha usa banco temporário, contas e chaves sintéticas explícitas, o mesmo Caddyfile de produção e uma CA local que não é instalada no host. Não publica portas. Ao terminar, execute `docker compose -p aelo-tls-validation -f docker-compose.tls-test.yml down --volumes` para remover somente essa pilha e sua CA de teste. O relatório de [validação F0 da área 1](../../docs/validation/F0_AREA1_2026-11-16.md) distingue esses testes da implantação final.
 
 ## Auditoria, assinaturas e chaves
 

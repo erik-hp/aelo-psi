@@ -1,0 +1,16 @@
+{
+  "platform": "linux",
+  "python": "3.12",
+  "compiler": "pip-tools==7.6.2",
+  "inputs": {
+    "base.txt": "e3d8f86c662d4f3418d83d630fe267291f804ab362868edcdd120d05152dd90d",
+    "ai.txt": "bf6414ab65de448818007fad8c2e410146c3855c966191b64753de55809ba3e3",
+    "dev.txt": "82da5f9c48045f560bcbfed43795e5b1891338f3e48be04fac765d978ea673fc",
+    "ci.in": "f679739f36c136d302ff41fe0ea23b364263727f08fcdab46e660b3bd61c8c11"
+  },
+  "locks": {
+    "base.linux-py312.lock": "cb611c063641d43b5dd48429142514118a96da500d1a979209d9b0ffc58e9eee",
+    "ai.linux-py312.lock": "cb47382771b90455ef260415088396e827cc7022a0359bbff15c63debafea303",
+    "ci.linux-py312.lock": "825a9137226c25f37f16ca4a284a1855708bbcac55ff1715935e043c3580e628"
+  }
+}

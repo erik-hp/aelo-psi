@@ -1,0 +1,2010 @@
+{
+  "schema": 1,
+  "method": "django_model_metadata_without_database_access",
+  "contains_record_values": false,
+  "limitations": [
+    "Declared model schema, not a deployed-database inspection",
+    "Field encryption does not cover all identifiers, metadata or vectors",
+    "AAD currently binds model/field, not clinic/patient/record",
+    "Framework tables being installed does not prove they contain data"
+  ],
+  "models": [
+    {
+      "model": "admin.logentry",
+      "source": "dependency:django.contrib.admin.models",
+      "table": "django_admin_log",
+      "scope": "framework",
+      "category": "framework_identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "AutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "action_time",
+          "type": "DateTimeField",
+          "column": "action_time",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "column": "user_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "content_type",
+          "type": "ForeignKey",
+          "column": "content_type_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "contenttypes.contenttype"
+        },
+        {
+          "name": "object_id",
+          "type": "TextField",
+          "column": "object_id",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "object_repr",
+          "type": "CharField",
+          "column": "object_repr",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "action_flag",
+          "type": "PositiveSmallIntegerField",
+          "column": "action_flag",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "change_message",
+          "type": "TextField",
+          "column": "change_message",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.aianalysis",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_aianalysis",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "requested_by",
+          "type": "ForeignKey",
+          "column": "requested_by_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "note",
+          "type": "ForeignKey",
+          "column": "note_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "clinical_notes.clinicalnote"
+        },
+        {
+          "name": "note_version",
+          "type": "PositiveIntegerField",
+          "column": "note_version",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "job",
+          "type": "OneToOneField",
+          "column": "job_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.analysisjob"
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patterns",
+          "type": "EncryptedJSONField",
+          "column": "patterns",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.patterns"
+        },
+        {
+          "name": "longitudinal_evolution",
+          "type": "EncryptedTextField",
+          "column": "longitudinal_evolution",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.longitudinal_evolution"
+        },
+        {
+          "name": "attention_points",
+          "type": "EncryptedJSONField",
+          "column": "attention_points",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.attention_points"
+        },
+        {
+          "name": "narrative_metrics",
+          "type": "EncryptedJSONField",
+          "column": "narrative_metrics",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.narrative_metrics"
+        },
+        {
+          "name": "behavioral_changes",
+          "type": "EncryptedJSONField",
+          "column": "behavioral_changes",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.behavioral_changes"
+        },
+        {
+          "name": "longitudinal_coherence",
+          "type": "EncryptedTextField",
+          "column": "longitudinal_coherence",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.longitudinal_coherence"
+        },
+        {
+          "name": "possible_inconsistencies",
+          "type": "EncryptedJSONField",
+          "column": "possible_inconsistencies",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.possible_inconsistencies"
+        },
+        {
+          "name": "relevance_score",
+          "type": "DecimalField",
+          "column": "relevance_score",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "raw_response",
+          "type": "EncryptedJSONField",
+          "column": "raw_response",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aianalysis.raw_response"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.aisource",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_aisource",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "analysis",
+          "type": "ForeignKey",
+          "column": "analysis_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.aianalysis"
+        },
+        {
+          "name": "session",
+          "type": "ForeignKey",
+          "column": "session_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "therapy_sessions.therapysession"
+        },
+        {
+          "name": "note",
+          "type": "ForeignKey",
+          "column": "note_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "clinical_notes.clinicalnote"
+        },
+        {
+          "name": "excerpt",
+          "type": "EncryptedTextField",
+          "column": "excerpt",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.aisource.excerpt"
+        },
+        {
+          "name": "relevance_score",
+          "type": "DecimalField",
+          "column": "relevance_score",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.analysisjob",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_analysisjob",
+      "scope": "domain",
+      "category": "clinical_job_metadata",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "note",
+          "type": "ForeignKey",
+          "column": "note_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "clinical_notes.clinicalnote"
+        },
+        {
+          "name": "requested_by",
+          "type": "ForeignKey",
+          "column": "requested_by_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "context_limit",
+          "type": "PositiveSmallIntegerField",
+          "column": "context_limit",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "result",
+          "type": "OneToOneField",
+          "column": "result_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.aianalysis"
+        },
+        {
+          "name": "attempts",
+          "type": "PositiveSmallIntegerField",
+          "column": "attempts",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "started_at",
+          "type": "DateTimeField",
+          "column": "started_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "error_code",
+          "type": "CharField",
+          "column": "error_code",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.humanvalidation",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_humanvalidation",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "analysis",
+          "type": "OneToOneField",
+          "column": "analysis_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.aianalysis"
+        },
+        {
+          "name": "reviewed_by",
+          "type": "ForeignKey",
+          "column": "reviewed_by_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "decision",
+          "type": "CharField",
+          "column": "decision",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "comment",
+          "type": "EncryptedTextField",
+          "column": "comment",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.humanvalidation.comment"
+        },
+        {
+          "name": "signature",
+          "type": "CharField",
+          "column": "signature",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "public_key_spki",
+          "type": "TextField",
+          "column": "public_key_spki",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "signed_payload_sha256",
+          "type": "CharField",
+          "column": "signed_payload_sha256",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.noteextractionjob",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_noteextractionjob",
+      "scope": "domain",
+      "category": "clinical_job_metadata",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "note",
+          "type": "ForeignKey",
+          "column": "note_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "clinical_notes.clinicalnote"
+        },
+        {
+          "name": "note_version",
+          "type": "PositiveIntegerField",
+          "column": "note_version",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "attempts",
+          "type": "PositiveSmallIntegerField",
+          "column": "attempts",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "started_at",
+          "type": "DateTimeField",
+          "column": "started_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "error_code",
+          "type": "CharField",
+          "column": "error_code",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.sentimentmetric",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_sentimentmetric",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "analysis",
+          "type": "ForeignKey",
+          "column": "analysis_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.aianalysis"
+        },
+        {
+          "name": "label",
+          "type": "CharField",
+          "column": "label",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "value",
+          "type": "DecimalField",
+          "column": "value",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "metadata",
+          "type": "EncryptedJSONField",
+          "column": "metadata",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.sentimentmetric.metadata"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.vaultcheckpoint",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_vaultcheckpoint",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "analysis",
+          "type": "OneToOneField",
+          "column": "analysis_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.aianalysis"
+        },
+        {
+          "name": "markdown",
+          "type": "EncryptedTextField",
+          "column": "markdown",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.vaultcheckpoint.markdown"
+        },
+        {
+          "name": "content_sha256",
+          "type": "CharField",
+          "column": "content_sha256",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "node_count",
+          "type": "PositiveIntegerField",
+          "column": "node_count",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "edge_count",
+          "type": "PositiveIntegerField",
+          "column": "edge_count",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.vaultedge",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_vaultedge",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "source",
+          "type": "ForeignKey",
+          "column": "source_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.vaultnode"
+        },
+        {
+          "name": "target",
+          "type": "ForeignKey",
+          "column": "target_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.vaultnode"
+        },
+        {
+          "name": "note",
+          "type": "ForeignKey",
+          "column": "note_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "clinical_notes.clinicalnote"
+        },
+        {
+          "name": "relation",
+          "type": "CharField",
+          "column": "relation",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "evidence",
+          "type": "EncryptedTextField",
+          "column": "evidence",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.vaultedge.evidence"
+        },
+        {
+          "name": "observed_at",
+          "type": "DateTimeField",
+          "column": "observed_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "confidence",
+          "type": "DecimalField",
+          "column": "confidence",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "weight",
+          "type": "DecimalField",
+          "column": "weight",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.vaultjob",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_vaultjob",
+      "scope": "domain",
+      "category": "clinical_job_metadata",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "analysis",
+          "type": "OneToOneField",
+          "column": "analysis_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "ai_analysis.aianalysis"
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "attempts",
+          "type": "PositiveSmallIntegerField",
+          "column": "attempts",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "started_at",
+          "type": "DateTimeField",
+          "column": "started_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "error_code",
+          "type": "CharField",
+          "column": "error_code",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "ai_analysis.vaultnode",
+      "source": "Backend/apps/ai_analysis/models.py",
+      "table": "ai_analysis_vaultnode",
+      "scope": "domain",
+      "category": "clinical_derived",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "fingerprint",
+          "type": "CharField",
+          "column": "fingerprint",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "kind",
+          "type": "CharField",
+          "column": "kind",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "label",
+          "type": "EncryptedTextField",
+          "column": "label",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "ai_analysis.vaultnode.label"
+        },
+        {
+          "name": "mention_count",
+          "type": "PositiveIntegerField",
+          "column": "mention_count",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "weight",
+          "type": "DecimalField",
+          "column": "weight",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "embedding",
+          "type": "VectorField",
+          "column": "embedding",
+          "nullable": true,
+          "protection": "vector_not_field_encrypted"
+        },
+        {
+          "name": "first_seen_at",
+          "type": "DateTimeField",
+          "column": "first_seen_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "last_seen_at",
+          "type": "DateTimeField",
+          "column": "last_seen_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "audit_logs.auditchainstate",
+      "source": "Backend/apps/audit_logs/models.py",
+      "table": "audit_logs_auditchainstate",
+      "scope": "domain",
+      "category": "security_audit",
+      "retention_decision": "RET-05",
+      "fields": [
+        {
+          "name": "id",
+          "type": "PositiveSmallIntegerField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "sequence",
+          "type": "PositiveBigIntegerField",
+          "column": "sequence",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "head_hash",
+          "type": "CharField",
+          "column": "head_hash",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "audit_logs.auditlog",
+      "source": "Backend/apps/audit_logs/models.py",
+      "table": "audit_logs_auditlog",
+      "scope": "domain",
+      "category": "security_audit",
+      "retention_decision": "RET-05",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "column": "user_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "action",
+          "type": "CharField",
+          "column": "action",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "entity",
+          "type": "CharField",
+          "column": "entity",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "entity_id",
+          "type": "CharField",
+          "column": "entity_id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "ip_address",
+          "type": "GenericIPAddressField",
+          "column": "ip_address",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "user_agent",
+          "type": "TextField",
+          "column": "user_agent",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "metadata",
+          "type": "JSONField",
+          "column": "metadata",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "actor_id",
+          "type": "CharField",
+          "column": "actor_id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "sequence",
+          "type": "PositiveBigIntegerField",
+          "column": "sequence",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "previous_hash",
+          "type": "CharField",
+          "column": "previous_hash",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "entry_hash",
+          "type": "CharField",
+          "column": "entry_hash",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "auth.group",
+      "source": "dependency:django.contrib.auth.models",
+      "table": "auth_group",
+      "scope": "framework",
+      "category": "framework_identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "AutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "name",
+          "type": "CharField",
+          "column": "name",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "permissions",
+          "type": "ManyToManyField",
+          "column": "permissions",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "auth.permission",
+          "join_table": "auth_group_permissions"
+        }
+      ]
+    },
+    {
+      "model": "auth.permission",
+      "source": "dependency:django.contrib.auth.models",
+      "table": "auth_permission",
+      "scope": "framework",
+      "category": "framework_identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "AutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "name",
+          "type": "CharField",
+          "column": "name",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "content_type",
+          "type": "ForeignKey",
+          "column": "content_type_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "contenttypes.contenttype"
+        },
+        {
+          "name": "codename",
+          "type": "CharField",
+          "column": "codename",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "clinical_notes.clinicalnote",
+      "source": "Backend/apps/clinical_notes/models.py",
+      "table": "clinical_notes_clinicalnote",
+      "scope": "domain",
+      "category": "clinical_record",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "deleted_at",
+          "type": "DateTimeField",
+          "column": "deleted_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "session",
+          "type": "ForeignKey",
+          "column": "session_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "therapy_sessions.therapysession"
+        },
+        {
+          "name": "author",
+          "type": "ForeignKey",
+          "column": "author_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "raw_text",
+          "type": "EncryptedTextField",
+          "column": "raw_text",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnote.raw_text"
+        },
+        {
+          "name": "anonymized_text",
+          "type": "EncryptedTextField",
+          "column": "anonymized_text",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnote.anonymized_text"
+        },
+        {
+          "name": "version",
+          "type": "PositiveIntegerField",
+          "column": "version",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "locked_at",
+          "type": "DateTimeField",
+          "column": "locked_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "clinical_notes.clinicalnotedraft",
+      "source": "Backend/apps/clinical_notes/models.py",
+      "table": "clinical_notes_clinicalnotedraft",
+      "scope": "domain",
+      "category": "clinical_draft",
+      "retention_decision": "RET-03",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "column": "user_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "title",
+          "type": "EncryptedTextField",
+          "column": "title",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnotedraft.title"
+        },
+        {
+          "name": "content",
+          "type": "EncryptedTextField",
+          "column": "content",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnotedraft.content"
+        },
+        {
+          "name": "version",
+          "type": "PositiveIntegerField",
+          "column": "version",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "expires_at",
+          "type": "DateTimeField",
+          "column": "expires_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "clinical_notes.clinicalnotehistory",
+      "source": "Backend/apps/clinical_notes/models.py",
+      "table": "clinical_notes_clinicalnotehistory",
+      "scope": "domain",
+      "category": "clinical_record",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "note",
+          "type": "ForeignKey",
+          "column": "note_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "clinical_notes.clinicalnote"
+        },
+        {
+          "name": "edited_by",
+          "type": "ForeignKey",
+          "column": "edited_by_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "raw_text",
+          "type": "EncryptedTextField",
+          "column": "raw_text",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnotehistory.raw_text"
+        },
+        {
+          "name": "anonymized_text",
+          "type": "EncryptedTextField",
+          "column": "anonymized_text",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnotehistory.anonymized_text"
+        },
+        {
+          "name": "version",
+          "type": "PositiveIntegerField",
+          "column": "version",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "clinics.clinic",
+      "source": "Backend/apps/clinics/models.py",
+      "table": "clinics_clinic",
+      "scope": "domain",
+      "category": "identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "deleted_at",
+          "type": "DateTimeField",
+          "column": "deleted_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "name",
+          "type": "CharField",
+          "column": "name",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "document",
+          "type": "CharField",
+          "column": "document",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField",
+          "column": "is_active",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "contenttypes.contenttype",
+      "source": "dependency:django.contrib.contenttypes.models",
+      "table": "django_content_type",
+      "scope": "framework",
+      "category": "framework_identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "AutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "app_label",
+          "type": "CharField",
+          "column": "app_label",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "model",
+          "type": "CharField",
+          "column": "model",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "patients.patient",
+      "source": "Backend/apps/patients/models.py",
+      "table": "patients_patient",
+      "scope": "domain",
+      "category": "identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "deleted_at",
+          "type": "DateTimeField",
+          "column": "deleted_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "clinic",
+          "type": "ForeignKey",
+          "column": "clinic_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "clinics.clinic"
+        },
+        {
+          "name": "internal_code",
+          "type": "CharField",
+          "column": "internal_code",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "display_name",
+          "type": "CharField",
+          "column": "display_name",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_by",
+          "type": "ForeignKey",
+          "column": "created_by_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        }
+      ]
+    },
+    {
+      "model": "patients.patientaccess",
+      "source": "Backend/apps/patients/models.py",
+      "table": "patients_patientaccess",
+      "scope": "domain",
+      "category": "identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "column": "user_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "can_edit",
+          "type": "BooleanField",
+          "column": "can_edit",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "granted_by",
+          "type": "ForeignKey",
+          "column": "granted_by_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        }
+      ]
+    },
+    {
+      "model": "sessions.session",
+      "source": "dependency:django.contrib.sessions.models",
+      "table": "django_session",
+      "scope": "framework",
+      "category": "framework_session_and_tokens",
+      "retention_decision": "RET-06",
+      "fields": [
+        {
+          "name": "session_key",
+          "type": "CharField",
+          "column": "session_key",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "session_data",
+          "type": "TextField",
+          "column": "session_data",
+          "nullable": false,
+          "protection": "session_blob_not_field_encrypted"
+        },
+        {
+          "name": "expire_date",
+          "type": "DateTimeField",
+          "column": "expire_date",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "therapy_sessions.therapysession",
+      "source": "Backend/apps/therapy_sessions/models.py",
+      "table": "therapy_sessions_therapysession",
+      "scope": "domain",
+      "category": "clinical_record",
+      "retention_decision": "RET-02",
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "column": "updated_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "deleted_at",
+          "type": "DateTimeField",
+          "column": "deleted_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "patient",
+          "type": "ForeignKey",
+          "column": "patient_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "patients.patient"
+        },
+        {
+          "name": "professional",
+          "type": "ForeignKey",
+          "column": "professional_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "scheduled_at",
+          "type": "DateTimeField",
+          "column": "scheduled_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "started_at",
+          "type": "DateTimeField",
+          "column": "started_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "ended_at",
+          "type": "DateTimeField",
+          "column": "ended_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "summary",
+          "type": "EncryptedTextField",
+          "column": "summary",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "therapy_sessions.therapysession.summary"
+        }
+      ]
+    },
+    {
+      "model": "token_blacklist.blacklistedtoken",
+      "source": "dependency:rest_framework_simplejwt.token_blacklist.models",
+      "table": "token_blacklist_blacklistedtoken",
+      "scope": "framework",
+      "category": "framework_session_and_tokens",
+      "retention_decision": "RET-06",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BigAutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "token",
+          "type": "OneToOneField",
+          "column": "token_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "token_blacklist.outstandingtoken"
+        },
+        {
+          "name": "blacklisted_at",
+          "type": "DateTimeField",
+          "column": "blacklisted_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "token_blacklist.outstandingtoken",
+      "source": "dependency:rest_framework_simplejwt.token_blacklist.models",
+      "table": "token_blacklist_outstandingtoken",
+      "scope": "framework",
+      "category": "framework_session_and_tokens",
+      "retention_decision": "RET-06",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BigAutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "column": "user_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "jti",
+          "type": "CharField",
+          "column": "jti",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "token",
+          "type": "TextField",
+          "column": "token",
+          "nullable": false,
+          "protection": "bearer_token_not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "expires_at",
+          "type": "DateTimeField",
+          "column": "expires_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    },
+    {
+      "model": "users.user",
+      "source": "Backend/apps/users/models.py",
+      "table": "users_user",
+      "scope": "domain",
+      "category": "identity_and_access",
+      "retention_decision": "RET-01",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BigAutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "password",
+          "type": "CharField",
+          "column": "password",
+          "nullable": false,
+          "protection": "password_hash"
+        },
+        {
+          "name": "last_login",
+          "type": "DateTimeField",
+          "column": "last_login",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "is_superuser",
+          "type": "BooleanField",
+          "column": "is_superuser",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "username",
+          "type": "CharField",
+          "column": "username",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "first_name",
+          "type": "CharField",
+          "column": "first_name",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "last_name",
+          "type": "CharField",
+          "column": "last_name",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "email",
+          "type": "EmailField",
+          "column": "email",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "is_staff",
+          "type": "BooleanField",
+          "column": "is_staff",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "date_joined",
+          "type": "DateTimeField",
+          "column": "date_joined",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "role",
+          "type": "CharField",
+          "column": "role",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "clinic",
+          "type": "ForeignKey",
+          "column": "clinic_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "clinics.clinic"
+        },
+        {
+          "name": "license_number",
+          "type": "CharField",
+          "column": "license_number",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField",
+          "column": "is_active",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "groups",
+          "type": "ManyToManyField",
+          "column": "groups",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "auth.group",
+          "join_table": "users_user_groups"
+        },
+        {
+          "name": "user_permissions",
+          "type": "ManyToManyField",
+          "column": "user_permissions",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "auth.permission",
+          "join_table": "users_user_user_permissions"
+        }
+      ]
+    },
+    {
+      "model": "users.usersigningkey",
+      "source": "Backend/apps/users/models.py",
+      "table": "users_usersigningkey",
+      "scope": "domain",
+      "category": "signing_public_material",
+      "retention_decision": "RET-04",
+      "fields": [
+        {
+          "name": "id",
+          "type": "BigAutoField",
+          "column": "id",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "user",
+          "type": "OneToOneField",
+          "column": "user_id",
+          "nullable": false,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "public_key_spki",
+          "type": "TextField",
+          "column": "public_key_spki",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "fingerprint",
+          "type": "CharField",
+          "column": "fingerprint",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "column": "created_at",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        }
+      ]
+    }
+  ]
+}

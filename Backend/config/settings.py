@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlsplit
 import base64
 import binascii
 import os
@@ -192,3 +193,23 @@ if REQUIRE_HTTPS:
         raise ImproperlyConfigured("CLINICAL_DATA_KEYS must contain valid base64 encoded keys.") from exc
     if any(len(key) != 32 for key in decoded_keys):
         raise ImproperlyConfigured("Every CLINICAL_DATA_KEYS key must contain 32 random bytes.")
+    service_secrets = [SECRET_KEY, AUDIT_LOG_HMAC_KEY, AI_SERVICE_TOKEN]
+    key_material = [value.encode("utf-8") for value in service_secrets] + decoded_keys
+    if len(set(key_material)) != len(key_material) or any(key in service_secrets for key in CLINICAL_DATA_KEYS):
+        raise ImproperlyConfigured("HTTPS deployment requires independent secrets for each purpose.")
+    for name, origins in (("CORS_ALLOWED_ORIGINS", CORS_ALLOWED_ORIGINS), ("CSRF_TRUSTED_ORIGINS", CSRF_TRUSTED_ORIGINS)):
+        for origin in origins:
+            try:
+                parsed = urlsplit(origin)
+                valid = (
+                    parsed.scheme == "https" and parsed.hostname and "*" not in parsed.netloc
+                    and parsed.username is None and parsed.password is None
+                    and not parsed.path and not parsed.query and not parsed.fragment
+                    and not any(character.isspace() for character in parsed.netloc)
+                    and "\\" not in parsed.netloc
+                )
+                parsed.port  # Reject malformed/out-of-range ports without printing the origin.
+            except ValueError:
+                valid = False
+            if not valid:
+                raise ImproperlyConfigured(f"{name} must contain exact HTTPS origins without credentials or wildcards.")

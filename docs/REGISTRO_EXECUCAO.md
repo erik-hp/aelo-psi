@@ -1,12 +1,12 @@
 # Registro de execução e decisões — AELO-PSI (TCC2)
 
-**Atualizado em:** 09/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
+**Atualizado em:** 17/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
 
 ## Estado geral
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** F0-04, validar implantação/TLS/proxy e falhas fechadas; consolidar F0-05 e validação responsável F0-06 antes da decisão G0. F0-02 recebeu a continuação de listagens/filtros/mutações/grants/revisão/download, mas revisão independente e concorrência continuam pendentes. Comparação de modelos locais e inspeção API/UX seguem em aberto.
+- **Próxima tarefa:** revisão independente F0-02 e consolidação documentada dos critérios G0 com as decisões GOV/RET que exigem responsáveis competentes. O pacote técnico F0-06 foi preparado e testado: **43 etapas aprovadas** no SHA `4156153`, incluindo inventário de 28 modelos/235 campos sem consulta de registros. [Execução F0-06](validation/F0_PRIVACY_2026-11-17.md). CI local autorizada permanece disponível sem aguardar cota GitHub. Implantação alvo F0-04, modelos locais e inspeção API/UX seguem em revisão.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -397,6 +397,12 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Validação complementar executada em projeto Docker sintético isolado `aelo-f002-boundaries-20261109`: migrações e **457 testes PostgreSQL/pgvector aprovados**, nenhum ignorado; pilha encerrada ao final. Bandit local sem achados no nível configurado. Isso não substitui os jobs remotos faltantes; a falha de inicialização fica registrada em F0-05.
 - Mapa/índice/log no Cérebro atualizados. Incremento destacado implementado e verificado, requisito integral **EM REVISÃO**; F1-03 continua pendente, pois a assinatura exercitada é a da revisão de IA. **G0 permanece BLOQUEADO**. Próximo item: F0-04.
 
+## Preparação da apresentação do TCC2 — 09/11/2026 — EM REVISÃO
+
+Preparação documental solicitada pelo autor (F7-01/F7-04; VAL-04/RNF-08): criado `1 - TCC/wiki/outputs/guia_apresentacao_tcc2_15_20_minutos.md`, com estudo, roteiro de 18 minutos adaptável a 15/20, falas por slide, demonstração/contingência e perguntas da banca; índice/log do Cérebro atualizados. Base técnica `dd2e2a7`, PR #24 confirmado aberto/em rascunho. Material local de preparação, ainda sujeito à revisão do autor/orientador; não é avaliação científica ou aprovação de defesa. Sem alteração de código, novo teste de aplicação ou promoção de gate. O limite de CI foi informado pelo autor, sem inspeção independente da cota. A implementação F0-04 permanece pendente; o pedido atual mudou o foco para apresentação.
+
+Verificação documental local: `DOC_CHECK_OK` confirmou 12 slides, intervalos contínuos até 18:00, versões de 15:00/20:00, 19 perguntas, links internos/fontes existentes e inclusão no índice/log; `git diff --check` sem erros nos documentos alterados. Nenhum build ou teste da aplicação foi repetido. Arquivos desta preparação ainda locais, sem novo commit/push ou disparo de CI.
+
 ## Pendências de decisão
 
 - Revisão de normas CFP e estado efetivo da Resolução 001/2009; CFP 009/2024 se refere a TDIC, não proibição específica de IA.
@@ -418,3 +424,33 @@ O registro não é histórico de conversa: é histórico auditável de artefatos
 - **F6-04 (preparação do protocolo, não execução da avaliação):** `services/metrics/evidence_benchmark.py` mede Recall@k por IDs de notas ouro e validade **literal** de citações (mesmo paciente, versão e trecho existente); detecta referências estrangeiras/desconhecidas, sem inferência clínica ou rede. Exige classificação sintética declarada, sem verificá-la independentemente. Incluído dataset estritamente sintético e documentação do esquema.
 - **Verificação local isolada:** `cd Backend && python -m pytest tests/test_tcc2_evidence_benchmark.py -q` em cópia de trabalho com os novos arquivos: **11 testes passaram**. CLI com `--input tests/fixtures/tcc2_evidence_synthetic.json --strict` retornou código 0 e contagens esperadas para um caso artificial. Não foram executadas aqui a suíte integrada Django, frontend, PostgreSQL, Ollama nem GitHub Actions desta branch; os resultados do fixture **não** são desempenho do GraphRAG real.
 - **Estado:** `EM REVISÃO`; G0/G1 **continuam BLOQUEADOS**, sem autorização para pacientes reais, coleta humana ou alegações de conformidade. Próxima tarefa de segurança: revisar gates F0 e ambiente local antes de expandir a avaliação de modelos.
+
+## Área 1 — validação de segurança e execução — 16/11/2026 — EM REVISÃO
+
+- Pedido do autor: validar a área 1. Base `dd2e2a7`; PR #24 confirmado aberto/em rascunho, sem merge. Código no commit local `0f37c98`, branch `validation/f0-area1-tls`, sem push/novo PR nesta rodada; foco F0-04 e evidências F0-01/F0-02/F0-05/F0-06; RF-01/RNF-02/RNF-03/RNF-05/RNF-08. Preparação preexistente da apresentação preservada. Pilha sintética e sua CA removidas após os ensaios.
+- Dez casos novos reproduziram inicialização HTTPS com origens inseguras ou segredos reutilizados; corrigidos, com 29 testes de configuração aprovados. Smoke HTTPS reproduziu duplicação de cabeçalhos e ausência de HSTS na página frontend; Caddy corrigido e teste completo aprovado com CA local descartável, sem instalar confiança no host. Excluídos backup Git/histórico e arquivos locais de ambiente dos contextos Docker; backup confirmado em imagem antiga, que permanece intacta e exige reconstrução antes de implantação.
+- Executados: **473 testes PostgreSQL/pgvector aprovados**, nenhum ignorado; dois casos reais de concorrência/revogação com auditoria íntegra; **220 testes frontend aprovados**, build/lint aprovados (9 avisos existentes); Ruff/Bandit aprovados; pip-audit/npm audit sem vulnerabilidades conhecidas; Gitleaks do histórico `--all` com código 0 e saída suprimida; dois contextos Docker aprovados. Django deploy check sem erros, com avisos W005/W021; migrations sem alterações; API UID 10001. [Comandos, falhas iniciais e limites](validation/F0_AREA1_2026-11-16.md).
+- CI de `dd2e2a7` conferida novamente: dependências aprovado; baseline/qualidade/segredos incompletos ou em falha. As anotações não explicaram os jobs não iniciados; depois da validação, o autor informou explicitamente que a cota GitHub está esgotada. Registrar indisponibilidade operacional conforme essa informação, sem atribuir falha de aplicação a jobs não executados ou insistir em reexecução. Nova etapa HTTPS preparada no workflow, sem execução remota nesta rodada; retomar somente após restabelecimento da cota.
+- Inventário/RIPD técnico atualizado para refletir cookies, criptografia, auditoria e Vault existentes; responsáveis, finalidades/bases, retenção/incidentes e aprovação humana continuam pendentes. Não houve validação independente, servidor alvo, certificado público ou prontuário real. Área 1 **EM REVISÃO; G0 BLOQUEADO**. Próxima tarefa executável F0-05 local (lock/hashes/evidências), seguida da consolidação responsável F0-06 e revisão independente F0-02. Correção documental sobre a cota: sem novos testes, push ou execução remota.
+
+## F0-05 — cota contornada por executor local integral — 17/11/2026 — INCREMENTO CONCLUÍDO
+
+- Pedido explícito do autor: contornar a indisponibilidade prolongada da CI GitHub. Decisão de processo no Plano Mestre: checks técnicos executados localmente podem cumprir a execução F0-05 quando integrais, vinculados ao commit e auditáveis. Não é preciso aguardar cota, ocultar falhas ou registrar execução GitHub fictícia. Gates clínicos e revisão independente preservados.
+- Código `393a93c`, correção CRLF/LF `759f9dd`, branch `validation/f0-area1-tls`; sem push ou alteração de proteções. Implementados `tools/local_ci.py`, testes do executor, três locks Linux/Python 3.12 com hashes e manifesto de inputs; Dockerfiles usam `--require-hashes`. Fonte de teste arquivada por Git, excluindo alterações/pastas pessoais preexistentes.
+- **Rodada executada no SHA `759f9dd83e8b86e29c8e93eeb41dd90abbe1857b`: 42 etapas aprovadas em 450,45 s**, código 0. Backend PostgreSQL/pgvector 473 aprovados/zero ignorados, frontend 220, executor 11; subsuítes Django 48 e IA 8 também aprovadas, sem tratá-las como amostras independentes. Builds novos, estática, migrações, auditorias, segredos, API/IA UID 10001, Caddy, HTTP/HTTPS, carga 10 usuários/30 s e smoke após carga aprovados.
+- Manifesto e artefatos conferidos por `--verify`, retornando o SHA correto. Bancos temporários/CA e três projetos encerrados; nenhum container/volume CA restante dessa rodada. [Relatório e limitações](validation/F0_LOCAL_CI_2026-11-17.md), [resumo com hashes](validation/evidence/local-ci-2026-11-17.json), [como repetir](validation/LOCAL_CI.md).
+- Primeira tentativa interrompida por divergência CRLF/LF, sem aprovação; corrigida, teste acrescentado e rodada integral repetida. Cota remota deixa de ser bloqueador operacional dos checks cobertos. Incremento executor/locks **CONCLUÍDO**; requisitos integrais e **G0 continuam EM REVISÃO/BLOQUEADO** por critérios próprios. Próximo item F0-06 e revisão independente F0-02; implantação alvo F0-04 pendente.
+
+## F0-06 — inventário e pacote de governança — 17/11/2026 — EM REVISÃO
+
+- Pedido do autor: prosseguir para o próximo item. Base `86050fa`, branch `validation/f0-area1-tls`, PR #24 ainda aberto/em rascunho na branch predecessora. Código/artefatos `4156153`; F0-06/RNF-05/RNF-08, apoio a RNF-01/RNF-02/RNF-03. Sem push ou alteração de dados/políticas de produção; preparação preexistente da apresentação preservada.
+- Entregues catálogo reproduzível de **28 modelos/235 campos**, nove fluxos e riscos revisados; dez decisões GOV, nove classes RET, responsabilidades por função e roteiros de titulares/incidente. Fonte é metadado de modelo, não dados de paciente; acesso a banco proibido no gerador. Catálogo desatualizado/modelo desconhecido bloqueiam a checagem local/remota preparada.
+- Limites documentados: AAD apenas modelo/campo; token de infraestrutura sem criptografia clínica; exportações legíveis; retenção de cópias e chaves não homologada; destinos/sincronização a confirmar. Não foi executada exploração, purga, consulta de banco real ou comunicação a terceiros. Referências oficiais consultadas; situação consolidada de CFP 001/2009 ainda não confirmada, sem alegação de prazo/aderência final.
+- **Pipeline local integral: 43 etapas aprovadas em 269,85 s, SHA `415615387c4e5b2c534a8e90df4b2abaa3bdbdd6`**. Backend 478 aprovados/zero ignorados (5 novos), frontend 220 e executor 11; builds, auditorias, HTTP/carga/HTTPS e limpeza aprovados. Manifesto conferido por `--verify`; projetos/CA encerrados. [Relatório](validation/F0_PRIVACY_2026-11-17.md), [evidência](validation/evidence/f0-06-2026-11-17.json), [governança](privacy/F0_GOVERNANCE_DECISIONS.md).
+- Entrega técnica concluída; requisito/governança **EM REVISÃO**, sem designar agentes reais, aprovar bases legais, pesquisa humana ou operação clínica. **G0 não liberado**. Próximo item: revisão independente F0-02 e consolidação documentada de G0, preservando as decisões humanas necessárias.
+
+## Vault e tokens de interface — 17/11/2026 — EM REVISÃO
+
+- Base `f01e9ee`, branch `validation/f0-area1-tls`. Commit das alterações locais de frontend: grafo do Vault (Cytoscape com d3-force), tokens/tipografia (Instrument Sans) e ajustes de testes. Sem alteração de API, autorização ou dados.
+- Executados: `npm test` (**220 aprovados/30 arquivos**), `npm run build` (aprovado; aviso de chunk) e `npm run lint` (**0 erros/9 avisos**). Backend e CI local não foram repetidos; sem inspeção visual no navegador.
+- Passos restantes para concluir o projeto: [PROXIMOS_PASSOS.md](PROXIMOS_PASSOS.md). **G0 continua BLOQUEADO**.
