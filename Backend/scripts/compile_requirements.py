@@ -16,7 +16,7 @@ def record_metadata():
     locks = [f"{scope}.linux-py312.lock" for scope in ("base", "ai", "ci")]
     data = {"platform": "linux", "python": "3.12", "compiler": "pip-tools==7.6.2"}
     for key, names in (("inputs", inputs), ("locks", locks)):
-        data[key] = {name: hashlib.sha256((directory / name).read_bytes()).hexdigest() for name in names}
+        data[key] = {name: hashlib.sha256((directory / name).read_bytes().replace(b"\r\n", b"\n")).hexdigest() for name in names}
     (directory / "locks.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 

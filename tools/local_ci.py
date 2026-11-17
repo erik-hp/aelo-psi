@@ -26,6 +26,10 @@ def sha256(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def text_sha256(path):
+    return hashlib.sha256(Path(path).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def inside(root, relative):
     path = (Path(root) / relative).resolve()
     if not path.is_relative_to(Path(root).resolve()):
@@ -122,7 +126,7 @@ def make_snapshot(ref, output_base):
         subprocess.run(["git", "archive", "--format=tar", commit], cwd=ROOT, stdout=stream, check=True)
     with tarfile.open(archive) as stream:
         stream.extractall(source, filter="data")
-    if sha256(source / "tools/local_ci.py") != sha256(Path(__file__)):
+    if text_sha256(source / "tools/local_ci.py") != text_sha256(Path(__file__)):
         raise ValueError("Commit the runner changes before validating this ref")
     return commit, run_id, output, source
 

@@ -3,14 +3,14 @@
   "python": "3.12",
   "compiler": "pip-tools==7.6.2",
   "inputs": {
-    "base.txt": "9c51c1904f1f73e025ae37fbf2cedc4a71777f8f12e63f3c0cd75b2ccfd4cc87",
-    "ai.txt": "0187156a2668d247a5564c3c443e366a60f46d0d6cc037a06aee1071426776bf",
-    "dev.txt": "90f04fc497c044f3ebb7681b909f7ae9809d6a6e3b3141fe95d14c7fce5cd3e2",
+    "base.txt": "e3d8f86c662d4f3418d83d630fe267291f804ab362868edcdd120d05152dd90d",
+    "ai.txt": "bf6414ab65de448818007fad8c2e410146c3855c966191b64753de55809ba3e3",
+    "dev.txt": "82da5f9c48045f560bcbfed43795e5b1891338f3e48be04fac765d978ea673fc",
     "ci.in": "f679739f36c136d302ff41fe0ea23b364263727f08fcdab46e660b3bd61c8c11"
   },
   "locks": {
-    "base.linux-py312.lock": "51bc862184065e83882628b6b266c464f163d8831b511a419e5b25bd1493b159",
-    "ai.linux-py312.lock": "fd86e9dbc0d5705c3acf1e2c8e97ca95b76d3c5922bddeaf17d74263f07b363a",
+    "base.linux-py312.lock": "cb611c063641d43b5dd48429142514118a96da500d1a979209d9b0ffc58e9eee",
+    "ai.linux-py312.lock": "cb47382771b90455ef260415088396e827cc7022a0359bbff15c63debafea303",
     "ci.linux-py312.lock": "825a9137226c25f37f16ca4a284a1855708bbcac55ff1715935e043c3580e628"
   }
 }

@@ -16,7 +16,8 @@ def verify(directory):
         if set(data[group]) != names:
             raise ValueError("Incomplete lock manifest")
         for name in names:
-            if hashlib.sha256((directory / name).read_bytes()).hexdigest() != data[group][name]:
+            content = (directory / name).read_bytes().replace(b"\r\n", b"\n")
+            if hashlib.sha256(content).hexdigest() != data[group][name]:
                 raise ValueError(f"Requirements changed; regenerate locks: {name}")
 
 

@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from Backend.scripts.verify_requirements import verify
-from tools.local_ci import Pipeline, StepFailed, inside, verify_report
+from tools.local_ci import Pipeline, StepFailed, inside, text_sha256, verify_report
 
 
 class LocalPipelineTests(unittest.TestCase):
@@ -73,6 +73,12 @@ class LocalPipelineTests(unittest.TestCase):
         self.pipeline.finish(True, {})
         with self.assertRaises(ValueError):
             verify_report(self.root)
+
+    def test_git_line_endings_do_not_change_runner_identity(self):
+        first, second = self.root / "lf.py", self.root / "crlf.py"
+        first.write_bytes(b"print('synthetic')\n")
+        second.write_bytes(b"print('synthetic')\r\n")
+        self.assertEqual(text_sha256(first), text_sha256(second))
 
     def test_lock_input_drift_is_rejected(self):
         inputs = ["base.txt", "ai.txt", "dev.txt", "ci.in"]
