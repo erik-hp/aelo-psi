@@ -56,7 +56,6 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
           sessionFrequency: "Semanal",
           lastSession: "2026-05-20",
           nextSession: "2026-05-28",
-          riskLevel: "moderado",
           therapist: "Dra. Marina Costa",
           tags: ["TCC"],
         },
@@ -86,7 +85,6 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
         time: "10:00",
         status: "draft",
         complement: "Acolhimento de rotina",
-        attentionIndex: 85,
       },
       {
         id: "s-2",
@@ -96,7 +94,6 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
         time: "11:00",
         status: "needs_review",
         complement: "Anotações pendentes",
-        attentionIndex: 30,
       },
     ]);
 
@@ -194,7 +191,6 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
         time: "23:59",
         status: "draft",
         complement: "",
-        attentionIndex: null,
       },
     ]);
     vi.mocked(clinicalService.getFinance).mockResolvedValue([]);
@@ -230,7 +226,6 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
         time: "08:00",
         status: "draft",
         complement: "Consulta inicial de alinhamento",
-        attentionIndex: null,
       },
       {
         id: "s-20",
@@ -240,7 +235,6 @@ describe("Adversarial Stress Test: AgendaPage Dual View, Transitions & Modal", (
         time: "09:30",
         status: "needs_review",
         complement: "Aguardando notas clínicas",
-        attentionIndex: 90,
       },
     ]);
   });

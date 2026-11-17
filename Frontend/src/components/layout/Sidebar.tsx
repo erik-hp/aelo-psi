@@ -101,7 +101,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   // Efeito Zeigarnik: Identifica prontuários e sessões com pendência de evolução ou atenção
   const pendingReviews = agenda.filter(
-    (item) => item.status === "needs_review" || (item.attentionIndex !== null && item.attentionIndex >= 80),
+    (item) => item.status === "needs_review",
   ).length;
 
   const filterItems = (items: NavItem[]) => items.filter((item) => !item.permission || can(item.permission));

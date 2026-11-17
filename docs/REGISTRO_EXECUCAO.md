@@ -1,12 +1,12 @@
 # Registro de execução e decisões — AELO-PSI (TCC2)
 
-**Atualizado em:** 06/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
+**Atualizado em:** 09/11/2026. **Padrão:** somente fatos verificados; este documento é o ponto de retomada de novas sessões/assistentes.
 
 ## Estado geral
 
 - **Fase corrente:** F0 — diagnóstico e contenção de riscos.
 - **Gate liberado:** nenhum gate de implementação verificado.
-- **Próxima tarefa:** comparar outros modelos locais no mesmo conjunto sintético, já que `llama3.1` não atendeu em CPU; depois inspeção em navegador real e OP-00/UX-01. G0 permanece bloqueado.
+- **Próxima tarefa:** F0-04, validar implantação/TLS/proxy e falhas fechadas; consolidar F0-05 e validação responsável F0-06 antes da decisão G0. F0-02 recebeu a continuação de listagens/filtros/mutações/grants/revisão/download, mas revisão independente e concorrência continuam pendentes. Comparação de modelos locais e inspeção API/UX seguem em aberto.
 - **Referência da documentação:** [PR #1](https://github.com/erik-hp/aelo-psi/pull/1), originado da branch `feat/tcc2-foundation-security-docs`. **Confirmar o estado do PR e o commit atual da `main` no GitHub** ao retomar o trabalho; não inferir estado de merge a partir deste registro.
 - **Ambiente de produção:** não avaliado; **não autorizado como pronto para dados clínicos reais**.
 
@@ -371,6 +371,31 @@ Ajustes finais de revisão: estagiários não podem escrever conteúdo clínico 
 - Prompt de análise agora descreve o formato e exige citação literal, o que antes faltava para qualquer modelo. Iniciador local em `Backend/scripts/run_ai_claude.py`, pois o CLI só existe no computador do autor, não nos containers.
 - **Ensaio real com dados sintéticos:** 13 notas, 18 conceitos e 29 relações gerados pela leitura automática, sem falhas; prévia mascarou nome e telefone; análise em 12 s, em revisão humana; a sessão 1, fora da janela de 10, foi citada como fonte. Em navegador, salvar, revisar e confirmar concluiu em 14 s. Com o serviço parado, 13 leituras e a análise falharam de forma explícita.
 - **Limites:** sem assinatura da revisão em navegador. Conjunto pequeno, não mede qualidade clínica. Não vale para modelo local. `Backend/.env` local aponta para o serviço no computador; para Ollama, reverter `AI_SERVICE_URL`. **G0 continua BLOQUEADO**.
+
+## Mapa de pendências e incremento F0-03 — 09/11/2026 — EM REVISÃO
+
+- Pedido do autor: criar mapa no Cérebro e prosseguir conforme o plano. Bases confirmadas: AELO `main` em `10200cc` e Cérebro `main` em `84e5c20`; nenhum PR aberto encontrado na consulta inicial. Preferências locais e arquivos pessoais preservados.
+- Criado `1 - TCC/wiki/outputs/mapa_implementacao_aelo_2026-11-09.md`, com as 42 tarefas, requisitos, dependências, evidências parciais e aceites faltantes; índice/log atualizados no repositório separado. Verificação `MAP_CHECK_OK` passou.
+- Código `d8ff5f6`, branch `fix/f0-03-sem-classificacao-risco`: removidos risco automático e índice numérico de atenção da demonstração/contratos internos. Revisão depende exclusivamente do estado documental e segue ordem cronológica; inconsistências de texto não são chamadas de risco. Estados de erro/vazio preservados. Sem migração/alteração HTTP.
+- Baseline F0-01: backend 212 aprovados/2 ignorados; frontend 211 aprovados. Seis falhas reproduzidas antes da correção. Após correção: frontend 220 aprovados/30 arquivos, lint 0 erros/9 avisos e build aprovado. Django check/migrations em settings isolados e Compose config passaram. Comandos e limites em [F0_2026-11-09.md](validation/F0_2026-11-09.md).
+- Não houve nesta rodada PostgreSQL real, smoke HTTP, modelo real, inspeção visual ou revisão profissional. Indicadores demonstrativos remanescentes precisam de revisão F4; critérios integrais RNF-03/RNF-06/RNF-08 não foram promovidos. **G0 permanece BLOQUEADO**. Próximo item: F0-02.
+
+## Continuação F0-02 — matriz de autorização — 09/11/2026 — EM REVISÃO
+
+- Código `0dbb833`, continuação no [PR #24](https://github.com/erik-hp/aelo-psi/pull/24). RF-01/RNF-02/RNF-08: implementados 79 cenários de autorização para notas/sessões/análises/jobs/grafo/checkpoints/FHIR e negação de processamento sem escrita. Nove identidades, incluindo estagiário, admin, sem grant, revogado e outra clínica. Todos passaram; nenhum controle de produção foi alterado sem falha reproduzida.
+- Executados: matriz 79 aprovados; suíte backend completa **291 aprovados/2 ignorados**, 1 aviso Starlette/httpx; Ruff do novo arquivo sem erros. Frontend permanece em 220 aprovados/build aprovado/lint 0 erros e 9 avisos. Comandos, cobertura efetiva e limites em [F0_AUTHORIZATION_MATRIX_2026-11-09.md](validation/F0_AUTHORIZATION_MATRIX_2026-11-09.md).
+- CI do SHA anterior `ab65768`: quatro workflows aprovados, incluindo PostgreSQL/pgvector e smoke/carga curta. Não equivale à verificação do commit final com os novos testes, que deve ser conferido antes do merge. Falha intermitente histórica do smoke ainda sem causa identificada.
+- Cérebro: mapa/índice/log publicados em `main`, commit `29a32bb`; complemento desta matriz registrado em seguida. Código no PR #24, sem merge. **G0 BLOQUEADO**. Próximo incremento F0-02: completar listagens/filtros, mutações, grants, revisão/assinatura e download, antes de F0-04/F0-05/F0-06.
+
+## Continuação F0-02 — correção de seletores/filtros e ações — 09/11/2026 — EM REVISÃO
+
+- Pedido do autor: prosseguir para o próximo passo destacado. Base `32d57e6`, mesma branch e [PR #24](https://github.com/erik-hp/aelo-psi/pull/24) confirmado aberto/em rascunho; sem mudanças versionadas preexistentes na aplicação. RF-01/RNF-02/RNF-08.
+- Reproduzidas dez falhas: seletores HTML exibiam nomes de pacientes de outra clínica; POST de relações e filtros permitiam distinguir IDs não autorizados existentes de inexistentes. Corrigidos os querysets das relações nos serializers e a validação/renderização de filtros pelo backend escopado. Respostas autorizadas preservadas; filtro não autorizado agora recebe 400 como inexistente. Sem migração, nova dependência ou mudança de stack.
+- Código `18c13ea`. Adicionados 164 cenários para fronteiras, listagens/filtros, mutações por grant/autoria, concessão/revogação, diretório operacional, revisão com assinatura real e download/adulteração de checkpoint; fixtures compartilhadas com os 79 cenários anteriores.
+- Executados: direcionados 164 aprovados; suíte completa **455 aprovados/2 ignorados**, 1 aviso Starlette/httpx; Ruff completo, Django check e migrations em settings isolados aprovados; diff check aprovado. HTML renderizado pela API, sem inspeção visual. Frontend não alterado/retestado localmente. [Relatório](validation/F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md).
+- CI de `b3ca6ef`: baseline/dependências/segredos falharam sem jobs; qualidade falhou com somente `security-smoke` executado e aprovado (incluindo carga curta). Causa de inicialização não exposta pela API/CLI; reexecução recusada com HTTP 403 (`This workflow run cannot be retried`). `.github/` inalterada desde o SHA anterior aprovado. Links e diagnóstico no relatório; não declarar CI verde.
+- Validação complementar executada em projeto Docker sintético isolado `aelo-f002-boundaries-20261109`: migrações e **457 testes PostgreSQL/pgvector aprovados**, nenhum ignorado; pilha encerrada ao final. Bandit local sem achados no nível configurado. Isso não substitui os jobs remotos faltantes; a falha de inicialização fica registrada em F0-05.
+- Mapa/índice/log no Cérebro atualizados. Incremento destacado implementado e verificado, requisito integral **EM REVISÃO**; F1-03 continua pendente, pois a assinatura exercitada é a da revisão de IA. **G0 permanece BLOQUEADO**. Próximo item: F0-04.
 
 ## Pendências de decisão
 

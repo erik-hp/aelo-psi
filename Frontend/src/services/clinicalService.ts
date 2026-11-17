@@ -173,7 +173,6 @@ export const clinicalService = {
         date: new Date(note.created_at).toLocaleDateString("pt-BR"),
         title: "Prontuário da sessão",
         content: note.raw_text,
-        attentionIndex: null,
       }));
     }
     return patientNotes.filter((note) => note.patientId === patientId);
@@ -204,7 +203,6 @@ export const clinicalService = {
           time: scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
           status: session.status,
           complement: session.complement || session.summary,
-          attentionIndex: null,
         };
       });
     }

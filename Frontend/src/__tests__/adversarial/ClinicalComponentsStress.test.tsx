@@ -345,7 +345,6 @@ describe("Adversarial Stress Test: PatientProfilePage & SessionAnalysisBlock", (
       sessionFrequency: "Quinzenal" as const,
       lastSession: "01/05/2026",
       nextSession: "15/05/2026",
-      riskLevel: "baixo" as const,
       therapist: "Dr. Roberto",
       tags: ["TCC"],
     },

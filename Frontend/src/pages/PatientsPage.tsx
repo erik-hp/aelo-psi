@@ -48,7 +48,6 @@ export function PatientsPage() {
         <Select className="md:w-56 md:flex-none" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filtrar status">
           <option value="all">Todos os status</option>
           <option value="active">Ativos</option>
-          <option value="watch">Em atenção</option>
           <option value="inactive">Inativos</option>
         </Select>
       </div>

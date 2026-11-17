@@ -46,7 +46,6 @@ describe("Sidebar Navigation and Zeigarnik Counters", () => {
         time: "09:00",
         status: "needs_review",
         complement: "Evolução pendente de preenchimento",
-        attentionIndex: 85,
       },
       {
         id: "s-2",
@@ -56,7 +55,6 @@ describe("Sidebar Navigation and Zeigarnik Counters", () => {
         time: "10:00",
         status: "completed",
         complement: "Sessão finalizada",
-        attentionIndex: null,
       },
     ]);
   });

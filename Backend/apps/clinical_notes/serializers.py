@@ -1,11 +1,23 @@
 from rest_framework import serializers
 from services.security.anonymization import anonymize_text
 from .models import ClinicalNote
-from apps.patients.access import can_access_patient
+from apps.patients.access import accessible_patients, can_access_patient
+from apps.therapy_sessions.models import TherapySession
 
 
 class ClinicalNoteSerializer(serializers.ModelSerializer):
     expected_version = serializers.IntegerField(write_only=True, required=False, min_value=1)
+
+    def get_fields(self):
+        fields = super().get_fields()
+        user = getattr(self.context.get("request"), "user", None)
+        patients = accessible_patients(user, clinical=True, write=True)
+        fields["patient"].queryset = patients
+        fields["session"].queryset = TherapySession.objects.filter(
+            patient__in=patients, professional_id=getattr(user, "pk", None), deleted_at__isnull=True,
+        )
+        return fields
+
     class Meta:
         model = ClinicalNote
         fields = (

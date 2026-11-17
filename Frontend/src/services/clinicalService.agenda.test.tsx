@@ -32,7 +32,7 @@ describe("Agenda in API mode through React Query", () => {
     }] : [{ id: "synthetic-session", patient: "synthetic-patient", scheduled_at: scheduledAt, status: "SCHEDULED", summary: "Registro sintético" }] } }));
     await expect(loadAsQueryCallback()).resolves.toEqual([{
       id: "synthetic-session", patientId: "synthetic-patient", patientName: "Paciente sintético",
-      date: format(new Date(scheduledAt), "yyyy-MM-dd"), time: format(new Date(scheduledAt), "HH:mm"), status: "draft", complement: "Registro sintético", attentionIndex: null,
+      date: format(new Date(scheduledAt), "yyyy-MM-dd"), time: format(new Date(scheduledAt), "HH:mm"), status: "draft", complement: "Registro sintético",
     }]);
     expect(http.get).toHaveBeenCalledWith("/patients/");
     expect(http.get).toHaveBeenCalledWith("/sessions/");

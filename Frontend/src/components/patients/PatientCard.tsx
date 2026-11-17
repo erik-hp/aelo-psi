@@ -29,8 +29,8 @@ export function PatientCard({ patient, completedSessions = 0, scheduledSessions 
             <dd>{patient.sessionFrequency}</dd>
           </div>
         </dl>
-        <Badge className="justify-self-start self-start md:justify-self-end" variant={patient.riskLevel === "atenção" ? "warning" : patient.riskLevel === "não avaliado" ? "muted" : patient.status === "active" ? "success" : "muted"}>
-          {patient.riskLevel}
+        <Badge className="justify-self-start self-start md:justify-self-end" variant={patient.status === "active" ? "success" : "muted"}>
+          {patient.status === "inactive" ? "Cadastro inativo" : "Cadastro ativo"}
         </Badge>
       </div>
       <p className="mt-2 text-body-regular text-text-secondary">
