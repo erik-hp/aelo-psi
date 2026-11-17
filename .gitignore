@@ -23,3 +23,13 @@ Frontend/*.tsbuildinfo
 .vscode/
 reports/local-ci/
 tools/**/__pycache__/
+
+# Locais/pessoais, fora do repositorio (1 - TCC/ e um repo Git separado)
+/1 - TCC/
+/.agents/
+/.obsidian/
+/Claude outputs/
+/research_notes/
+/reports/
+/node_modules/
+Frontend/.gstack/
