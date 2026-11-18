@@ -14,17 +14,17 @@
 | 4 | Implantação alvo F0-04: TLS real, endurecimento do ambiente, governança de chaves e reconstrução das imagens antigas que contêm backup Git/histórico | Autor | Pendente |
 | 5 | Pentest, ou revisão de infraestrutura e privacidade | Autor ou terceiro | Pendente |
 | 6 | Validar o pipeline integral (worker, Ollama, interface) e inspecionar no navegador (claro, escuro, alto contraste, leitor de tela) | Autor | Pendente |
-| 7 | Pendências técnicas de F0 e núcleo F1-02/F1-03: proteção de tokens, logout em todos os dispositivos, corrida de cadastro duplicado, `SearchFilter`, sobreposição de intervalos na agenda, assinatura/retificação de nota clínica, adaptadores Gemini/Claude sintéticos, FHIR `Provenance`/`official_only` e calculador SUS/UMUX-Lite | Autor | Implementado e testado em 17/11 (512 PostgreSQL / 221 Frontend); em revisão |
+| 7 | Pendências técnicas de F0 e núcleo F1-01/F1-02/F1-03/F5-02: proteção de tokens, logout em todos os dispositivos, corrida de cadastro duplicado, `SearchFilter`, sobreposição de intervalos e remarcação na agenda, gestão de vínculos/equipe/arquivamento na UI, assinatura/retificação de nota clínica, adaptadores Gemini/Claude sintéticos, FHIR `Provenance`/`official_only` (API + UI) e calculador SUS/UMUX-Lite | Autor | Implementado e testado em 17/11 (513 PostgreSQL / 225 Frontend); em revisão |
 | 8 | Consolidar os critérios G0 em documento e registrar no `REGISTRO_EXECUCAO.md` | Autor | Depois dos passos 1 a 7 |
 
 A CI local (`tools/local_ci.py`) cobre os checks técnicos sem depender da cota do GitHub. Rode-a antes de cada marco: [LOCAL_CI.md](validation/LOCAL_CI.md).
 
 ## 2. F1: núcleo clínico confiável (G1)
 
-- Prontuário íntegro, com fluxo completo de assinatura e histórico auditável (F1-03: hoje só existe a assinatura da revisão de IA).
-- Criptografia e autorização por clínica operacionais.
-- Financeiro, notificações e edição de preferências e contas.
-- Autosave e concorrência de edição.
+- Prontuário íntegro, com fluxo completo de rascunho, revisão, assinatura ECDSA e retificação auditável (`F1-03`: implementado e testado em 17/11; em revisão para promoção de gate).
+- Criptografia `AES-256-GCM`, rotação de chaves (`rotate_clinical_keys`), autorização por clínica, gestão de vínculos/equipe e remarcação na agenda operacionais (`F1-01`, `F1-02`, `F1-04`: implementados em modo API).
+- Autosave protegido no servidor e controle otimista de versão (`expected_version` / HTTP 409) operacionais.
+- Financeiro, notificações externas, convênios e preferências gerais permanecem fora do escopo aprovado conforme `SC-OP-01` ([PLANO_OPERACIONAL_CLINICA.md](PLANO_OPERACIONAL_CLINICA.md)).
 
 ## 3. F2: indexação e RAG rastreável (G2)
 

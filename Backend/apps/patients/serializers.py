@@ -19,7 +19,25 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class PatientAccessSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source="user.username", read_only=True)
+    user_role = serializers.CharField(source="user.role", read_only=True)
+    user_display = serializers.SerializerMethodField()
+
+    def get_user_display(self, obj) -> str:
+        full_name = f"{obj.user.first_name} {obj.user.last_name}".strip()
+        return full_name or obj.user.username
+
     class Meta:
         model = PatientAccess
-        fields = ("id", "patient", "user", "can_edit", "granted_by", "created_at")
-        read_only_fields = ("id", "granted_by", "created_at")
+        fields = (
+            "id",
+            "patient",
+            "user",
+            "user_username",
+            "user_role",
+            "user_display",
+            "can_edit",
+            "granted_by",
+            "created_at",
+        )
+        read_only_fields = ("id", "user_username", "user_role", "user_display", "granted_by", "created_at")

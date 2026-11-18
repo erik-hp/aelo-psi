@@ -68,6 +68,39 @@ class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
         grants = PatientAccess.objects.filter(patient=patient).select_related("user").order_by("created_at")
         return Response(PatientAccessSerializer(grants, many=True).data)
 
+    @action(detail=True, methods=["get"], url_path="eligible-assignees")
+    def eligible_assignees(self, request, pk=None):
+        patient = self.get_object()
+        if not (request.user.is_admin_role or can_access_patient(request.user, patient, clinical=True, write=True)):
+            raise PermissionDenied("Only an authorized professional can list eligible assignees.")
+        allowed_roles = [UserRole.PSYCHOLOGIST] if request.user.is_admin_role else [UserRole.PSYCHOLOGIST, UserRole.INTERN]
+        existing_user_ids = PatientAccess.objects.filter(patient=patient).values_list("user_id", flat=True)
+        candidates = (
+            get_user_model()
+            .objects.filter(
+                clinic_id=patient.clinic_id,
+                clinic__is_active=True,
+                is_active=True,
+                role__in=allowed_roles,
+            )
+            .exclude(is_superuser=True)
+            .exclude(pk__in=existing_user_ids)
+            .order_by("first_name", "username", "id")
+        )
+        payload = [
+            {
+                "id": candidate.pk,
+                "username": candidate.username,
+                "display_name": f"{candidate.first_name} {candidate.last_name}".strip() or candidate.username,
+                "role": candidate.role,
+            }
+            for candidate in candidates
+        ]
+        audit(request, "READ", patient, {"module": "patients", "method": "GET"})
+        response = Response(payload)
+        response["Cache-Control"] = "no-store"
+        return response
+
     @action(detail=True, methods=["post"], url_path="grant-access")
     @transaction.atomic
     def grant_access(self, request, pk=None):

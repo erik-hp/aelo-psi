@@ -481,3 +481,18 @@ O registro não é histórico de conversa: é histórico auditável de artefatos
   - `audit_data_inventory.py --check`: **28 modelos, 243 campos (`DATA_INVENTORY_OK`)**.
   - Frontend (`npm test -- --run`, `npm run lint`, `npm run build`): **221 aprovados em 30 arquivos**, **0 erros de lint** (9 avisos existentes), build de produção aprovado.
 - **Limitações e próximos passos humanos:** alinhamento com o orientador sobre `SC-IA-01` e cronograma CEP/TCLE antes de conduzir entrevistas reais; revisão independente F0-02; execução de `python tools/local_ci.py` após o commit final; consolidação da monografia em Word (`.docx`, ≥ 40 laudas, com declaração de IA) e montagem dos slides `.pptx`. **G0 continua BLOQUEADO** para dados clínicos reais.
+
+
+## Fluxos operacionais na interface em modo API — 17/11/2026 — EM REVISÃO
+
+- Pedido do autor: concluir as pendências operacionais de implementação dentro do escopo aprovado (`F1-01`, `F1-02`, `F5-02` / `RF-01`, `RF-02`, `RF-03`, `RF-11`, `RNF-06`, `RNF-08`), preservando fora do código as expansões comerciais não aprovadas de `SC-OP-01` (financeiro, notificações externas, convênios e portal do paciente). Base `18cf5ab`, branch `fix/f0-pendencias-tecnicas`.
+- **Concessão/revogação de acesso clínico e elegíveis por clínica (`F1-01` / `RF-01`, `RF-02`):** adicionada ação `GET /api/patients/{id}/eligible-assignees/` em `PatientViewSet` (restrita a `ADMIN` para designação inicial de psicólogos ativos ou a psicólogo com `write=True` para psicólogos/estagiários ativos da mesma clínica, excluindo já vinculados) e campos de identificação em `PatientAccessSerializer`. Na interface (`PatientAccessPanel.tsx` + `PatientProfilePage.tsx`), conectados listagem, concessão (`grant-access`), revogação com confirmação (`revoke-access`), arquivamento cadastral por `ADMIN` (`archive`) e ocultação de abas clínicas/Vault/notas para `ADMIN` em modo API.
+- **Gestão de equipe clínica (`F1-01` / `RF-02`):** conectado `UsersPage.tsx` em modo API para provisionar contas `PSYCHOLOGIST`/`INTERN` (`POST /api/users/`) e desativar/reativar contas (`PATCH /api/users/{id}/` com `is_active`), com confirmação explícita.
+- **Remarcação de sessão (`F1-02` / `RF-03`):** adicionado fluxo `Remarcar` em `AgendaPage.tsx` (`PATCH /api/sessions/{id}/` com `scheduled_at` e `summary`), preservando o modal aberto em caso de conflito `400` de sobreposição de intervalo e corrigindo pré-preenchimento indevido do placeholder `"Sem resumo registrado."`.
+- **Exportação portátil FHIR R4 na interface (`F5-02` / `RF-11`):** adicionado botão `Exportar FHIR R4` em `PatientProfilePage.tsx` para profissionais com vínculo clínico (`GET /api/patients/{id}/fhir/?official_only=1`), oculto para `ADMIN`.
+- **Comandos realmente executados e aprovados:**
+  - `docker compose -p aelo-teste-ops -f docker-compose.test.yml run --build --rm backend_test` + `down -v` (PostgreSQL 16 + pgvector): **513 aprovados, 0 ignorados, 0 falhas**.
+  - `pytest -q -p no:cacheprovider` (SQLite): **509 aprovados, 4 ignorados, 0 falhas**; `pytest tools/tests -q`: **11 aprovados**.
+  - `ruff check .`, `bandit -r apps ai_service services config -x "**/migrations/**" -ll -q`, `audit_data_inventory.py --check` (**28 modelos, 243 campos**), `verify_requirements.py`: **0 erros**.
+  - Frontend (`npm test -- --run`, `npm run lint`, `npm run build`): **225 aprovados em 30 arquivos** (4 novos cenários em `operational-flows.test.tsx`), **0 erros de lint** (9 avisos existentes), build de produção aprovado.
+- **Limitações:** sem nova inspeção manual em navegador real com leitor de tela para os quatro modais recém-conectados; itens fora do escopo aprovado (`SC-OP-01`) permanecem intencionalmente não implementados. **G0 continua BLOQUEADO**.

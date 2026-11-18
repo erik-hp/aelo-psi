@@ -109,6 +109,10 @@ export function AgendaPage() {
 
   // Estado do modal funcional de nova sessão
   const [isNewSessionOpen, setIsNewSessionOpen] = useState(false);
+  const [rescheduleTarget, setRescheduleTarget] = useState<AgendaItem | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [rescheduleSummary, setRescheduleSummary] = useState("");
   const [pendingStatus, setPendingStatus] = useState<{ id: string; status: "cancelled" | "missed" } | null>(null);
   const [newPatientName, setNewPatientName] = useState("");
   const [newPatientId, setNewPatientId] = useState(params.get("patient") ?? "");
@@ -127,6 +131,16 @@ export function AgendaPage() {
     await Promise.all([queryClient.invalidateQueries({ queryKey: ["agenda"] }), queryClient.invalidateQueries({ queryKey: ["dashboard"] }), queryClient.invalidateQueries({ queryKey: ["patient"] }), queryClient.invalidateQueries({ queryKey: ["editor-sessions"] })]);
   };
   const createSession = useMutation({ mutationFn: recordService.createSession, onSuccess: refreshRecords });
+  const rescheduleSession = useMutation({
+    mutationFn: recordService.rescheduleSession,
+    onSuccess: async (_session, vars) => {
+      setRescheduleTarget(null);
+      setSelectedDate(vars.date);
+      setVisibleMonth(parseLocalDate(vars.date));
+      await refreshRecords();
+      notify({ type: "success", title: "Sessão remarcada", description: "O novo horário foi registrado no servidor." });
+    },
+  });
   const changeStatus = useMutation({ mutationFn: ({ id, status }: { id: string; status: "COMPLETED" | "CANCELLED" | "MISSED" }) => recordService.updateSessionStatus(id, status), onSuccess: refreshRecords });
 
   // Estado local para sessões criadas ou com status alterado nesta sessão do navegador
@@ -639,6 +653,20 @@ export function AgendaPage() {
                               <ButtonLink to={`/editor?patient=${encodeURIComponent(item.patientId)}&session=${encodeURIComponent(item.id)}`} size="small">Abrir editor</ButtonLink>
                               {item.status === "draft" && <>
                                 <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => void handleUpdateStatus(item.id, "completed")}>Concluir atendimento</Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={rescheduleSession.isPending}
+                                  onClick={() => {
+                                    rescheduleSession.reset();
+                                    setRescheduleTarget(item);
+                                    setRescheduleDate(item.date);
+                                    setRescheduleTime(item.time);
+                                    setRescheduleSummary(!item.complement || item.complement === "Sem resumo registrado." ? "" : item.complement);
+                                  }}
+                                >
+                                  Remarcar
+                                </Button>
                                 <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => setPendingStatus({ id: item.id, status: "cancelled" })}>Cancelar sessão</Button>
                                 <Button size="sm" variant="outline" disabled={changeStatus.isPending} onClick={() => setPendingStatus({ id: item.id, status: "missed" })}>Registrar falta</Button>
                               </>}
@@ -832,6 +860,57 @@ export function AgendaPage() {
                 </Button>
               </div>
             </form>
+        </Dialog>
+      ) : null}
+
+      {rescheduleTarget ? (
+        <Dialog open onClose={() => setRescheduleTarget(null)} busy={rescheduleSession.isPending} title="Remarcar sessão clínica">
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              rescheduleSession.mutate({
+                id: rescheduleTarget.id,
+                date: rescheduleDate,
+                time: rescheduleTime,
+                summary: rescheduleSummary,
+              });
+            }}
+          >
+            <div>
+              <h2 className="text-title-3-semibold text-text-primary">Remarcar sessão clínica</h2>
+              <p className="mt-1 text-caption-1-regular text-text-secondary">
+                Paciente: {rescheduleTarget.patientName}. Conflitos de intervalo com outros atendimentos ativos serão verificados pelo servidor.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label htmlFor="reschedule-date-input" className="block text-body-medium">Nova data</label>
+                <Input id="reschedule-date-input" type="date" required value={rescheduleDate} onChange={(e) => setRescheduleDate(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="reschedule-time-input" className="block text-body-medium">Novo horário</label>
+                <Input id="reschedule-time-input" type="time" required value={rescheduleTime} onChange={(e) => setRescheduleTime(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="reschedule-summary-input" className="block text-body-medium">Observações da remarcação</label>
+              <Textarea id="reschedule-summary-input" rows={3} value={rescheduleSummary} onChange={(e) => setRescheduleSummary(e.target.value)} />
+            </div>
+            {rescheduleSession.isError && (
+              <p role="alert" className="text-body-regular text-text-error-primary">
+                {apiErrorMessage(rescheduleSession.error, "Não foi possível remarcar para este horário.")}
+              </p>
+            )}
+            <div className="flex justify-end gap-2 pt-2 border-t border-border-button-default">
+              <Button type="button" variant="outline" disabled={rescheduleSession.isPending} onClick={() => setRescheduleTarget(null)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={rescheduleSession.isPending || !rescheduleDate || !rescheduleTime}>
+                {rescheduleSession.isPending ? "Remarcando…" : "Confirmar remarcação"}
+              </Button>
+            </div>
+          </form>
         </Dialog>
       ) : null}
     </>

@@ -33,6 +33,10 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { useAuth } from "@/hooks/useAuth";
 import { AIAnalysisCard } from "@/components/analysis/AIAnalysisCard";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmDialog } from "@/components/ui/dialog";
+import { PatientAccessPanel } from "@/components/patients/PatientAccessPanel";
+import { recordService } from "@/services/recordService";
+import { apiErrorMessage } from "@/services/apiError";
 
 function SessionAnalysisBlock({
   patientId,
@@ -185,6 +189,9 @@ function SessionAnalysisBlock({
 
 export function PatientProfilePage() {
   const { user } = useAuth();
+  const { notify } = useToast();
+  const queryClient = useQueryClient();
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const { patientId = "" } = useParams();
   const { data, isLoading } = useQuery({
     queryKey: ["patient", patientId],
@@ -193,6 +200,7 @@ export function PatientProfilePage() {
   const { data: notes = [] } = useQuery({
     queryKey: ["patient-notes", patientId],
     queryFn: () => clinicalService.getPatientNotes(patientId),
+    enabled: !isApiMode || user?.role !== "ADMIN",
   });
   const { data: metrics = [] } = useQuery({
     queryKey: ["patient-longitudinal", patientId],
@@ -209,6 +217,27 @@ export function PatientProfilePage() {
   );
 
   const [activeTab, setActiveTab] = useState("overview");
+  const archiveMutation = useMutation({
+    mutationFn: () => recordService.archivePatient(patientId),
+    onSuccess: async () => {
+      setConfirmArchive(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["patient", patientId] }),
+        queryClient.invalidateQueries({ queryKey: ["patients"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      ]);
+      notify({ type: "success", title: "Paciente arquivado", description: "O cadastro foi inativado, preservando sessões e prontuários existentes." });
+    },
+    onError: (error) => {
+      setConfirmArchive(false);
+      notify({ type: "error", title: "Falha ao arquivar", description: apiErrorMessage(error, "Não foi possível arquivar este cadastro.") });
+    },
+  });
+  const fhirExport = useMutation({
+    mutationFn: () => recordService.downloadPatientFhir(patientId, true),
+    onSuccess: () => notify({ type: "success", title: "Exportação FHIR gerada", description: "Bundle FHIR R4 com notas oficiais baixado." }),
+    onError: (error) => notify({ type: "error", title: "Falha na exportação FHIR", description: apiErrorMessage(error, "Verifique seu vínculo clínico com este paciente.") }),
+  });
 
   const handleSelectNote = (noteId: string) => {
     setActiveTab("sessions");
@@ -247,6 +276,22 @@ export function PatientProfilePage() {
       <PageHeader
         title={data.patient.name}
         description="Histórico de sessões, notas e análises assistivas deste paciente."
+        action={
+          isApiMode ? (
+            <div className="flex flex-wrap gap-2">
+              {user?.role !== "ADMIN" && (
+                <Button variant="outline" disabled={fhirExport.isPending} onClick={() => fhirExport.mutate()}>
+                  {fhirExport.isPending ? "Exportando…" : "Exportar FHIR R4"}
+                </Button>
+              )}
+              {user?.role === "ADMIN" && data.patient.status === "active" && (
+                <Button variant="outline" disabled={archiveMutation.isPending} onClick={() => setConfirmArchive(true)}>
+                  Arquivar paciente
+                </Button>
+              )}
+            </div>
+          ) : null
+        }
       />
 
       {/* Particionamento em 4 Abas Clínicas com foco e teclado acessível (WAI-ARIA) */}
@@ -308,7 +353,7 @@ export function PatientProfilePage() {
           </section>
 
           {/* Síntese Atual dos Prontuários */}
-          {isApiMode ? <section className="space-y-4"><h2 className="text-headline-semibold">Análises assistivas registradas</h2>{data.analyses.length ? data.analyses.map((item) => <AIAnalysisCard key={item.id} analysis={item} />) : <EmptyState title="Nenhuma análise registrada" description="A ausência de análise não representa ausência de risco. A avaliação clínica pertence ao profissional." />}</section> : <Card className="border-border-button-default">
+           {isApiMode ? <><PatientAccessPanel patientId={patientId} />{user?.role === "ADMIN" ? <EmptyState title="Conteúdo clínico restrito" description="A administração operacional gerencia cadastro e vínculos iniciais, sem acesso a prontuários ou sínteses clínicas." /> : <section className="space-y-4"><h2 className="text-headline-semibold">Análises assistivas registradas</h2>{data.analyses.length ? data.analyses.map((item) => <AIAnalysisCard key={item.id} analysis={item} />) : <EmptyState title="Nenhuma análise registrada" description="A ausência de análise não representa ausência de risco. A avaliação clínica pertence ao profissional." />}</section>}</> : <Card className="border-border-button-default">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-headline-regular">
                 <Sparkles className="h-4 w-4 text-status-blue-text" />
@@ -421,9 +466,17 @@ export function PatientProfilePage() {
 
         {/* ABA 4: COFRE COGNITIVO (VAULT) */}
         <TabPanel id="vault" className="min-w-0 space-y-4">
-          <PatientVault patientId={patientId} analyses={data.analyses} onSelectNote={handleSelectNote} />
+          {isApiMode && user?.role === "ADMIN" ? <EmptyState title="Conteúdo clínico restrito" description="A memória clínica longitudinal é acessível apenas a profissionais com vínculo clínico autorizado." /> : <PatientVault patientId={patientId} analyses={data.analyses} onSelectNote={handleSelectNote} />}
         </TabPanel>
       </Tabs>
+      <ConfirmDialog
+        open={confirmArchive}
+        title="Arquivar cadastro do paciente?"
+        description="O paciente passará para status inativo/arquivado. Sessões e prontuários permanecem íntegros para fins de guarda obrigatória."
+        confirmLabel="Sim, arquivar paciente"
+        onClose={() => setConfirmArchive(false)}
+        onConfirm={() => archiveMutation.mutate()}
+      />
     </>
   );
 }

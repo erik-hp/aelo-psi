@@ -16,7 +16,21 @@ export interface ClinicalNoteHistoryRecord {
   raw_text: string; status_at_archive: string; amendment_reason: string; created_at: string;
 }
 
-export interface StaffRecord { id: string | number; username: string; email: string; first_name: string; last_name: string; role: string; is_active: boolean }
+export interface StaffRecord {
+  id: string | number; username: string; email: string;
+  first_name: string; last_name: string; role: string;
+  license_number?: string; is_active: boolean;
+}
+
+export interface PatientGrantRecord {
+  id: string | number; patient: string; user: string | number;
+  user_username?: string; user_role?: string; user_display?: string;
+  can_edit: boolean; created_at?: string;
+}
+
+export interface EligibleAssigneeRecord {
+  id: string | number; username: string; display_name: string; role: "PSYCHOLOGIST" | "INTERN";
+}
 
 function requireApi() { if (!isApiMode) throw new Error("Esta operação exige conexão com a API. A demonstração não salva registros."); }
 
@@ -26,7 +40,70 @@ export const recordService = {
     const grants = await getCollection<{ user: string | number; can_edit: boolean }>(`/patients/${patientId}/access-grants/`);
     return grants.some((grant) => String(grant.user) === userId && grant.can_edit);
   },
+  async getPatientGrants(patientId: string) {
+    requireApi();
+    return getCollection<PatientGrantRecord>(`/patients/${patientId}/access-grants/`);
+  },
+  async getEligibleAssignees(patientId: string) {
+    requireApi();
+    const { data } = await apiClient.get<EligibleAssigneeRecord[]>(`/patients/${patientId}/eligible-assignees/`);
+    return data;
+  },
+  async grantPatientAccess(patientId: string, input: { userId: string | number; canEdit: boolean }) {
+    requireApi();
+    const parsedUser = typeof input.userId === "string" && /^\d+$/.test(input.userId) ? Number(input.userId) : input.userId;
+    const { data } = await apiClient.post<PatientGrantRecord>(`/patients/${patientId}/grant-access/`, {
+      user: parsedUser,
+      can_edit: input.canEdit,
+    });
+    return data;
+  },
+  async revokePatientAccess(patientId: string, userId: string | number) {
+    requireApi();
+    const parsedUser = typeof userId === "string" && /^\d+$/.test(userId) ? Number(userId) : userId;
+    await apiClient.post(`/patients/${patientId}/revoke-access/`, { user: parsedUser });
+  },
+  async archivePatient(patientId: string) {
+    requireApi();
+    const { data } = await apiClient.post<ApiPatient>(`/patients/${patientId}/archive/`);
+    return mapPatient(data);
+  },
+  async downloadPatientFhir(patientId: string, officialOnly = true) {
+    requireApi();
+    const { data } = await apiClient.get<Blob>(`/patients/${patientId}/fhir/`, {
+      params: officialOnly ? { official_only: 1 } : undefined,
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(data);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `aelo-fhir-${patientId}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  },
   async getUsers() { requireApi(); return getCollection<StaffRecord>("/users/"); },
+  async createStaffUser(input: {
+    username: string; email: string; firstName: string; lastName: string;
+    role: "PSYCHOLOGIST" | "INTERN"; licenseNumber?: string; password: string;
+  }) {
+    requireApi();
+    const { data } = await apiClient.post<StaffRecord>("/users/", {
+      username: input.username.trim(),
+      email: input.email.trim(),
+      first_name: input.firstName.trim(),
+      last_name: input.lastName.trim(),
+      role: input.role,
+      license_number: (input.licenseNumber ?? "").trim(),
+      password: input.password,
+      is_active: true,
+    });
+    return data;
+  },
+  async setStaffActive(userId: string | number, isActive: boolean) {
+    requireApi();
+    const { data } = await apiClient.patch<StaffRecord>(`/users/${userId}/`, { is_active: isActive });
+    return data;
+  },
   async requestNoteAnalysis(patientId: string, noteId: string) {
     requireApi();
     const { data } = await apiClient.post<{ job_id: string; status: string }>("/analysis/request/", { patient: patientId, note: noteId, context_limit: 10 });
@@ -50,6 +127,16 @@ export const recordService = {
     const scheduledAt = new Date(`${input.date}T${input.time}:00`);
     if (!Number.isFinite(scheduledAt.getTime())) throw new Error("Informe data e horário válidos.");
     const { data } = await apiClient.post<ApiSession>("/sessions/", { patient: input.patientId, scheduled_at: scheduledAt.toISOString(), summary: input.summary.trim() });
+    return mapSession(data);
+  },
+  async rescheduleSession(input: { id: string; date: string; time: string; summary?: string }) {
+    requireApi();
+    const scheduledAt = new Date(`${input.date}T${input.time}:00`);
+    if (!Number.isFinite(scheduledAt.getTime())) throw new Error("Informe nova data e horário válidos.");
+    const { data } = await apiClient.patch<ApiSession>(`/sessions/${input.id}/`, {
+      scheduled_at: scheduledAt.toISOString(),
+      ...(input.summary !== undefined ? { summary: input.summary.trim() } : {}),
+    });
     return mapSession(data);
   },
   async updateSessionStatus(id: string, status: "COMPLETED" | "CANCELLED" | "MISSED") {

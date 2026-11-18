@@ -64,3 +64,27 @@ def test_stale_note_version_is_not_silently_overwritten(records):
     records["note"].refresh_from_db()
     assert records["note"].raw_text == "Primeira revisao sintetica"
     assert records["note"].version == 2
+
+
+@pytest.mark.django_db
+def test_eligible_assignees_is_clinic_scoped_role_filtered_and_denies_readonly_or_outsiders(records):
+    patient = records["patient"]
+    clinic = records["clinic"]
+    admin = User.objects.create_user(username="ops-admin", role=UserRole.ADMIN, clinic=clinic)
+    intern = User.objects.create_user(username="ops-intern", first_name="Estagiaria", role=UserRole.INTERN, clinic=clinic)
+    User.objects.create_user(username="ops-psych", first_name="Psicologa", role=UserRole.PSYCHOLOGIST, clinic=clinic)
+
+    # Admin sees only unassigned psychologists of the same clinic (never interns, admins, or other clinics).
+    admin_resp = client_for(admin).get(f"/api/patients/{patient.id}/eligible-assignees/")
+    assert admin_resp.status_code == 200
+    assert [u["username"] for u in admin_resp.data] == ["ops-psych"]
+
+    # Responsible psychologist sees both unassigned psychologists and interns of the same clinic.
+    owner_resp = client_for(records["owner"]).get(f"/api/patients/{patient.id}/eligible-assignees/")
+    assert owner_resp.status_code == 200
+    assert {u["username"] for u in owner_resp.data} == {"ops-psych", "ops-intern"}
+    assert intern.username in {u["username"] for u in owner_resp.data}
+
+    # Read-only psychologist and foreign clinic professional are denied.
+    assert client_for(records["reader"]).get(f"/api/patients/{patient.id}/eligible-assignees/").status_code == 403
+    assert client_for(records["outsider"]).get(f"/api/patients/{patient.id}/eligible-assignees/").status_code == 404
