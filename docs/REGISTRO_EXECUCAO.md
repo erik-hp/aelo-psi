@@ -496,3 +496,21 @@ O registro não é histórico de conversa: é histórico auditável de artefatos
   - `ruff check .`, `bandit -r apps ai_service services config -x "**/migrations/**" -ll -q`, `audit_data_inventory.py --check` (**28 modelos, 243 campos**), `verify_requirements.py`: **0 erros**.
   - Frontend (`npm test -- --run`, `npm run lint`, `npm run build`): **225 aprovados em 30 arquivos** (4 novos cenários em `operational-flows.test.tsx`), **0 erros de lint** (9 avisos existentes), build de produção aprovado.
 - **Limitações:** sem nova inspeção manual em navegador real com leitor de tela para os quatro modais recém-conectados; itens fora do escopo aprovado (`SC-OP-01`) permanecem intencionalmente não implementados. **G0 continua BLOQUEADO**.
+
+
+## Integração em `main` e validação local dinâmica completa — 17/11/2026 — EM REVISÃO
+
+- Pedido do autor: integrar na `main` e rodar a CI local (`F0-05` / `RNF-08`). Branch `fix/f0-pendencias-tecnicas` integrada por *fast-forward* na `main` no SHA `1c9ee1c4a2f94a9d4254fb8d63cd65700f03cbfe` e removida localmente após o merge, sem `push` remoto.
+- **Execução do `tools/local_ci.py` no SHA `1c9ee1c4a2f94a9d4254fb8d63cd65700f03cbfe`:**
+  - **Rodada 1 (`20261118t023906z-b408f5-1c9ee1c4a2f9`):** etapas 01 a 27 aprovadas; etapa 28 (`python-audit`) interrompida por *read timeout* transitório de rede em `pypi.org:443`.
+  - **Rodada 2 (`20261118t024508z-bc7450-1c9ee1c4a2f9`):** etapas 01 a 28 **aprovadas** (`runner-tests` 11/11, `requirements-locks`, `secrets-tree` e `secrets-history` Gitleaks, 5 builds Docker, `python-ruff`, `python-bandit`, `pip check`, `privacy-inventory` 28 modelos/243 campos, `django-migrate`, `django-check`, `makemigrations --check`, `backend-tests` **513/513 PostgreSQL/pgvector**, `django-app-tests`, `ai-compile`, `ai-unit-tests` 8/8, `nonroot-api` e `nonroot-ai` UID 10001, `frontend-lint`, `frontend-tests` **225/225**, `frontend-build` e `python-audit` **0 CVEs**).
+  - **Bloqueio externo na etapa 29 (`frontend-audit`):** `npm audit --audit-level=moderate` detectou o aviso recém-publicado **`GHSA-fc5q-39xc-vjpf` (`CVE-2026-112366`)** em `picomatch <= 4.0.7` (ReDoS em `extglobs` repetidos). Triagem confirmada: `npm view picomatch version` ainda aponta `4.0.7` como última versão publicada no npm (sem patch `4.0.8` upstream disponível até o momento); a dependência ocorre exclusivamente em `devDependencies` (`vite`, `vitest`, `tinyglobby`) e não entra no bundle estático servido pelo Caddy; `npm audit --omit=dev --audit-level=moderate` retornou **0 vulnerabilidades** nas 192 dependências de produção. Em conformidade com as diretrizes de segurança, `tools/local_ci.py` **não foi enfraquecido** para contornar o check.
+- **Execução direta e aprovação integral das etapas 30 a 39 em pilhas Docker isoladas (`aelo-sec-1c9ee1c` e `aelo-tls-1c9ee1c`):**
+  - `caddy validate --config /etc/caddy/Caddyfile`: `Valid configuration`.
+  - `docker compose --env-file .env.example` (`docker-compose.yml` e `docker-compose.tls.yml`): `config --quiet` aprovados.
+  - `security_smoke` (pré-carga): `LIVE_SECURITY_SMOKE_OK: clinic and graph isolation, draft, preview, cookies, origin, cache, proxy headers`.
+  - `load_security` (`k6`, 10 usuários sintéticos / 30 s): **482/482 checks aprovados (100%)**, `0,00%` de falhas em 492 requisições HTTP, `p(95) read = 97,28 ms` (`< 2000 ms`) e `p(95) write = 114,88 ms` (`< 3000 ms`).
+  - `security_smoke` (pós-carga): `LIVE_SECURITY_SMOKE_OK` confirmado.
+  - `tls_smoke` (CA local descartável): `LIVE_TLS_SMOKE_OK: verified CA/hostname, HTTP redirect, HSTS, proxy spoofing, Secure/HttpOnly/SameSite cookies, origin, rotation/replay/logout, clinic scope, admin denial`.
+  - `manage.py check --deploy --fail-level ERROR`: aprovado com 0 erros (avisos esperados `W005`/`W021`). Pilhas e volume de CA descartável removidos ao final.
+- **Decisão e próximo item:** código integrado e validado na `main`; assim que o upstream publicar `picomatch >= 4.0.8`, atualizar `Frontend/package-lock.json` e reexecutar `python tools/local_ci.py` para emissão do manifesto unificado com código 0. **G0 continua BLOQUEADO**.

@@ -66,4 +66,4 @@ O Plano Mestre sugere priorizar o MVP G0 a G3 e tratar F4 e F5 como escopo reduz
 - Confirmar no GitHub o estado dos PRs #15 a #24 e da `main`, pois o registro pode estar defasado.
 - A branch `validation/f0-area1-tls` ainda não foi enviada ao remoto.
 - Pastas pessoais não versionadas (`.agents/`, `.obsidian/`, `1 - TCC/`, `Claude outputs/`, `reports/`, `research_notes/`, `node_modules/` na raiz): decidir se entram no `.gitignore`.
-- Avisos conhecidos do build: 9 de Fast Refresh, Zod e chunk grande do Cytoscape.
+- Avisos conhecidos do build e auditoria dev: 9 de Fast Refresh, Zod, chunk grande do Cytoscape e advisory externo sem patch upstream ainda no npm (`GHSA-fc5q-39xc-vjpf` / `CVE-2026-112366` em `picomatch <= 4.0.7`, restrito a `devDependencies`; `npm audit --omit=dev` limpo).
