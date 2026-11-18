@@ -203,7 +203,7 @@ export function NarrativeEditor({
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-caption-1-semibold text-text-secondary flex items-center gap-1.5 mr-1">
             <FileEdit className="h-3.5 w-3.5 text-status-blue-text" />
-            Modelos Clínicos (CFP 01/2009):
+            Estruturas de apoio à redação:
           </span>
           <Button
             type="button"

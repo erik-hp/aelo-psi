@@ -8,7 +8,7 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (allDevices?: boolean) => Promise<void>;
   can: (permission: Permission) => boolean;
 }
 

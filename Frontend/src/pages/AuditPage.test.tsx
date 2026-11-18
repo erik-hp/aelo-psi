@@ -59,7 +59,7 @@ describe("AuditPage & AuditTable Cryptographic Traceability and Semantic Categor
         id: "log-3",
         actor: "Sistema / WAF de Segurança",
         role: "ADMIN",
-        action: "Alerta de segurança: tentativa de exportação não autorizada (LGPD Art. 11/20)",
+        action: "Alerta de segurança: tentativa de exportação não autorizada (LGPD Art. 11 e Art. 46)",
         entity: "Cofre de Dados Sensíveis de Saúde",
         date: "2026-05-28 09:45",
         ip: "200.189.112.50",

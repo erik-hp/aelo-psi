@@ -148,7 +148,7 @@ export const auditEvents: AuditEvent[] = [
     payload: {
       signature_standard: "ECDSA_P256_SHA256",
       checkpoint_id: "chk-9002",
-      compliance: "CFP nº 009/2024 Art. 3º",
+      verification_scope: "Revisão humana assinada (uso sintético)",
       decision: "VALIDATED",
     },
   },
@@ -188,7 +188,7 @@ export const auditEvents: AuditEvent[] = [
     id: "log-4",
     actor: "Sistema / WAF de Segurança",
     role: "ADMIN",
-    action: "Alerta de segurança: tentativa de exportação não autorizada (LGPD Art. 11/20)",
+    action: "Alerta de segurança: tentativa de exportação não autorizada (LGPD Art. 11 e Art. 46)",
     entity: "Cofre de Dados Sensíveis de Saúde",
     date: "2026-05-28 09:45",
     ip: "200.189.112.50",

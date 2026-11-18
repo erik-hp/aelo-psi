@@ -14,7 +14,7 @@
 | 4 | Implantação alvo F0-04: TLS real, endurecimento do ambiente, governança de chaves e reconstrução das imagens antigas que contêm backup Git/histórico | Autor | Pendente |
 | 5 | Pentest, ou revisão de infraestrutura e privacidade | Autor ou terceiro | Pendente |
 | 6 | Validar o pipeline integral (worker, Ollama, interface) e inspecionar no navegador (claro, escuro, alto contraste, leitor de tela) | Autor | Pendente |
-| 7 | Pendências técnicas de F0: proteção de tokens contra XSS, encerramento de sessão em outros dispositivos, corrida de cadastro duplicado, concorrência de agenda, `SearchFilter` real em pacientes/usuários | Autor | Pendente |
+| 7 | Pendências técnicas de F0 e núcleo F1-02/F1-03: proteção de tokens, logout em todos os dispositivos, corrida de cadastro duplicado, `SearchFilter`, sobreposição de intervalos na agenda, assinatura/retificação de nota clínica, adaptadores Gemini/Claude sintéticos, FHIR `Provenance`/`official_only` e calculador SUS/UMUX-Lite | Autor | Implementado e testado em 17/11 (512 PostgreSQL / 221 Frontend); em revisão |
 | 8 | Consolidar os critérios G0 em documento e registrar no `REGISTRO_EXECUCAO.md` | Autor | Depois dos passos 1 a 7 |
 
 A CI local (`tools/local_ci.py`) cobre os checks técnicos sem depender da cota do GitHub. Rode-a antes de cada marco: [LOCAL_CI.md](validation/LOCAL_CI.md).

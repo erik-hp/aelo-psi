@@ -129,3 +129,112 @@ def test_claude_runs_without_tools_and_outside_the_project(monkeypatch, tmp_path
     claude_cli.run_claude("{}")
     assert seen["command"][seen["command"].index("--tools") + 1] == ""
     assert "Backend" not in seen["cwd"]
+
+
+@pytest.mark.parametrize("engine", ["gemini", "anthropic"])
+@pytest.mark.parametrize("synthetic", ["", "False", "no"])
+def test_frontier_http_engines_require_declared_synthetic_environment(engine, synthetic):
+    with pytest.raises(RuntimeError):
+        ai_module.validate_engine(engine, synthetic)
+
+
+@pytest.mark.parametrize("engine", ["gemini", "anthropic"])
+def test_frontier_http_engines_start_in_synthetic_environment(engine):
+    ai_module.validate_engine(engine, "True")
+
+
+def test_gemini_sends_key_in_header_never_url_and_extracts_json(monkeypatch):
+    import httpx
+    from ai_service import frontier_providers
+
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-gemini-key-test")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-2.5-pro")
+    captured = {}
+
+    class FakeClient:
+        async def post(self, url, headers, json):
+            captured.update(url=url, headers=headers, json=json)
+            return httpx.Response(
+                200,
+                json={"candidates": [{"content": {"parts": [{"text": '{"patterns": ["insônia"]}'}]}}]},
+                request=httpx.Request("POST", url),
+            )
+
+    monkeypatch.setattr(ai_module, "AI_ENGINE", "gemini")
+    ai_module.app.state.http_client = FakeClient()
+    try:
+        out = asyncio.run(ai_module.generate_json({"task": "synthetic"}))
+    finally:
+        ai_module.app.state._state.pop("http_client", None)
+    assert out == '{"patterns": ["insônia"]}'
+    assert "synthetic-gemini-key-test" not in captured["url"]
+    assert captured["headers"]["x-goog-api-key"] == "synthetic-gemini-key-test"
+    assert captured["json"]["generationConfig"]["responseMimeType"] == "application/json"
+    assert frontier_providers.check_ready("gemini") == ["gemini-2.5-pro"]
+
+
+def test_gemini_embeddings_work_when_enabled_and_reject_invalid_vectors(monkeypatch):
+    import httpx
+
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-gemini-key-test")
+    monkeypatch.setenv("GEMINI_USE_EMBEDDINGS", "True")
+    monkeypatch.setattr(ai_module, "AI_ENGINE", "gemini")
+    assert ai_module.has_embeddings() is True
+
+    class FakeClient:
+        async def post(self, url, headers, json):
+            return httpx.Response(
+                200,
+                json={"embeddings": [{"values": [0.1, 0.2, 0.3]}, {"values": [0.4, 0.5, 0.6]}]},
+                request=httpx.Request("POST", url),
+            )
+
+    ai_module.app.state.http_client = FakeClient()
+    try:
+        vectors = asyncio.run(ai_module.embed_texts(["sono", "ansiedade"]))
+    finally:
+        ai_module.app.state._state.pop("http_client", None)
+    assert vectors == [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+
+
+def test_anthropic_sends_key_in_header_and_never_leaks_prompt_or_key_on_failure(monkeypatch):
+    import httpx
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "synthetic-anthropic-secret-key")
+    monkeypatch.setenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+    monkeypatch.setattr(ai_module, "AI_ENGINE", "anthropic")
+
+    class FailingClient:
+        async def post(self, url, headers, json):
+            return httpx.Response(429, text="rate limit: texto clinico confidencial synthetic-anthropic-secret-key", request=httpx.Request("POST", url))
+
+    class OkClient:
+        async def post(self, url, headers, json):
+            assert headers["x-api-key"] == "synthetic-anthropic-secret-key"
+            assert "synthetic-anthropic-secret-key" not in url
+            return httpx.Response(
+                200,
+                json={"content": [{"type": "text", "text": '```json\n{"nodes": [], "edges": []}\n```'}]},
+                request=httpx.Request("POST", url),
+            )
+
+    try:
+        ai_module.app.state.http_client = FailingClient()
+        with pytest.raises(ValueError) as failure:
+            asyncio.run(ai_module.generate_json({"note": "texto clinico confidencial"}))
+        assert "texto clinico" not in str(failure.value)
+        assert "synthetic-anthropic-secret-key" not in str(failure.value)
+
+        ai_module.app.state.http_client = OkClient()
+        assert asyncio.run(ai_module.generate_json({"note": "ok"})) == '{"nodes": [], "edges": []}'
+    finally:
+        ai_module.app.state._state.pop("http_client", None)
+
+
+def test_frontier_engines_disallow_untrusted_http_base_url(monkeypatch):
+    from ai_service import frontier_providers
+
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-key")
+    monkeypatch.setenv("GEMINI_BASE_URL", "http://evil.example.com/v1beta")
+    with pytest.raises(ValueError):
+        frontier_providers.check_ready("gemini")

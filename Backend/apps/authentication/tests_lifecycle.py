@@ -98,6 +98,21 @@ class AuthenticationLifecycleTests(TestCase):
         # Invalid logout attempt must not consume the legitimate owner's token.
         self.assertEqual(self.refresh(other_client).status_code, 200)
 
+    def test_logout_all_devices_blocks_other_sessions(self):
+        laptop, phone = APIClient(), APIClient()
+        own = self.login(self.professional.username, laptop).data
+        self.login(self.professional.username, phone)
+        other = APIClient()
+        self.login(self.other_professional.username, other)
+        laptop.credentials(HTTP_AUTHORIZATION=f"Bearer {own['access']}")
+        response = laptop.post(
+            "/api/auth/logout/", {"all_devices": True}, format="json",
+            HTTP_ORIGIN="http://testserver", HTTP_X_AELO_SESSION="1",
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertIn(self.refresh(phone).status_code, (401, 403))
+        self.assertEqual(self.refresh(other).status_code, 200)
+
     def test_logout_own_token_blocks_refresh(self):
         client = APIClient()
         own = self.login(self.professional.username, client).data

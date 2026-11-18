@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from services.security.anonymization import anonymize_text
-from .models import ClinicalNote
+from .models import ClinicalNote, ClinicalNoteHistory
 from apps.patients.access import accessible_patients, can_access_patient
 from apps.therapy_sessions.models import TherapySession
 
@@ -28,12 +28,28 @@ class ClinicalNoteSerializer(serializers.ModelSerializer):
             "raw_text",
             "anonymized_text",
             "version",
+            "status",
             "expected_version",
             "locked_at",
+            "signed_by",
+            "signed_at",
+            "signed_payload_sha256",
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "author", "anonymized_text", "version", "locked_at", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "author",
+            "anonymized_text",
+            "version",
+            "status",
+            "locked_at",
+            "signed_by",
+            "signed_at",
+            "signed_payload_sha256",
+            "created_at",
+            "updated_at",
+        )
 
     def validate(self, attrs):
         if not self.instance and "expected_version" in attrs:
@@ -73,3 +89,34 @@ class ClinicalNoteSerializer(serializers.ModelSerializer):
             internal_code=patient.internal_code,
         )
         return super().create(validated_data)
+
+
+class NoteSigningPayloadSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=["SIGN", "AMEND"], default="SIGN")
+    raw_text = serializers.CharField(required=False, max_length=50000)
+    reason = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
+class NoteSignSerializer(serializers.Serializer):
+    signature = serializers.CharField(max_length=128)
+
+
+class NoteAmendSerializer(serializers.Serializer):
+    raw_text = serializers.CharField(min_length=1, max_length=50000)
+    reason = serializers.CharField(min_length=10, max_length=2000)
+    signature = serializers.CharField(max_length=128)
+
+
+class ClinicalNoteHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClinicalNoteHistory
+        fields = (
+            "id",
+            "version",
+            "edited_by",
+            "raw_text",
+            "status_at_archive",
+            "amendment_reason",
+            "created_at",
+        )
+        read_only_fields = fields

@@ -20,8 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, [queryClient]);
 
-  const logout = useCallback(async () => {
-    const pending = authService.logout();
+  const logout = useCallback(async (allDevices = false) => {
+    const pending = authService.logout(allDevices);
     clearLocalSession();
     channel.current?.postMessage("logout");
     await pending;

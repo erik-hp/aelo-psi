@@ -329,7 +329,7 @@ describe("Empirical Challenge: VaultCytoscapeCanvas Zoom Math Across Screen Rati
 });
 
 describe("Empirical Challenge: VaultApprovalModal Justification State Lifecycle", () => {
-  it("resets justification state across modal open/close toggles and checkpoint change (CFP nº 009/2024)", () => {
+  it("resets justification state across modal open/close toggles and checkpoint change", () => {
     const { rerender } = render(
       <VaultApprovalModal
         open={true}

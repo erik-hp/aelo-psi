@@ -6,7 +6,8 @@ from apps.ai_analysis.permissions import CanReviewAI
 from apps.ai_analysis.signatures import public_key_from_spki
 from django.db.models import Q
 from rest_framework.permissions import BasePermission
-from rest_framework.exceptions import PermissionDenied
+from django.db import IntegrityError, transaction
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from apps.audit_logs.services import audit
 from .models import User, UserSigningKey
 from .serializers import UserSerializer
@@ -30,7 +31,11 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if not self.request.user.clinic_id:
             raise PermissionDenied('Clinic is required.')
-        user = serializer.save(clinic_id=self.request.user.clinic_id)
+        try:
+            with transaction.atomic():
+                user = serializer.save(clinic_id=self.request.user.clinic_id)
+        except IntegrityError as exc:
+            raise ValidationError({"username": "Nome de usuário já cadastrado."}) from exc
         audit(self.request, "CREATE", user, {"module": "users"})
 
     def perform_update(self, serializer):

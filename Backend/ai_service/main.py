@@ -11,7 +11,8 @@ from fastapi import FastAPI, Header, HTTPException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 from pydantic import ValidationError
 
-from . import claude_cli
+import shutil
+from . import claude_cli, frontier_providers
 from .schemas import (
     AnalysisRequest,
     AnalysisResult,
@@ -60,21 +61,28 @@ ALLOWED_VAULT_KINDS = frozenset({"symptom", "event", "context", "intervention"})
 ALLOWED_VAULT_RELATIONS = frozenset({"co_occurs", "precedes", "reports", "associated"})
 
 
+EXTERNAL_ENGINES = frozenset({"claude-cli", "gemini", "anthropic"})
+
+
 def validate_engine(engine: str, synthetic_only: str) -> None:
-    """Clinical text may only reach Ollama; Claude is limited to synthetic tests (ADR-004)."""
+    """Real clinical text may only reach Ollama; frontier engines require synthetic mode (ADR-004 / SC-IA-01)."""
     if engine == "ollama":
         return
-    if engine != "claude-cli":
+    if engine not in EXTERNAL_ENGINES:
         raise RuntimeError("Unknown AI_ENGINE.")
     if synthetic_only.lower() != "true":
-        raise RuntimeError("AI_ENGINE=claude-cli requires AELO_SYNTHETIC_DATA_ONLY=True.")
+        raise RuntimeError(f"AI_ENGINE={engine} requires AELO_SYNTHETIC_DATA_ONLY=True.")
 
 
 validate_engine(AI_ENGINE, os.getenv("AELO_SYNTHETIC_DATA_ONLY", ""))
 
 
 def has_embeddings() -> bool:
-    return AI_ENGINE == "ollama"
+    if AI_ENGINE == "ollama":
+        return True
+    if AI_ENGINE == "gemini":
+        return frontier_providers.gemini_embeddings_enabled()
+    return False
 
 
 class CircuitOpenError(Exception):
@@ -116,10 +124,16 @@ async def _ollama_post(path: str, payload: dict) -> dict:
 
 async def generate_json(prompt: dict) -> str:
     text = json.dumps(prompt, ensure_ascii=False)
-    if len(text) / CHARS_PER_TOKEN_ESTIMATE + RESPONSE_TOKEN_RESERVE > OLLAMA_NUM_CTX:
+    max_ctx = max(2048, int(os.getenv("AI_MAX_CONTEXT_TOKENS", str(OLLAMA_NUM_CTX))))
+    if len(text) / CHARS_PER_TOKEN_ESTIMATE + RESPONSE_TOKEN_RESERVE > max_ctx:
         raise PromptTooLargeError("Prompt exceeds the configured model context.")
+    client = getattr(app.state, "http_client", None)
     if AI_ENGINE == "claude-cli":
         return await claude_cli.generate(prompt)
+    if AI_ENGINE == "gemini":
+        return await frontier_providers.generate_gemini(prompt, client=client)
+    if AI_ENGINE == "anthropic":
+        return await frontier_providers.generate_anthropic(prompt, client=client)
     data = await _ollama_post("/api/generate", {
         "model": OLLAMA_MODEL, "prompt": text, "stream": False, "format": "json",
         # shift=False makes Ollama answer HTTP 400 instead of truncating an underestimated prompt.
@@ -131,6 +145,9 @@ async def generate_json(prompt: dict) -> str:
 
 
 async def embed_texts(texts: list[str]) -> list[list[float]]:
+    if AI_ENGINE == "gemini":
+        client = getattr(app.state, "http_client", None)
+        return await frontier_providers.embed_gemini(texts, client=client)
     body = await _ollama_post("/api/embed", {"model": OLLAMA_EMBED_MODEL, "input": texts, "truncate": False})
     if not isinstance(body, dict):
         raise ValueError("Ollama returned an invalid embedding response.")
@@ -296,6 +313,14 @@ def health_live() -> dict:
 @app.get("/health/ready")
 async def health_ready() -> dict:
     try:
+        validate_engine(AI_ENGINE, os.getenv("AELO_SYNTHETIC_DATA_ONLY", ""))
+        if AI_ENGINE == "claude-cli":
+            if shutil.which("claude") is None:
+                raise ValueError("Claude CLI is not available.")
+            return {"status": "ready", "engine": AI_ENGINE, "models": [claude_cli.model()]}
+        if AI_ENGINE in {"gemini", "anthropic"}:
+            models = frontier_providers.check_ready(AI_ENGINE)
+            return {"status": "ready", "engine": AI_ENGINE, "models": models}
         client = getattr(app.state, "http_client", None)
         if client is None:
             raise ValueError("HTTP client is not initialized")
@@ -307,10 +332,10 @@ async def health_ready() -> dict:
         missing = {OLLAMA_MODEL.split(":")[0], OLLAMA_EMBED_MODEL.split(":")[0]} - names
         if missing:
             raise ValueError("Required models unavailable: " + ", ".join(sorted(missing)))
-    except (httpx.HTTPError, ValueError, TypeError, KeyError) as exc:
-        logger.warning("Ollama readiness failed: %s", type(exc).__name__)
+    except (RuntimeError, httpx.HTTPError, ValueError, TypeError, KeyError) as exc:
+        logger.warning("AI readiness failed: %s", type(exc).__name__)
         raise HTTPException(status_code=503, detail={"status": "not_ready", "reason": type(exc).__name__}) from exc
-    return {"status": "ready", "models": sorted(names)}
+    return {"status": "ready", "engine": AI_ENGINE, "models": sorted(names)}
 
 
 @app.post("/vault/extract")

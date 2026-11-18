@@ -4,20 +4,24 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.test import override_settings
 
-from apps.ai_analysis.models import AIAnalysis, AISource, HumanValidation, SentimentMetric
+from apps.ai_analysis.models import AIAnalysis, AISource, HumanValidation, SentimentMetric, VaultCheckpoint, VaultEdge, VaultNode
 from apps.audit_logs.integrity import append_audit_log
-from apps.clinical_notes.models import ClinicalNote, ClinicalNoteHistory
+from apps.clinical_notes.models import ClinicalNote, ClinicalNoteDraft, ClinicalNoteHistory
 from apps.therapy_sessions.models import TherapySession
 
 
 ENCRYPTED_MODELS = (
     (ClinicalNote, ("raw_text", "anonymized_text")),
-    (ClinicalNoteHistory, ("raw_text", "anonymized_text")),
+    (ClinicalNoteHistory, ("raw_text", "anonymized_text", "amendment_reason")),
+    (ClinicalNoteDraft, ("title", "content")),
     (TherapySession, ("summary",)),
     (AIAnalysis, ("patterns", "longitudinal_evolution", "attention_points", "narrative_metrics", "behavioral_changes", "longitudinal_coherence", "possible_inconsistencies", "raw_response")),
     (AISource, ("excerpt",)),
     (HumanValidation, ("comment",)),
     (SentimentMetric, ("metadata",)),
+    (VaultNode, ("label",)),
+    (VaultEdge, ("evidence",)),
+    (VaultCheckpoint, ("markdown",)),
 )
 
 

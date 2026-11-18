@@ -83,7 +83,7 @@ Django decide o que pode ser lido e prepara o contexto. `ai_service` é um proce
 ### Dados clínicos
 
 - `EncryptedTextField`/`EncryptedJSONField` (`services/security/encrypted_fields.py`) cifram na aplicação com AES-256-GCM. Por isso, PostgreSQL não consegue buscar nesses campos: filtros sobre texto clínico precisam ocorrer em memória, depois da autorização.
-- `ClinicalNote` usa exclusão lógica, `version` e `ClinicalNoteHistory`. `locked_at` bloqueia edição e exclusão. Salvar nota não assina nem aciona análise.
+- `ClinicalNote` usa exclusão lógica, `version`, `status` (`DRAFT` → `IN_REVIEW` → `SIGNED` → `AMENDED`) e `ClinicalNoteHistory`. Salvar nota não assina nem aciona análise. A assinatura explícita (`/sign/`) e a retificação formal com motivo (`/amend/`) usam ECDSA P-256 (`apps/clinical_notes/signatures.py`), preservando a versão assinada anterior cifrada em `ClinicalNoteHistory`.
 - `audit()` (`apps/audit_logs/services.py`) aceita só metadados de uma lista permitida e grava em cadeia HMAC. Em PostgreSQL, triggers impedem alterar eventos. `AuditReadMixin` já audita `list` e `retrieve`; não audite de novo.
 
 ### Pipeline de IA (`apps/ai_analysis`)
@@ -92,7 +92,7 @@ Django decide o que pode ser lido e prepara o contexto. `ai_service` é um proce
 - `retrieval.py`: seleção em camadas por grafo e texto original, com vagas por rota, sem penalizar idade. Desligada por `AI_LOD_RETRIEVAL`.
 - `vault_core/services.py` separa `extract_note_graph` (lê a nota e valida), `persist_note_graph` (grava de forma idempotente por nota) e `create_checkpoint` (único que trava a nota). O checkpoint exportado exige revisão assinada com ECDSA.
 - `AI_AUTO_EXTRACTION` enfileira `NoteExtractionJob` ao salvar nota. `settings.py` só aceita a opção com `AELO_SYNTHETIC_DATA_ONLY=True` e sem HTTPS.
-- `ai_service/main.py`: `generate_json` define `num_ctx` e `shift: false`, porque o Ollama descarta o início de prompts longos com HTTP 200. `literal_graph` mantém só conceitos com rótulo e evidência copiados da nota, e citações são conferidas contra o contexto. Rótulos interpretativos são recusados de propósito.
+- `ai_service/main.py` e `ai_service/frontier_providers.py`: suportam `AI_ENGINE` em `ollama` (padrão local) ou `gemini`, `anthropic` e `claude-cli` (restritos por trava técnica a `AELO_SYNTHETIC_DATA_ONLY=True` e recusados em `DJANGO_REQUIRE_HTTPS=True`). `generate_json` define `num_ctx` e `shift: false` no Ollama, porque o Ollama descarta o início de prompts longos com HTTP 200. `literal_graph` mantém só conceitos com rótulo e evidência copiados da nota, e citações são conferidas contra o contexto. Rótulos interpretativos são recusados de propósito.
 
 ### Frontend
 

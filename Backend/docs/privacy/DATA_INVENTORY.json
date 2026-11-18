@@ -1245,10 +1245,53 @@
           "protection": "not_field_encrypted"
         },
         {
+          "name": "status",
+          "type": "CharField",
+          "column": "status",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
           "name": "locked_at",
           "type": "DateTimeField",
           "column": "locked_at",
           "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "signed_by",
+          "type": "ForeignKey",
+          "column": "signed_by_id",
+          "nullable": true,
+          "protection": "not_field_encrypted",
+          "related_model": "users.user"
+        },
+        {
+          "name": "signed_at",
+          "type": "DateTimeField",
+          "column": "signed_at",
+          "nullable": true,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "signature",
+          "type": "CharField",
+          "column": "signature",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "public_key_spki",
+          "type": "TextField",
+          "column": "public_key_spki",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "signed_payload_sha256",
+          "type": "CharField",
+          "column": "signed_payload_sha256",
+          "nullable": false,
           "protection": "not_field_encrypted"
         }
       ]
@@ -1397,6 +1440,21 @@
           "column": "version",
           "nullable": false,
           "protection": "not_field_encrypted"
+        },
+        {
+          "name": "status_at_archive",
+          "type": "CharField",
+          "column": "status_at_archive",
+          "nullable": false,
+          "protection": "not_field_encrypted"
+        },
+        {
+          "name": "amendment_reason",
+          "type": "EncryptedTextField",
+          "column": "amendment_reason",
+          "nullable": false,
+          "protection": "aes_gcm_field",
+          "aad_scope": "clinical_notes.clinicalnotehistory.amendment_reason"
         }
       ]
     },

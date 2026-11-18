@@ -101,13 +101,19 @@ async def read_note(index, text, gold):
 
 
 async def main():
-    use_claude = os.environ.get("AELO_EVAL_ENGINE") == "claude"
+    eval_engine = os.environ.get("AELO_EVAL_ENGINE", "ollama").strip().lower()
     limit = int(os.environ.get("AELO_EVAL_LIMIT", len(NOTES)))
     async with httpx.AsyncClient(timeout=httpx.Timeout(600.0, connect=5.0)) as client:
         ai.app.state.http_client = client
-        if use_claude:
+        if eval_engine in {"claude", "claude-cli"}:
             ai.AI_ENGINE = "claude-cli"
             version, engine = "claude-cli", ai.claude_cli.model()
+        elif eval_engine == "gemini":
+            ai.AI_ENGINE = "gemini"
+            version, engine = "gemini-api", ai.frontier_providers.gemini_model()
+        elif eval_engine == "anthropic":
+            ai.AI_ENGINE = "anthropic"
+            version, engine = "anthropic-api", ai.frontier_providers.anthropic_model()
         else:
             version = (await client.get(f"{ai.OLLAMA_BASE_URL}/api/version")).json()["version"]
             engine = ai.OLLAMA_MODEL

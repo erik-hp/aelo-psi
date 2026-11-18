@@ -4,6 +4,13 @@ from services.security.models import SoftDeleteModel, TimestampedModel
 from services.security.encrypted_fields import EncryptedTextField
 
 
+class NoteStatus(models.TextChoices):
+    DRAFT = "DRAFT", "Draft"
+    IN_REVIEW = "IN_REVIEW", "In review"
+    SIGNED = "SIGNED", "Signed"
+    AMENDED = "AMENDED", "Amended"
+
+
 class ClinicalNote(SoftDeleteModel):
     patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT, related_name="clinical_notes")
     session = models.ForeignKey("therapy_sessions.TherapySession", null=True, blank=True, on_delete=models.PROTECT, related_name="clinical_notes")
@@ -11,7 +18,13 @@ class ClinicalNote(SoftDeleteModel):
     raw_text = EncryptedTextField()
     anonymized_text = EncryptedTextField(blank=True)
     version = models.PositiveIntegerField(default=1)
+    status = models.CharField(max_length=20, choices=NoteStatus.choices, default=NoteStatus.DRAFT, db_index=True)
     locked_at = models.DateTimeField(null=True, blank=True)
+    signed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="signed_clinical_notes")
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signature = models.CharField(max_length=128, blank=True)
+    public_key_spki = models.TextField(blank=True)
+    signed_payload_sha256 = models.CharField(max_length=64, blank=True)
 
     class Meta:
         indexes = [models.Index(fields=["patient", "created_at"]), models.Index(fields=["author", "created_at"])]
@@ -26,6 +39,8 @@ class ClinicalNoteHistory(TimestampedModel):
     raw_text = EncryptedTextField()
     anonymized_text = EncryptedTextField(blank=True)
     version = models.PositiveIntegerField()
+    status_at_archive = models.CharField(max_length=20, blank=True)
+    amendment_reason = EncryptedTextField(blank=True)
 
     class Meta:
         indexes = [models.Index(fields=["note", "version"])]

@@ -1,4 +1,5 @@
 import { apiClient } from "@/api/client";
+import type { ClinicalNoteRecord } from "@/services/recordService";
 
 type Decision = "VALIDATED" | "REJECTED";
 type StoredKey = { privateKey: CryptoKey; fingerprint: string };
@@ -83,5 +84,32 @@ export const signingService = {
       comment,
       signature: toBase64(signature),
     });
+  },
+  async signNote(noteId: string, userId: string): Promise<ClinicalNoteRecord> {
+    const privateKey = await signingKey(userId);
+    const { data: prep } = await apiClient.post<{ payload: string }>(`/clinical-notes/${noteId}/signing-payload/`, { action: "SIGN" });
+    const payload = fromBase64(prep.payload);
+    const signature = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, privateKey, payload));
+    const { data } = await apiClient.post<ClinicalNoteRecord>(`/clinical-notes/${noteId}/sign/`, {
+      signature: toBase64(signature),
+    });
+    return data;
+  },
+  async amendNote(noteId: string, rawText: string, reason: string, userId: string): Promise<ClinicalNoteRecord> {
+    const privateKey = await signingKey(userId);
+    const cleanReason = reason.trim();
+    const { data: prep } = await apiClient.post<{ payload: string }>(`/clinical-notes/${noteId}/signing-payload/`, {
+      action: "AMEND",
+      raw_text: rawText,
+      reason: cleanReason,
+    });
+    const payload = fromBase64(prep.payload);
+    const signature = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, privateKey, payload));
+    const { data } = await apiClient.post<ClinicalNoteRecord>(`/clinical-notes/${noteId}/amend/`, {
+      raw_text: rawText,
+      reason: cleanReason,
+      signature: toBase64(signature),
+    });
+    return data;
   },
 };

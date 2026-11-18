@@ -115,7 +115,10 @@ REST_FRAMEWORK = {
         "apps.authentication.jwt.ClinicJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_FILTER_BACKENDS": ("services.security.filters.ScopedRelationFilterBackend",),
+    "DEFAULT_FILTER_BACKENDS": (
+        "services.security.filters.ScopedRelationFilterBackend",
+        "rest_framework.filters.SearchFilter",
+    ),
     "DEFAULT_THROTTLE_CLASSES": (
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -175,9 +178,16 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = REQUIRE_HTTPS or not DEBUG
 X_FRAME_OPTIONS = "DENY"
 
-# Automatic reading writes data derived from notes: synthetic environments only, until G0.
+SESSION_DURATION_MINUTES = max(15, min(240, int(os.getenv("SESSION_DURATION_MINUTES", "50"))))
+
+# Automatic reading and external frontier engines stay behind the synthetic gate until G0 / ADR-004 conditions.
+AI_ENGINE = os.getenv("AI_ENGINE", "ollama").strip() or "ollama"
 AI_AUTO_EXTRACTION = os.getenv("AI_AUTO_EXTRACTION", "False").lower() == "true"
 AELO_SYNTHETIC_DATA_ONLY = os.getenv("AELO_SYNTHETIC_DATA_ONLY", "False").lower() == "true"
+if AI_ENGINE not in {"ollama", "claude-cli", "gemini", "anthropic"}:
+    raise ImproperlyConfigured("Unknown AI_ENGINE.")
+if AI_ENGINE != "ollama" and (REQUIRE_HTTPS or not AELO_SYNTHETIC_DATA_ONLY):
+    raise ImproperlyConfigured("External AI_ENGINE requires AELO_SYNTHETIC_DATA_ONLY=True and no HTTPS deployment.")
 if AI_AUTO_EXTRACTION and (REQUIRE_HTTPS or not AELO_SYNTHETIC_DATA_ONLY):
     raise ImproperlyConfigured("AI_AUTO_EXTRACTION requires AELO_SYNTHETIC_DATA_ONLY=True and no HTTPS deployment.")
 

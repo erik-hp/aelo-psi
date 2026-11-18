@@ -1,4 +1,4 @@
-import { Bell, LogOut, Menu } from "lucide-react";
+import { Bell, LogOut, Menu, MonitorX } from "lucide-react";
 import { RiSearchLine } from "@remixicon/react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,16 @@ export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
             <p className="text-caption-1-medium">{user?.name}</p>
             <p className="text-caption-1-regular text-text-secondary">{user ? roleLabels[user.role] ?? user.role : null}</p>
           </div>
-          <Button size="icon" variant="ghost" aria-label="Sair" onClick={logout}>
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Sair de todos os dispositivos"
+            title="Sair de todos os dispositivos"
+            onClick={() => { if (window.confirm("Encerrar a sessão em todos os dispositivos?")) void logout(true); }}
+          >
+            <MonitorX className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost" aria-label="Sair" onClick={() => void logout()}>
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

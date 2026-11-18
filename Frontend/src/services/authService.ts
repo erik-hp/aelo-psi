@@ -87,11 +87,11 @@ export const authService = {
       },
     };
   },
-  async logout(): Promise<void> {
+  async logout(allDevices = false): Promise<void> {
     if (!isApiMode) return;
     try {
       const access = authStorage.getAccessToken();
-      await apiClient.post("/auth/logout/", {}, { headers: { "X-AELO-Session": "1", ...(access ? { Authorization: `Bearer ${access}` } : {}) } });
+      await apiClient.post("/auth/logout/", allDevices ? { all_devices: true } : {}, { headers: { "X-AELO-Session": "1", ...(access ? { Authorization: `Bearer ${access}` } : {}) } });
     } catch {
       // Local credentials are cleared even when the API is unavailable.
     }

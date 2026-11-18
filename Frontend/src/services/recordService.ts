@@ -3,9 +3,17 @@ import { getCollection } from "@/api/collections";
 import { isApiMode } from "./runtime";
 import { mapPatient, mapSession, type ApiPatient, type ApiSession } from "./clinicalMappers";
 
+export type ClinicalNoteStatus = "DRAFT" | "IN_REVIEW" | "SIGNED" | "AMENDED";
+
 export interface ClinicalNoteRecord {
   id: string; patient: string; session: string | null; author: string | number;
   raw_text: string; version: number; locked_at: string | null;
+  status?: ClinicalNoteStatus; signed_by?: string | number | null; signed_at?: string | null;
+}
+
+export interface ClinicalNoteHistoryRecord {
+  id: string | number; version: number; edited_by: string | number;
+  raw_text: string; status_at_archive: string; amendment_reason: string; created_at: string;
 }
 
 export interface StaffRecord { id: string | number; username: string; email: string; first_name: string; last_name: string; role: string; is_active: boolean }
@@ -59,5 +67,15 @@ export const recordService = {
       ? await apiClient.patch<ClinicalNoteRecord>(`/clinical-notes/${input.noteId}/`, { raw_text: input.content, ...(input.expectedVersion ? { expected_version: input.expectedVersion } : {}) })
       : await apiClient.post<ClinicalNoteRecord>("/clinical-notes/", { patient: input.patientId, session: input.sessionId, raw_text: input.content });
     return response.data;
+  },
+  async submitNoteReview(noteId: string) {
+    requireApi();
+    const { data } = await apiClient.post<ClinicalNoteRecord>(`/clinical-notes/${noteId}/submit-review/`);
+    return data;
+  },
+  async getNoteHistory(noteId: string) {
+    requireApi();
+    const { data } = await apiClient.get<ClinicalNoteHistoryRecord[]>(`/clinical-notes/${noteId}/history/`);
+    return data;
   },
 };

@@ -7,6 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .policy import active_clinic_account
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -87,7 +88,12 @@ class LogoutView(APIView):
                 token.blacklist()
             except TokenError:
                 return Response({"detail": "Invalid refresh token."}, status=status.HTTP_400_BAD_REQUEST)
-        audit(request, "LOGOUT", request.user, {"module": "authentication"})
+        everywhere = request.data.get("all_devices") is True
+        if everywhere:
+            # Access tokens already issued stay valid until they expire (JWT_ACCESS_MINUTES).
+            for outstanding in OutstandingToken.objects.filter(user=request.user, blacklistedtoken__isnull=True):
+                BlacklistedToken.objects.get_or_create(token=outstanding)
+        audit(request, "LOGOUT_ALL" if everywhere else "LOGOUT", request.user, {"module": "authentication"})
         response = Response(status=status.HTTP_204_NO_CONTENT)
         response.delete_cookie("aelo_refresh", path="/api/auth/", samesite="Strict")
         return response

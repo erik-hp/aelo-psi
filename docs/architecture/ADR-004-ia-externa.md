@@ -1,7 +1,7 @@
 # ADR-004 — Uso de modelos de IA externos
 
-**Status:** proposta, aguardando decisão do autor e do orientador. Depende de parecer jurídico e profissional.
-**Data:** 06/11/2026.
+**Status:** revisão SC-IA-01 definida pelo autor em 17/11/2026 (adaptadores `gemini` e `anthropic` implementados sob trava estrita de dados sintéticos); alinhamento com o orientador e parecer jurídico/profissional para eventual uso fora do ambiente sintético permanecem pendentes.
+**Data:** 06/11/2026 (atualizada em 17/11/2026).
 **Relaciona-se a:** RNF-03, restrições 7, 8 e 10 do Plano Mestre, F0-06, F5-04.
 **Evidências:** [relatório de pesquisa](../research/recuperacao-lod-e-ia-em-nuvem.md), `Backend/tests/evaluate_deidentification.py`.
 
@@ -11,11 +11,12 @@
 
 É possível trocar ou complementar o Ollama por modelos de fronteira em nuvem para processar notas de psicoterapia?
 
-## Decisão proposta
+## Decisão vigente (SC-IA-01 — 17/11/2026)
 
-**Manter o Ollama como único destino de conteúdo clínico.** Nenhum dado clínico, mesmo pseudonimizado, é enviado a provedor externo. Modelos externos só podem ser usados com **dados exclusivamente sintéticos**, em avaliação científica isolada do produto. Nenhum código de envio externo foi implementado.
-
-Tecnicamente é viável. O bloqueio atual é de governança, segurança e norma profissional, não de capacidade.
+1. **Adaptadores multimodelo implementados em `Backend/ai_service/`:** além de `AI_ENGINE=ollama` (padrão local preservado na stack), o serviço suporta `AI_ENGINE=gemini` (Google Gemini REST API via `httpx`, cabeçalho `x-goog-api-key`, `responseMimeType="application/json"` e embeddings opcionais via `GEMINI_USE_EMBEDDINGS=True`), `AI_ENGINE=anthropic` (Anthropic Messages API via `httpx`, cabeçalho `x-api-key`) e `AI_ENGINE=claude-cli`.
+2. **Trava técnica obrigatória para dados reais:** qualquer motor externo (`gemini`, `anthropic`, `claude-cli`) **recusa iniciar** sem `AELO_SYNTHETIC_DATA_ONLY=True` e é **bloqueado quando `DJANGO_REQUIRE_HTTPS=True`** em `Backend/config/settings.py` e `Backend/ai_service/main.py`. Dessa forma, a demonstração, os benchmarks do TCC2 e os testes guiados com casos fictícios podem utilizar modelos de fronteira mais capazes sem abrir envio de prontuários reais de pacientes.
+3. **Mesmas invariantes clínicas e de segurança:** todo texto continua passando por `prepare_ai_text` antes do serviço de IA; chaves nunca entram em query string ou exceções; toda saída passa por validação de schema, âncora literal caractere a caractere (`literal_graph` e conferência de citações) e revisão humana assinada; qualquer indisponibilidade resulta em falha explícita (`503`).
+4. **Uso clínico real em nuvem continua bloqueado** até alinhamento com o orientador e cumprimento cumulativo das condições normativas (LGPD, Res. CD/ANPD 19/2024 e orientações do CFP).
 
 ## Fundamentos
 

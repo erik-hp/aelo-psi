@@ -142,7 +142,7 @@ export function PatientVault({
 
             {!!graph?.communities.length && (
               <p className="text-caption-1-regular text-text-secondary">
-                {graph.communities.length} grupos de conceitos. Os agrupamentos apoiam a leitura e não configuram diagnóstico (CFP nº 009/2024).
+                {graph.communities.length} grupos de conceitos. Os agrupamentos apoiam a leitura longitudinal e não configuram diagnóstico ou decisão clínica.
               </p>
             )}
           </TabPanel>

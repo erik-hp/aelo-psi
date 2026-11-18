@@ -21,6 +21,14 @@ class TherapySession(SoftDeleteModel):
     summary = EncryptedTextField(blank=True)
 
     class Meta:
+        constraints = [
+            # Closes the race between the serializer's conflict check and the insert.
+            models.UniqueConstraint(
+                fields=["professional", "scheduled_at"],
+                condition=models.Q(deleted_at__isnull=True) & ~models.Q(status__in=["CANCELLED", "MISSED"]),
+                name="uniq_active_session_slot_per_professional",
+            ),
+        ]
         indexes = [
             models.Index(fields=["patient", "scheduled_at"]),
             models.Index(fields=["professional", "scheduled_at"]),

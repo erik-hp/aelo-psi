@@ -12,6 +12,8 @@
 
 **Complemento documental de 06/11/2026:** [Plano operacional digital da clínica](PLANO_OPERACIONAL_CLINICA.md), pesquisa e proposta SC-OP-01 solicitadas pelo autor para priorizar a operação antes da análise por IA. Refina capacidades relacionadas a F0/F1 e registra ampliações em backlog; não altera IDs, critérios de aceite ou gates F0–F7. Financeiro, novos papéis, comunicação e portal dependem de decisão de escopo antes de implementação.
 
+**Solicitação de mudança do autor em 17/11/2026 — SC-IA-01:** [ADR-004](architecture/ADR-004-ia-externa.md) atualizada com adaptadores HTTP para modelos de fronteira (`AI_ENGINE=gemini` e `AI_ENGINE=anthropic`, além de `claude-cli` e do padrão local `ollama`), bloqueados tecnicamente sem `AELO_SYNTHETIC_DATA_ONLY=True` e em `DJANGO_REQUIRE_HTTPS=True`. O alinhamento formal com o orientador e a submissão ética (CEP/TCLE) para entrevistas com psicólogos ([protocolo F6](validation/F6_PROTOCOLO_ENTREVISTAS_E_AVALIACAO_DSR.md)) permanecem pendentes antes de qualquer coleta humana ou uso não sintético.
+
 **Propostas de 06/11/2026, não aprovadas:** [ADR-003](architecture/ADR-003-recuperacao-em-camadas.md) detalha F2-04 com recuperação em camadas, código desligado por padrão. [ADR-004](architecture/ADR-004-ia-externa.md) recomenda manter inferência local para conteúdo clínico. Nenhuma altera IDs, critérios ou gates.
 
 **Título acadêmico:** Plataforma Web Inteligente para Gestão Operacional e Auxílio ao Monitoramento Terapêutico em Clínicas de Psicologia.

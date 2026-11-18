@@ -1,5 +1,5 @@
 from rest_framework import viewsets, status
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -34,7 +34,12 @@ class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
             raise PermissionDenied('A clínica ativa é obrigatória.')
         if not (self.request.user.is_admin_role or self.request.user.role == UserRole.PSYCHOLOGIST):
             raise PermissionDenied('Somente administração ou psicólogos podem cadastrar pacientes.')
-        patient = serializer.save(clinic=self.request.user.clinic, created_by=self.request.user)
+        try:
+            with transaction.atomic():
+                patient = serializer.save(clinic=self.request.user.clinic, created_by=self.request.user)
+        except IntegrityError as exc:
+            # Two simultaneous creations pass the serializer check; the constraint decides.
+            raise ValidationError({"internal_code": "Já existe paciente com este código na clínica."}) from exc
         if self.request.user.role == UserRole.PSYCHOLOGIST:
             PatientAccess.objects.get_or_create(
                 patient=patient,
@@ -137,7 +142,8 @@ class PatientViewSet(AuditReadMixin, viewsets.ModelViewSet):
         patient = self.get_object()
         if not can_access_patient(request.user, patient, clinical=True):
             raise PermissionDenied("Clinical access is required for FHIR export.")
-        bundle = patient_bundle(patient)
+        official_only = request.query_params.get("official_only") in {"1", "true", "True"}
+        bundle = patient_bundle(patient, official_only=official_only)
         audit(request, "FHIR_EXPORT", patient, {"module": "patients", "resource_count": len(bundle["entry"])})
         response = JsonResponse(bundle, content_type="application/fhir+json")
         response["Cache-Control"] = "no-store"

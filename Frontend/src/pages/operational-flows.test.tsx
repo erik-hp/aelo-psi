@@ -9,6 +9,7 @@ import { AgendaPage } from "./AgendaPage";
 import { ClinicalEditorPage } from "./ClinicalEditorPage";
 import type { ApiPatient, ApiSession } from "@/services/clinicalMappers";
 import type { ClinicalNoteRecord } from "@/services/recordService";
+import { signingService } from "@/services/signingService";
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn() }));
 const auth = vi.hoisted(() => ({ role: "PSYCHOLOGIST", canWrite: true }));
@@ -146,5 +147,64 @@ describe("Operational flows in API mode, with real frontend services", () => {
     expect(await screen.findByText(/Seu vínculo não permite edição clínica/)).toBeDefined();
     expect(screen.queryByLabelText("Nota da sessão")).toBeNull();
     expect(http.get.mock.calls.some(([url]) => url === "/clinical-notes/")).toBe(false);
+  });
+
+  it("submits a saved note to review, signs it, blocks direct edits, and completes formal rectification", async () => {
+    existingSession();
+    notes = [{
+      id: "n-1",
+      patient: "p-1",
+      session: "s-1",
+      raw_text: "Texto sintético inicial antes da assinatura.",
+      author: "professional-1",
+      version: 1,
+      status: "DRAFT",
+      locked_at: null,
+    }];
+    http.post.mockImplementation(async (url: string) => {
+      if (url === "/clinical-notes/n-1/submit-review/") {
+        notes[0] = { ...notes[0], status: "IN_REVIEW" };
+        return { data: notes[0] };
+      }
+      throw new Error(`Unexpected write endpoint: ${url}`);
+    });
+    const signSpy = vi.spyOn(signingService, "signNote").mockImplementation(async () => {
+      notes[0] = { ...notes[0], status: "SIGNED", locked_at: "2026-11-17T22:00:00Z" };
+      return notes[0];
+    });
+    const amendSpy = vi.spyOn(signingService, "amendNote").mockImplementation(async (_id, rawText) => {
+      notes[0] = { ...notes[0], raw_text: rawText, version: 2, status: "AMENDED", locked_at: "2026-11-17T22:05:00Z" };
+      return notes[0];
+    });
+
+    const user = userEvent.setup();
+    show(ClinicalEditorPage, "/editor?patient=p-1&session=s-1");
+    expect(await screen.findByText("Rascunho")).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Submeter à revisão" }));
+    expect(await screen.findByText("Em revisão")).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Assinar nota" }));
+    await user.click(await screen.findByRole("button", { name: "Assinar e bloquear" }));
+    expect(await screen.findByText("Assinada")).toBeDefined();
+    expect(signSpy).toHaveBeenCalledWith("n-1", "professional-1");
+
+    const noteField = screen.getByLabelText("Nota da sessão") as HTMLTextAreaElement;
+    expect(noteField.readOnly).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Retificar nota assinada" }));
+    const amendTextField = await screen.findByLabelText("Texto retificado da nota");
+    await user.clear(amendTextField);
+    await user.type(amendTextField, "Texto sintético retificado formalmente após assinatura.");
+    await user.type(screen.getByLabelText("Motivo formal da retificação"), "Complemento formal sintético de relato.");
+    await user.click(screen.getByRole("button", { name: "Assinar retificação" }));
+
+    expect(await screen.findByText("Retificada e assinada")).toBeDefined();
+    expect(amendSpy).toHaveBeenCalledWith(
+      "n-1",
+      "Texto sintético retificado formalmente após assinatura.",
+      "Complemento formal sintético de relato.",
+      "professional-1",
+    );
   });
 });

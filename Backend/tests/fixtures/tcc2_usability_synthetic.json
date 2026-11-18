@@ -1,0 +1,21 @@
+{
+  "dataset_kind": "synthetic_validation",
+  "note": "Respostas estritamente sintéticas para validação determinística do cálculo F6-03. Não representam coleta com psicólogos.",
+  "responses": [
+    {
+      "participant_code": "SINT-01",
+      "sus": [5, 1, 5, 1, 5, 1, 5, 1, 5, 1],
+      "umux_lite": [7, 7]
+    },
+    {
+      "participant_code": "SINT-02",
+      "sus": [4, 2, 4, 2, 4, 2, 4, 2, 4, 2],
+      "umux_lite": [6, 5]
+    },
+    {
+      "participant_code": "SINT-03",
+      "sus": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+      "umux_lite": [4, 4]
+    }
+  ]
+}
