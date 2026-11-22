@@ -1,312 +1,227 @@
-# AELO-PSI — Gestão Clínica e Memória Terapêutica Inteligente
+<p align="center">
+  <img src="docs/img/tela-memoria-clinica.png" alt="Mapa da Memória clínica do AELO-PSI, com conceitos agrupados e legenda" width="860">
+</p>
 
-> **Projeto acadêmico de TCC2 | Sistemas de Informação — Centro Universitário Católica de Quixadá (UniCatólica), 2026**  
-> **Estado:** protótipo em desenvolvimento; **não homologado para operação clínica real**.  
-> **Documento orientador da engenharia:** [Plano Mestre de Implementação](docs/PLANO_MESTRE_IMPLEMENTACAO.md). **Não confunda funcionalidades planejadas com implementadas.**
+# AELO-PSI
 
-## 1. O que é o AELO-PSI?
+[![CI](https://github.com/erik-hp/aelo-psi/actions/workflows/ci.yml/badge.svg)](https://github.com/erik-hp/aelo-psi/actions/workflows/ci.yml)
+[![Licença: AGPL v3](https://img.shields.io/badge/licen%C3%A7a-AGPL--3.0-blue.svg)](LICENSE)
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB.svg)
+![Node 22](https://img.shields.io/badge/node-22-339933.svg)
+![Dados sintéticos](https://img.shields.io/badge/dados-somente%20sint%C3%A9ticos-orange.svg)
 
-O AELO-PSI é um projeto de plataforma web para apoiar psicólogos em tarefas operacionais e na organização de registros de acompanhamento terapêutico. O objetivo não é fazer terapia, diagnosticar ou substituir o psicólogo. A proposta combina uma agenda, cadastro de pacientes e prontuários com ferramentas **assistivas** para localizar informações documentadas, elaborar rascunhos de sínteses e observar temas que reaparecem ao longo do histórico clínico.
+Plataforma web para clínicas de psicologia que combina agenda, cadastro de pacientes e prontuário com uma **memória clínica longitudinal assistida por IA local**. A IA organiza e localiza o que já foi escrito nas notas; quem interpreta, confirma ou rejeita é sempre o psicólogo.
 
-**Para quem não é da área técnica:** imagine que, meses depois de uma consulta, o profissional queira recuperar quando um assunto começou a aparecer, o que foi registrado em sessões posteriores e quais mudanças foram relatadas. A ideia é tornar essa revisão mais ágil, mostrando sempre **de qual nota veio cada informação** e deixando a interpretação para o psicólogo.
+Trabalho de conclusão de curso (Sistemas de Informação, UniCatólica de Quixadá, 2026), conduzido como pesquisa aplicada (Design Science Research).
 
-O software é uma pesquisa aplicada com **Design Science Research (DSR)**. A avaliação planejada inclui testes de tarefas, recuperação e fidelidade das fontes, além das escalas de usabilidade **SUS** e **UMUX-Lite**, conforme o projeto de TCC fornecido pelo autor. As avaliações não devem ser tratadas como realizadas até haver coleta e análise documentadas.
+> **Estado:** protótipo de pesquisa. Funciona somente com **dados sintéticos** e não está homologado para uso clínico real.
 
-## 2. O diferencial: notas interligadas e memória clínica temporal
+**Conteúdo:** [Problema](#1-problema-e-proposta) · [Funcionalidades](#2-funcionalidades) · [Telas](#telas) · [Arquitetura](#3-arquitetura) · [Como reproduzir](#4-como-reproduzir) · [Testes](#5-testes-e-verificação) · [Estrutura](#6-estrutura-do-repositório) · [Documentação](#7-documentação-complementar) · [Limitações](#8-limitações)
 
-O módulo planejado **Memória Terapêutica Longitudinal Inteligente (MTLI)** é inspirado na ideia de notas conectadas e no GraphRAG, mas é **desenvolvido dentro do próprio AELO-PSI** — **não é necessário instalar ou utilizar o Obsidian**.
+## 1. Problema e proposta
 
-Exemplo **fictício**, sem identificar pessoas:
+Meses depois de uma sessão, o profissional precisa saber quando um tema surgiu, o que foi registrado depois e que mudanças foram relatadas. Reler todo o histórico é lento e sujeito a esquecimentos.
 
-1. Na sessão 1, o registro menciona dificuldades de sono e sobrecarga profissional.
-2. Na sessão 4, o texto relata persistência das dificuldades e novos aspectos de contexto familiar.
-3. Na sessão 9, registra-se melhora relatada do sono após ajustes de rotina.
-4. O sistema deverá permitir consultar o tema “sono”, recuperar as três anotações, apresentar possíveis conexões e **citar as notas e trechos correspondentes**.
-5. O psicólogo confirma, corrige ou rejeita relações e interpretações sugeridas.
+O AELO-PSI lê as notas de cada paciente, extrai conceitos e relações **copiando rótulos e trechos literais** do texto, e monta um mapa da evolução ao longo do tempo (a "Memória clínica"). Toda informação exibida aponta para a nota de origem. A ferramenta não diagnostica, não pontua risco e não toma decisões clínicas.
 
-Essa memória **não é treinamento autônomo do modelo**: o aprimoramento é incremental (mais notas indexadas, relações documentadas e correções humanas) sem transformar hipóteses em fatos. Prontuários originais não são substituídos por resumos, e a recuperação de um paciente nunca pode buscar registros de outro.
+Exemplo fictício: o profissional consulta o tema "sono". O sistema recupera as notas das sessões 1, 4 e 9, mostra como o assunto evoluiu e cita o trecho de cada uma. O profissional revisa e, se quiser, registra a revisão com assinatura digital.
 
-### Fluxo de alto nível — arquitetura alvo, ainda não totalmente implementada
+## 2. Funcionalidades
 
-```mermaid
-flowchart TD
-  A[Psicólogo e equipe autorizada] --> B[Interface AELO-PSI]
-  B --> C[Django REST API - permissões, prontuário e auditoria]
-  C --> D[Notas clínicas versionadas e protegidas]
-  D --> E[Indexação por nota, versão e trecho]
-  E --> F[Busca híbrida: texto + embeddings + relações temporais]
-  F --> G[IA local: Ollama via FastAPI]
-  G --> H[Rascunho com referências explícitas]
-  H --> I{Revisão do psicólogo}
-  I -->|Aprova ou corrige| J[Memória derivada validada]
-  I -->|Rejeita| K[Registro da decisão sem promover inferências]
-  C --> L[(PostgreSQL e pgvector - alvo)]
-```
+- **Agenda e pacientes:** cadastro, agendamento com detecção de conflito de horário e atendimento por sessão.
+- **Prontuário versionado:** notas com ciclo `rascunho → em revisão → assinada → retificada`. Assinatura e retificação (com motivo) usam ECDSA P-256 e preservam a versão anterior cifrada.
+- **Memória clínica:** grafo de conceitos por paciente, com grupos nomeados, evidências literais e navegação até a nota de origem.
+- **Recuperação em camadas:** seleção de contexto por grafo e por texto original, com vagas por rota e sem penalizar notas antigas ([ADR-003](docs/architecture/ADR-003-recuperacao-em-camadas.md)).
+- **Evolução:** sinais linguísticos exploratórios ao longo das sessões ([F4](docs/validation/F4_INDICADORES_LONGITUDINAIS.md)).
+- **Interoperabilidade:** exportação de recursos HL7 FHIR R4 com proveniência.
+- **Avaliação:** calculadoras SUS e UMUX-Lite e protocolo de avaliação de usabilidade.
 
-*As setas representam o desenho pretendido, não uma alegação de que todo o pipeline já funciona.*
+### Telas
 
-Este diagrama também está disponível como imagem ([`arquitetura.png`](docs/img/arquitetura.png)) e como [`arquitetura.pdf`](docs/img/arquitetura.pdf); a fonte é [`arquitetura.mmd`](docs/img/arquitetura.mmd).
+Capturas do modo demonstração, com dados fictícios.
 
-## 3. O que existe hoje e o que está planejado?
-
-**Snapshot de 09/11/2026 — branch do [PR #24](https://github.com/erik-hp/aelo-psi/pull/24), ainda sem merge:** [baseline e evidências](docs/validation/F0_2026-11-09.md), [matriz de autorização](docs/validation/F0_AUTHORIZATION_MATRIX_2026-11-09.md). Campos clínicos cifrados, grants explícitos, refresh HttpOnly, auditoria com integridade e componentes experimentais de memória já existem; seus aceites completos continuam pendentes. Nesta entrega, risco automático e escores de atenção foram removidos da demonstração. Frontend: 220 testes, build e lint aprovados; backend: 291 aprovados/2 ignorados, incluindo 79 novos cenários de autorização. O inventário inicial abaixo é histórico e não substitui o registro atualizado. G0 segue bloqueado.
-
-**Continuação F0-02:** seletores HTML e filtros relacionais agora respeitam o escopo antes da validação, corrigindo vazamento de nomes e enumeração de IDs. Mais 164 cenários de listagens, mutações, concessões, revisão assinada e exportação passaram; backend SQLite **455 aprovados/2 ignorados** e PostgreSQL/pgvector local **457 aprovados**. A CI de `b3ca6ef` ficou incompleta por falhas de inicialização, embora smoke/carga remotos tenham passado. [Relatório atual](docs/validation/F0_AUTHORIZATION_BOUNDARIES_2026-11-09.md). O snapshot anterior permanece como histórico; a revisão integral e G0 continuam pendentes.
-
-O [plano operacional digital da clínica](docs/PLANO_OPERACIONAL_CLINICA.md), pesquisado em 06/11/2026, descreve jornada, necessidades, base normativa, permissões, lacunas e sequência proposta para estabilizar a operação antes da IA. É planejamento em revisão; funcionalidades novas e integrações não estão implementadas por constarem nele.
-
-**Atualização operacional de 06/11/2026 (em revisão):** em modo API, o profissional autorizado pode seguir **Pacientes → Adicionar paciente → Agenda → agendar → Abrir editor → Salvar nota**. Cadastro, agendamento e nota foram verificados com dados sintéticos na API local; salvar não depende da IA e concluir atendimento não assina a nota. Achados, correções, testes e funcionalidades ainda pendentes estão na [auditoria funcional](docs/validation/AUDITORIA_FUNCIONAL_2026-11-06.md). Essa evidência incremental não libera uso clínico ou os gates do Plano Mestre.
-
-O inventário abaixo resulta de **leitura estática do repositório**; não houve neste registro comprovação de compilação, testes em runtime ou validação clínica. A matriz de requisitos descreve exatamente o que falta.
-
-| Funcionalidade | Situação verificável |
+| Editor de nota | Acesso profissional |
 | --- | --- |
-| Front-end React + TypeScript e páginas de pacientes, agenda, dashboard, análises, auditoria e configurações | **Estrutura existente** |
-| Back-end Django REST Framework com usuários, clínicas, pacientes, sessões e notas clínicas | **Estrutura existente** |
-| Autenticação JWT e permissões básicas | **Existentes, precisam endurecimento e testes** |
-| Serviço FastAPI + comunicação com Ollama local | **Integração inicial existente** |
-| Notas e histórico de versão | **Modelo inicial existente; assinatura/imutabilidade ainda incompletas** |
-| Desidentificação | **Regras regex iniciais; não equivalem a anonimização** |
-| IA clínica com citações validadas e RAG vetorial | **Planejado / ainda não demonstrado** |
-| PostgreSQL + pgvector, grafo temporal e MTLI | **Planejados** |
-| Painel longitudinal e indicadores linguísticos confiáveis | **Interface inicial; algumas métricas atuais usam dados simulados, não escores clínicos validados** |
-| Criptografia clínica, segregação verificável, auditoria forte, gestão de chaves | **Pendentes de implementação/validação integral** |
-| FHIR, resultados SUS/UMUX-Lite e estudo DSR final | **Planejados; sem resultados demonstrados** |
+| <img src="docs/img/tela-editor-nota.png" alt="Editor narrativo de prontuário com modelos SOAP e DAP"> | <img src="docs/img/tela-login.png" alt="Tela de acesso profissional"> |
 
-**Aviso técnico importante:** há mecanismos demonstrativos e respostas de contingência no código atual que não devem ser usados para inferência clínica nem interpretados como resultados reais. O primeiro ciclo de trabalho é corrigir esses riscos.
+## 3. Arquitetura
 
-## 4. Princípios inegociáveis
-
-- **Psicólogo no controle:** a IA apenas auxilia; não conclui diagnósticos nem toma decisões clínicas autônomas.
-- **Sigilo e autorização:** cada ação deve restringir o acesso à clínica, ao paciente, à função profissional e às permissões apropriadas.
-- **Histórico íntegro:** notas assinadas não podem sofrer edição silenciosa; retificações devem manter rastreabilidade.
-- **Fontes visíveis:** sínteses e relações clínicas precisam de nota, versão e trecho que fundamentem cada afirmação.
-- **Falhas transparentes:** indisponibilidade de IA não pode produzir métricas ou textos falsos como substituição.
-- **Memória revisada, não “autoavaliação” do paciente:** relações são propostas/derivadas, diferenciadas dos registros e validadas por profissional.
-- **Dados mínimos, processamento local, proteção por padrão:** executar localmente **reduz** exposição a provedores, mas não prova conformidade à LGPD.
-- **Desenvolvimento e demonstração apenas com dados sintéticos** até haver governança e aprovações adequadas.
-
-A arquitetura considera LGPD (Lei nº 13.709/2018), orientações da ANPD, regras profissionais pertinentes, [OWASP ASVS](https://github.com/OWASP/ASVS), [WCAG 2.2](https://www.w3.org/TR/WCAG22/) e [HL7 FHIR](https://hl7.org/fhir/R4/). Não há alegação de certificação nem conformidade automaticamente garantida.
-
-> **Precisão acadêmica:** a Resolução CFP 09/2024 aborda exercício profissional mediado por TDICs, **não** é uma norma específica proibindo diagnósticos de IA. O posicionamento do CFP sobre IA publicado em 2025 deve ser considerado separadamente. A situação de vigência das normas sobre registro documental precisa de verificação antes de alegações finais. RAG não elimina alucinações e NER não garante anonimização irreversível.
-
-## 5. Tecnologias — base atual e evolução
+```text
+React/Vite  →  Django REST (domínio, autorização, auditoria)  →  PostgreSQL + pgvector
+                      │ fila no banco
+               worker process_vault_jobs  →  FastAPI (ai_service)  →  Ollama (IA local)
+```
 
 | Camada | Tecnologia | Papel |
 | --- | --- | --- |
-| Interface atual | React, Vite, TypeScript, Tailwind CSS, Recharts, React Query | Telas, navegação e gráficos |
-| API principal atual | Python, Django, Django REST Framework | Regras de negócio, usuários, registros, permissões |
-| Serviço de IA atual | Python, FastAPI, Ollama | Inferência assistiva local |
-| Banco atual | PostgreSQL | Persistência relacional |
-| Banco alvo | PostgreSQL **com pgvector** | Recuperação semântica e relações temporais |
-| Implantação de desenvolvimento | Docker Compose | Execução de serviços locais |
-| Evolução planejada | Embeddings multilíngues, NER, recuperação híbrida, testes automatizados e auditoria | Memória segura e validação científica |
+| Interface | React, TypeScript, Vite, Tailwind CSS, React Query, BoardUI | Telas e navegação |
+| API | Python, Django, Django REST Framework, JWT | Regras de negócio, autorização, auditoria |
+| Worker | `manage.py process_vault_jobs` | Executa jobs de leitura de notas e checkpoints fora da requisição HTTP |
+| Serviço de IA | FastAPI + Ollama | Inferência local, sem acesso ao banco |
+| Banco | PostgreSQL 16 + pgvector | Dados relacionais e busca vetorial |
 
-**Decisão:** não reescrever tudo em FastAPI nem adicionar Neo4j apenas porque existe um grafo. Django continua responsável pelo domínio; FastAPI pelo processamento de IA; relações podem ser armazenadas no PostgreSQL. Mudança de stack exige decisão arquitetural documentada.
+Decisões de projeto:
 
-## 6. Como executar o protótipo de desenvolvimento
+- **Autorização no back-end.** Acesso a conteúdo clínico exige um vínculo explícito entre profissional e paciente. Administradores veem o diretório, nunca o conteúdo clínico; estagiários apenas leem.
+- **Dados clínicos cifrados na aplicação** (AES-256-GCM) e **auditoria** em cadeia HMAC, com triggers no PostgreSQL que impedem alterar eventos.
+- **IA local por padrão.** O Ollama é o único destino de conteúdo clínico ([ADR-004](docs/architecture/ADR-004-ia-externa.md)). Provedores externos existem apenas para experimentos com dados sintéticos e são recusados quando o HTTPS está ativo.
+- **Falha explícita da IA.** Se o modelo estiver indisponível, o sistema informa o erro; nunca inventa texto ou métricas.
+- **Mascaramento antes do envio.** O texto passa por regras de desidentificação e o envio é bloqueado se restar identificador direto. Não é anonimização completa.
+- **Inferência assíncrona.** As rotas de análise enfileiram o trabalho e respondem HTTP 202.
 
-**Pré-requisitos:** Git, Docker com plugin Compose e Node.js/npm compatíveis com o projeto; espaço para baixar o modelo do Ollama e recursos computacionais suficientes. Não há garantia de tempo de execução nem de aceleração GPU nesta versão.
+Diagrama completo: [`docs/img/arquitetura.png`](docs/img/arquitetura.png). Decisões arquiteturais: [`docs/architecture/`](docs/architecture/).
 
-> Estes comandos explicam a estrutura **existente**. A versão anterior inicializava uma conta de demonstração com senha fixa. A partir da F0-04, o Compose não executa mais esse seed automaticamente; contas são criadas de modo explícito no ambiente isolado. Use somente máquina/ambiente isolado de desenvolvimento, nunca rede pública ou prontuário real.
+## 4. Como reproduzir
 
-### 6.1. Obter o código
+### 4.1 Pré-requisitos
+
+- Git
+- Docker com Compose
+- Node.js 22 e npm (versão usada na CI)
+- Cerca de 10 GB livres em disco para as imagens e os modelos do Ollama
+- Para os testes fora do Docker: Python 3.12+
+
+Use apenas dados sintéticos.
+
+### 4.2 Obter o código
 
 ```bash
 git clone https://github.com/erik-hp/aelo-psi.git
 cd aelo-psi
 ```
 
-O repositório é privado: é preciso ter permissão no GitHub. Este README pertence à `main` após a integração do PR de documentação. O histórico da proposta e sua revisão permanecem disponíveis no [Pull Request #1](https://github.com/erik-hp/aelo-psi/pull/1). Para reproduzir exatamente uma versão, utilize o commit/release registrado na avaliação do TCC.
-
-### 6.2. Back-end, banco e IA
+### 4.3 Back-end, banco e IA
 
 ```bash
 cd Backend
-cp .env.example .env
+python scripts/dev_setup.py env      # cria Backend/.env com segredos aleatórios
+```
+
+O script copia `.env.example` e gera `DJANGO_SECRET_KEY`, `CLINICAL_DATA_KEYS`, `AUDIT_LOG_HMAC_KEY`, `POSTGRES_PASSWORD` e `AI_SERVICE_TOKEN`. Se preferir, copie o arquivo manualmente e troque cada valor `replace-with-...`. `CLINICAL_DATA_KEYS` deve ser base64 de 32 bytes. Não publique o `.env`.
+
+Suba os serviços e baixe os modelos de IA (a primeira vez demora):
+
+```bash
 docker compose up --build -d
+docker compose exec ollama ollama pull llama3.1
+docker compose exec ollama ollama pull embeddinggemma
 docker compose ps
 ```
 
-No **Windows PowerShell**, substitua `cp` por `Copy-Item .env.example .env`, se necessário. **Edite o `.env` antes de uso**, definindo segredos locais não triviais; não publique o arquivo. O Compose sobe `db`, `api`, `ai-service` e `ollama`; apenas banco e API são publicados em portas de loopback, enquanto IA e Ollama ficam em rede interna. Defina as credenciais antes de iniciar.
+O Compose inicia `db`, `migrate`, `api`, `ai-service`, `vault-worker` e `ollama`. Apenas a API é publicada em `http://127.0.0.1:8000/api/`; IA e Ollama ficam na rede interna do Docker. O modelo é configurável por `OLLAMA_MODEL` e `OLLAMA_NUM_CTX`; prompts maiores que o contexto falham de forma explícita.
 
-Endereços de desenvolvimento configurados no projeto:
-- Django API: `http://localhost:8000/api/`
-- FastAPI: `http://ai-service:8001/health` (somente rede Docker)
-- Ollama: `http://ollama:11434` (somente rede Docker, sem exposição pública)
+### 4.4 Criar clínica e usuário de teste
 
-Verificar registros/erros:
+Nenhuma conta é criada automaticamente. Com os containers no ar:
 
 ```bash
-docker compose logs --tail=100 api ai-service ollama
-docker compose exec api python manage.py check
+python scripts/dev_setup.py user     # cria a clínica sintética e o usuário "psi"; imprime a senha gerada
 ```
 
-Os pesos do modelo **não são automaticamente instalados** pelo Compose atual. O modelo configurado em `Backend/.env.example` é `llama3.1`, e a instalação local pode exigir:
+Opcionalmente, para popular um paciente e uma sessão fictícios (o comando exige um superusuário vinculado a uma clínica):
 
 ```bash
-docker compose exec ollama ollama pull llama3.1
+docker compose exec api python manage.py createsuperuser
+docker compose exec -e AELO_ALLOW_SYNTHETIC_SEED=1 api python manage.py seed_initial_data --admin-username <usuario>
 ```
 
-O endpoint `/health` apenas confirma o processo FastAPI; não garante que o modelo esteja disponível, que RAG funcione ou que as respostas sejam adequadas. **As portas/seed atuais são de desenvolvimento e devem ser protegidas** (fase F0).
+### 4.5 Front-end
 
-Para desligar:
-
-```bash
-docker compose down
-```
-
-Não use `docker compose down -v` sem intenção explícita de excluir volumes persistidos.
-
-### 6.3. Front-end
-
-Abra outro terminal a partir da raiz:
+Em outro terminal:
 
 ```bash
 cd Frontend
-cp .env.example .env
+cp .env.example .env          # VITE_USE_API=true aponta para a API local
 npm ci
 npm run dev
 ```
 
-No Windows PowerShell, `Copy-Item .env.example .env` também funciona. Abra o endereço indicado pelo Vite, normalmente `http://localhost:5173`. A configuração `VITE_USE_API=true` aponta para a API; com `false`, partes da interface utilizam dados demonstrativos **não clínicos**.
+Abra `http://localhost:5173` e entre com o usuário criado. Fluxo para conferir: **Pacientes → Adicionar paciente → Agenda → agendar sessão → Abrir editor → Salvar nota**. Salvar a nota não depende da IA nem a assina.
 
-Outros comandos disponíveis:
+Para ver a interface sem back-end, defina `VITE_USE_API=false` no `.env`. Nesse modo a interface usa dados demonstrativos fictícios (login `psi@aelo.com`, senha `aelo123`).
+
+### 4.6 Leitura automática de notas e memória clínica
+
+A extração do grafo é desligada por padrão. Para ativá-la em ambiente de teste, defina no `Backend/.env`:
+
+```text
+AELO_SYNTHETIC_DATA_ONLY=True
+AI_AUTO_EXTRACTION=True
+AI_LOD_RETRIEVAL=True        # recuperação em camadas (opcional)
+```
+
+e reinicie com `docker compose up -d`. Ao salvar uma nota, o `vault-worker` processa o job e a aba **Memória** do paciente passa a mostrar o grafo. Essas opções são recusadas pela configuração quando o HTTPS está ativo.
+
+Para encerrar: `docker compose down` (acrescente `-v` apenas se quiser apagar o banco e os modelos).
+
+## 5. Testes e verificação
+
+**Back-end** (a partir de `Backend/`, com um ambiente virtual Python e `pip install -r requirements/dev.txt`):
+
+```bash
+python -m pytest -q -p no:cacheprovider                    # SQLite; testes de pgvector são ignorados
+python -m ruff check .
+python manage.py makemigrations --check --dry-run --settings=config.settings_test
+```
+
+Os testes que dependem de PostgreSQL (`select_for_update`, pgvector, triggers de auditoria) rodam em pilha isolada, sem tocar nos containers de desenvolvimento:
+
+```bash
+docker compose -p aelo-teste -f docker-compose.test.yml run --build --rm backend_test
+docker compose -p aelo-teste -f docker-compose.test.yml down -v
+
+docker compose -p aelo-smoke -f docker-compose.security.yml run --build --rm security_smoke   # HTTP real, Caddy e CSP
+docker compose -p aelo-smoke -f docker-compose.security.yml down -v
+```
+
+**Front-end** (a partir de `Frontend/`):
 
 ```bash
 npm run lint
+npm test
 npm run build
 ```
 
-Para executar os checks de qualidade sem depender da cota GitHub Actions, use `python tools/local_ci.py` na raiz, com Docker Linux e Python 3.12+. O executor valida o commit, usa somente dados sintéticos e grava evidências em `reports/local-ci/`. Veja [pré-requisitos, cobertura e limites](docs/validation/LOCAL_CI.md). Alterações não commitadas ficam fora da execução.
+**Avaliações sintéticas** (não fazem parte da suíte e precisam ser chamadas explicitamente, a partir de `Backend/`):
 
-**Não foi executada uma verificação de build neste documento.** Se algum comando falhar, registrar o problema em F0-01 antes de alterar dependências em lote.
-
-### 6.4. Segurança de demonstração
-
-O comando de seed foi alterado para **não criar contas nem senhas** e somente aceitar dados sintéticos mediante opt-in explícito. O Compose não o executa automaticamente. Após iniciar, crie o administrador de desenvolvimento com `docker compose exec api python manage.py createsuperuser`; associe o usuário a uma clínica antes de cadastrar pacientes. Use somente dados sintéticos em um ambiente isolado. Nenhum dado de paciente real deve entrar no ambiente de demonstração atual.
-
-## 7. Organização do repositório
-
-```text
-aelo-psi/
-├── AGENTS.md                 # Regras persistentes para colaboração e IA de código
-├── README.md                 # Visão geral, instalação e status do projeto
-├── Backend/
-│   ├── apps/                 # users, clinics, patients, therapy_sessions,
-│   │                         # clinical_notes, ai_analysis, audit_logs, ...
-│   ├── ai_service/           # FastAPI e comunicação com Ollama
-│   ├── services/             # Serviços auxiliares de segurança, IA, métricas
-│   ├── config/               # Configurações e rotas Django
-│   ├── docs/                 # Documentação operacional/API atual
-│   ├── docker-compose.yml
-│   └── requirements/
-├── Frontend/
-│   └── src/
-│       ├── app/             # Inicialização
-│       ├── components/      # Componentes visuais
-│       ├── pages/           # Telas atuais
-│       ├── routes/          # Rotas e proteção de telas
-│       └── services/        # Integrações API e mocks demonstrativos
-└── docs/
-    ├── PLANO_MESTRE_IMPLEMENTACAO.md
-    ├── MATRIZ_REQUISITOS.md
-    ├── REGISTRO_EXECUCAO.md
-    └── architecture/
-        └── ADR-001-memoria-terapeutica-longitudinal.md
+```bash
+python -m pytest -q -s -p no:cacheprovider tests/evaluate_lod_retrieval.py
+python -m pytest -q -s -p no:cacheprovider tests/evaluate_deidentification.py
+python tests/evaluate_extraction.py        # exige Ollama em execução
 ```
 
-Estrutura futura, depois dos gates de segurança: `Backend/apps/patient_memory/`, serviços de indexação/busca, `Frontend/src/features/patient-knowledge/` e documentação de privacidade/testes/interoperabilidade. Estas pastas **ainda não devem ser consideradas implementadas**.
+## 6. Estrutura do repositório
 
-## 8. Plano de desenvolvimento: 8 fases com critérios obrigatórios
+```text
+Backend/
+  apps/         users, clinics, patients, therapy_sessions, clinical_notes, ai_analysis, audit_logs
+  ai_service/   FastAPI e integração com Ollama
+  services/     segurança (cifra, anonimização), cliente de IA, métricas
+  config/       configurações Django
+  tests/        testes e avaliações sintéticas
+Frontend/src/   pages, components, services, api, routes
+docs/           arquitetura (ADRs), validação, segurança, privacidade, design
+tools/          executor local de verificações (local_ci.py)
+```
 
-A execução detalhada está no [Plano Mestre](docs/PLANO_MESTRE_IMPLEMENTACAO.md). As fases são sequenciais por dependência e só avançam quando os critérios de passagem são efetivamente verificados.
+## 7. Documentação complementar
 
-| Fase | Entrega | Regra de passagem |
-| --- | --- | --- |
-| **F0 — Fundação segura** | Baseline, acesso por paciente/clínica, fim do fallback de IA fictício, CI e inventário de dados | Testes de acesso, falha explícita e ambiente reproduzível |
-| **F1 — Prontuário confiável** | Gestão operacional, nota assinada/versionada, criptografia, auditoria | Documento íntegro, autorizado e auditável |
-| **F2 — RAG rastreável** | pgvector, embeddings, busca híbrida e sínteses citadas | Fontes verificáveis e sem vazamento entre pacientes |
-| **F3 — Memória terapêutica** | Temas/eventos/relações, revisão humana e grafo temporal | Relações vinculadas e revisão demonstrada |
-| **F4 — Indicadores** | Métricas textuais longitudinais, limites e gráficos | Definições, versões, incertezas e validação técnica |
-| **F5 — Interoperabilidade** | Mapeamentos/exports FHIR e governança | Exportação testada e controles documentados |
-| **F6 — Validação DSR** | RAG vs memória temporal; SUS, UMUX-Lite, usabilidade | Resultados reais e metodologia reproduzível |
-| **F7 — Entrega do TCC** | Documentação, testes finais, release e demonstração | Código, evidências e texto acadêmico coerentes |
+- [Decisões arquiteturais (ADRs)](docs/architecture/)
+- [Plano de implementação e matriz de requisitos](docs/PLANO_MESTRE_IMPLEMENTACAO.md), [requisitos](docs/MATRIZ_REQUISITOS.md)
+- [Registro de execução e evidências](docs/REGISTRO_EXECUCAO.md)
+- [Operação do back-end](Backend/docs/OPERATIONS.md) e [exemplos da API](Backend/docs/API_EXAMPLES.md)
+- [Vault e GraphRAG](Backend/docs/VAULT_GRAPHRAG.md)
+- [Mapa de dados e riscos de privacidade](docs/privacy/F0_DATA_MAP_RIPD_DRAFT.md)
+- [Protocolo de avaliação com usuários (SUS e UMUX-Lite)](docs/validation/F6_PROTOCOLO_ENTREVISTAS_E_AVALIACAO_DSR.md)
+- [Identidade visual e sistema de design](docs/design/AELO_DESIGN_SYSTEM.md)
 
-**Situação em 17/10/2026:** as primeiras correções de segurança F0 foram integradas pelo PR #2. A fase F0 continua em andamento e **nenhum gate para uso clínico real foi liberado**. O estado verificável e a próxima tarefa estão em [Registro de Execução](docs/REGISTRO_EXECUCAO.md).
+## 8. Limitações
 
-## 9. Como contribuir sem perder o escopo do TCC
+- Somente dados sintéticos. Não há avaliação jurídica ou clínica que autorize prontuários reais.
+- O mascaramento de identificadores é baseado em regras e não equivale a anonimização.
+- Os sinais linguísticos da aba Evolução são exploratórios, não são escores clínicos validados.
+- A qualidade da extração depende do modelo local escolhido e da memória disponível na máquina.
 
-Para iniciar qualquer alteração:
+## Licença
 
-1. Ler [AGENTS.md](AGENTS.md), [Plano Mestre](docs/PLANO_MESTRE_IMPLEMENTACAO.md), [Matriz de Requisitos](docs/MATRIZ_REQUISITOS.md), [Registro de Execução](docs/REGISTRO_EXECUCAO.md) e [ADR-001](docs/architecture/ADR-001-memoria-terapeutica-longitudinal.md).
-2. Escolher a menor tarefa da fase desbloqueada e citar o ID (ex.: `F0-02`) no issue/PR.
-3. Especificar comportamento, permissões, caso de erro, impacto em dados pessoais e testes.
-4. Implementar em branch própria quando a mudança for grande ou arriscada; usar migrações, testes e documentação proporcional à mudança.
-5. Revisar diffs, executar checks realmente disponíveis, registrar resultados completos e limitações.
-6. Atualizar matriz/registro e solicitar revisão no PR. Não marcar **CONCLUÍDO** sem evidência verificável.
-
-**Convenções:** código organizado por domínio, validação de entrada, nomenclatura clara, TypeScript estrito, modelos e contratos consistentes, testes automatizados, dados sintéticos, mensagens acessíveis. Mudança arquitetural relevante requer uma nova **ADR (Architecture Decision Record)**.
-
-### Definição de concluído, em linguagem simples
-
-Uma função **não está pronta** apenas porque a tela abriu ou porque o modelo respondeu. Ela precisa funcionar nos cenários previstos, bloquear usos indevidos, lidar com erros, preservar informações e ter testes e documentação suficientes para outra pessoa verificar.
-
-## 10. Pesquisa acadêmica, ética e métricas
-
-O TCC adota **DSR**. As hipóteses visam investigar redução do esforço de documentação, aceitabilidade tecnológica e utilidade percebida de indicadores narrativos longitudinais. Para comparar soluções, o projeto prevê:
-- Recuperação manual no histórico;
-- RAG tradicional com busca textual/vetorial;
-- Memória Terapêutica Longitudinal com relações/tempo/revisão.
-
-Indicadores de engenharia planejados: `Recall@k`, precisão das citações, taxa de afirmações sem evidência, cobertura de sessões antigas, latência, erros de autorização e integridade. Indicadores de interação: taxa de sucesso da tarefa, tempo, erros observados, SUS e UMUX-Lite. Não apresentar resultados hipotéticos como medidos.
-
-A pesquisa com pessoas exige verificar e cumprir a situação ética aplicável, incluindo CEP quando necessário, TCLE e tratamento adequado de gravações e respostas. Usar dados **sintéticos** nos protótipos de validação de prontuário, protegendo os próprios dados dos participantes da pesquisa.
-
-O [inventário técnico inicial de dados e riscos (RIPD: rascunho)](docs/privacy/F0_DATA_MAP_RIPD_DRAFT.md) registra fluxos de tratamento, medidas existentes e pendências de avaliação jurídica/profissional. A documentação de avaliação e outros planos de segurança serão acrescentados nas fases correspondentes. O relatório do TCC deve ser atualizado à medida que existirem evidências e resultados concretos.
-
-## 11. Perguntas frequentes
-
-**A plataforma substitui o psicólogo?** Não. A IA fornece apoio documental, busca, rascunhos e hipóteses revisáveis; o profissional mantém julgamento e responsabilidade.
-
-**A ferramenta aprende tudo sobre cada paciente?** Não no sentido de treinar sozinha uma IA. O sistema propõe uma **memória documental acumulativa**, com fontes, correções humanas, revisões e controle de acesso.
-
-**Preciso instalar Obsidian?** Não. A ideia de conexões entre notas será implementada no AELO-PSI.
-
-**Os registros antigos são descartados?** Não. O histórico é preservado; índices e snapshots são complementos reconstruíveis.
-
-**A IA vai apontar depressão, risco de suicídio ou conduta terapêutica?** Não faz parte do escopo do sistema. Indicadores linguísticos não são diagnósticos nem decisões de tratamento.
-
-**Está adequado à LGPD e às regras profissionais?** Ainda não é possível afirmar. Há requisitos, controles, testes e revisões planejados; aderência deve ser evidenciada e avaliada por responsáveis qualificados.
-
-**Já posso usar com pacientes reais?** **Não.** O estado atual é de desenvolvimento, com riscos conhecidos e funcionalidades simuladas.
-
-**Como retomar o trabalho no futuro?** Comece em [Registro de Execução](docs/REGISTRO_EXECUCAO.md) e siga o ID da próxima tarefa; o histórico de conversa não substitui os arquivos versionados.
-
-## 12. Fontes e documentação complementar
-
-**Documentos do projeto**
-- [Plano Mestre: fases, dependências e gates](docs/PLANO_MESTRE_IMPLEMENTACAO.md)
-- [Matriz de rastreabilidade](docs/MATRIZ_REQUISITOS.md)
-- [Registro de execução e decisões](docs/REGISTRO_EXECUCAO.md)
-- [F0-06: mapa de dados e riscos (rascunho)](docs/privacy/F0_DATA_MAP_RIPD_DRAFT.md)
-- [ADR-001: Memória Terapêutica Longitudinal Inteligente](docs/architecture/ADR-001-memoria-terapeutica-longitudinal.md)
-- [Instruções de contribuição e para assistentes](AGENTS.md)
-- [Operações atuais do back-end](Backend/docs/OPERATIONS.md)
-- [Exemplos da API atual](Backend/docs/API_EXAMPLES.md)
-
-**Referências públicas**
-- [Lei Geral de Proteção de Dados (LGPD)](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)
-- [ANPD: Relatório de Impacto à Proteção de Dados Pessoais](https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/relatorio-de-impacto-a-protecao-de-dados-pessoais-ripd)
-- [CFP: posicionamento sobre IA na prática psicológica (2025)](https://site.cfp.org.br/cfp-divulga-posicionamento-sobre-inteligencia-artificial-no-contexto-da-pratica-psicologica/)
-- [W3C — WCAG 2.2](https://www.w3.org/TR/WCAG22/)
-- [OWASP — ASVS](https://github.com/OWASP/ASVS)
-- [HL7 — FHIR R4](https://hl7.org/fhir/R4/)
-- [pgvector](https://github.com/pgvector/pgvector)
-- [Microsoft GraphRAG (referência arquitetural, não dependência)](https://microsoft.github.io/graphrag/)
-
----
-
-**Pesquisa e desenvolvimento:** trabalho de conclusão de curso em Sistemas de Informação, UniCatólica de Quixadá, 2026. O título acadêmico, hipóteses, método DSR e instrumentos de avaliação têm como base o texto de TCC fornecido pelo pesquisador; decisões arquiteturais adicionais são propostas de implementação e devem ser verificadas nos resultados e revisadas no processo de orientação.
-
-**Licença:** consulte o arquivo [LICENSE](LICENSE) do repositório. A disponibilidade do código ou desta documentação não concede autorização para uso clínico sem os controles e requisitos apropriados.
+[GNU AGPL v3](LICENSE).

@@ -452,26 +452,26 @@ export function PatientProfilePage() {
             <p className="text-caption-1-regular text-text-secondary">
               {isApiMode
                 ? "Sinais linguísticos exploratórios extraídos das notas, por análise."
-                : "Variação dos indicadores clínicos estimada ao longo do acompanhamento psicoterapêutico."}
+                : "Curvas ilustrativas com dados fictícios, só na demonstração. O modo real não calcula escores clínicos: mostra apenas sinais linguísticos exploratórios."}
             </p>
           </div>
 
           {isApiMode ? (user?.role === "ADMIN" ? <EmptyState title="Conteúdo clínico restrito" description="A evolução clínica é acessível apenas a profissionais com vínculo clínico autorizado." /> : data.analyses.some((item) => item.signals?.length) ? <ExploratorySignals analyses={data.analyses} /> : <EmptyState title="Sem sinais exploratórios" description="Solicite uma análise assistiva para este paciente. Nenhum escore clínico é estimado sem análise registrada." />) : <div className="space-y-5">
             <ChartCard
               title="Indicador de humor"
-              description="Indicador estimado a partir dos prontuários analisados nas sessões."
+              description="Série fictícia para ilustrar o gráfico; não é medida clínica."
               data={metrics}
               dataKey="mood"
             />
             <ChartCard
               title="Estado emocional"
-              description="Variação da intensidade afetiva e estabilidade ao longo do acompanhamento."
+              description="Série fictícia para ilustrar o gráfico; não é medida clínica."
               data={metrics}
               dataKey="emotionalState"
             />
             <ChartCard
               title="Encargos psicológicos"
-              description="Potenciais sobrecargas e encargos identificados nas narrativas clínicas."
+              description="Série fictícia para ilustrar o gráfico; não é medida clínica."
               data={metrics}
               dataKey="psychologicalBurden"
             />
