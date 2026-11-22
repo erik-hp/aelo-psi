@@ -29,7 +29,7 @@ def extract_note_graph(note):
     payload = {"note": {"note_id": str(note.pk), "session_id": str(note.session_id) if note.session_id else None, "created_at": note.created_at.isoformat(), "text": text}}
     data = AIClient().request_vault(payload)
     raw_nodes, raw_edges = data.get("nodes"), data.get("edges")
-    if not isinstance(raw_nodes, list) or not isinstance(raw_edges, list) or len(raw_nodes) > 30 or len(raw_edges) > 50:
+    if not isinstance(raw_nodes, list) or not isinstance(raw_edges, list) or len(raw_nodes) > 400 or len(raw_edges) > 600:
         raise ValidationError("Invalid graph extraction.")
     for item in raw_nodes:
         if not isinstance(item, dict) or item.get("kind") not in KINDS or not isinstance(item.get("label"), str) or not isinstance(item.get("evidence"), str) or not item["label"] or not item["evidence"] or len(item["label"]) > 120 or len(item["evidence"]) > 240 or item["label"] not in text or item["evidence"] not in text:

@@ -1,6 +1,7 @@
 """Failure handling at the Ollama boundary without a running model."""
 
 import asyncio
+import json
 
 import httpx
 import pytest
@@ -133,6 +134,50 @@ def test_invented_concept_and_unsupported_types_are_dropped():
     assert kept.edges == []
 
 
+DENIAL_NOTE = (
+    "Nega ideação suicida e uso de álcool. Segue sem pensamentos de morte. Não há relato de pânico; pergunto diretamente. "
+    "Voltou na terça, sem dormir. Não conseguiu dormir de novo. Nega ideação suicida, mas relata insônia."
+)
+
+
+def test_denied_findings_are_not_kept_but_real_ones_are():
+    labels = ["ideação suicida", "uso de álcool", "pensamentos de morte", "pânico", "sem dormir", "Não conseguiu dormir", "insônia", "Nega ideação suicida"]
+    extraction = graph_of([("symptom", label, label) for label in labels], [])
+    kept = [node.label for node in ai_module.literal_graph(extraction, DENIAL_NOTE).nodes]
+    assert kept == ["sem dormir", "Não conseguiu dormir", "insônia"]
+
+
+def test_other_denial_forms_are_dropped():
+    text = "Jamais pensou em fugir. Descarta ideação suicida. Pânico: negado. Nunca teve alucinações. Sem nenhum uso de drogas. Não sentiu tristeza. Chorou muito."
+    labels = ["fugir", "ideação suicida", "Pânico", "alucinações", "uso de drogas", "tristeza", "Chorou muito"]
+    extraction = graph_of([("symptom", label, label) for label in labels], [])
+    assert [node.label for node in ai_module.literal_graph(extraction, text).nodes] == ["Chorou muito"]
+
+
+def test_split_note_is_exact_and_bounded():
+    text = " ".join(f"Frase número {i} com algum conteúdo clínico." for i in range(200))
+    chunks = ai_module.split_note(text)
+    assert len(chunks) > 5 and all(chunk in text for chunk in chunks)
+    assert max(map(len, chunks)) <= 950 and "".join(chunks).replace(" ", "") == text.replace(" ", "")
+
+
+def test_long_note_is_read_in_chunks_and_merged(monkeypatch):
+    text = " ".join(f"Relata sintoma{i} na sessão." for i in range(120))
+    calls = []
+
+    async def fake_generate(prompt):
+        chunk = prompt["note"]["text"]
+        calls.append(len(chunk))
+        first = chunk.split()[1]
+        return json.dumps({"nodes": [{"kind": "symptom", "label": first, "evidence": f"Relata {first}"}, {"kind": "symptom", "label": "sintoma0", "evidence": "Relata sintoma0"}], "edges": []})
+
+    monkeypatch.setattr(ai_module, "generate_json", fake_generate)
+    result = asyncio.run(ai_module.ollama_vault(ai_module.ContextItem(note_id="n", created_at="2026-01-01", text=text)))
+    assert len(calls) > 1 and max(calls) <= 950
+    assert len(result.nodes) == len({node.label for node in result.nodes}) >= len(calls)
+    assert all(node.label in text for node in result.nodes)
+
+
 def test_extraction_prompt_requires_exact_copies(monkeypatch):
     captured = {}
 
@@ -142,4 +187,4 @@ def test_extraction_prompt_requires_exact_copies(monkeypatch):
 
     monkeypatch.setattr(ai_module, "generate_json", fake_generate)
     asyncio.run(ai_module.ollama_vault(ai_module.ContextItem(note_id="n", created_at="2026-01-01", text=NOTE_TEXT)))
-    assert "exact" in captured["schema"]["nodes"][0]["label"]
+    assert "character by character" in captured["task"] and captured["response_schema"]

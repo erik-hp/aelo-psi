@@ -66,12 +66,13 @@ class VaultEdgeItem(BaseModel):
     target: int
     relation: str = Field(max_length=32)
     evidence: str = Field(max_length=240)
-    confidence: float = Field(ge=0, le=1)
+    confidence: float = Field(default=0, ge=0, le=1)  # 0 = model gave none
 
 
 class VaultExtraction(BaseModel):
-    nodes: list[VaultNodeItem] = Field(default_factory=list, max_length=30)
-    edges: list[VaultEdgeItem] = Field(default_factory=list, max_length=50)
+    # Long notes are read in chunks and merged, so the cap is per note, not per model call.
+    nodes: list[VaultNodeItem] = Field(default_factory=list, max_length=400)
+    edges: list[VaultEdgeItem] = Field(default_factory=list, max_length=600)
 
 
 class VaultRequest(BaseModel):
