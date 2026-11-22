@@ -45,6 +45,8 @@ flowchart TD
 
 *As setas representam o desenho pretendido, não uma alegação de que todo o pipeline já funciona.*
 
+Este diagrama também está disponível como imagem ([`arquitetura.png`](docs/img/arquitetura.png)) e como [`arquitetura.pdf`](docs/img/arquitetura.pdf); a fonte é [`arquitetura.mmd`](docs/img/arquitetura.mmd).
+
 ## 3. O que existe hoje e o que está planejado?
 
 **Snapshot de 09/11/2026 — branch do [PR #24](https://github.com/erik-hp/aelo-psi/pull/24), ainda sem merge:** [baseline e evidências](docs/validation/F0_2026-11-09.md), [matriz de autorização](docs/validation/F0_AUTHORIZATION_MATRIX_2026-11-09.md). Campos clínicos cifrados, grants explícitos, refresh HttpOnly, auditoria com integridade e componentes experimentais de memória já existem; seus aceites completos continuam pendentes. Nesta entrega, risco automático e escores de atenção foram removidos da demonstração. Frontend: 220 testes, build e lint aprovados; backend: 291 aprovados/2 ignorados, incluindo 79 novos cenários de autorização. O inventário inicial abaixo é histórico e não substitui o registro atualizado. G0 segue bloqueado.

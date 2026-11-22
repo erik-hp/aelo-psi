@@ -1,0 +1,12 @@
+flowchart TD
+  A[Psicólogo e equipe autorizada] --> B[Interface AELO-PSI]
+  B --> C[Django REST API - permissões, prontuário e auditoria]
+  C --> D[Notas clínicas versionadas e protegidas]
+  D --> E[Indexação por nota, versão e trecho]
+  E --> F[Busca híbrida: texto + embeddings + relações temporais]
+  F --> G[IA local: Ollama via FastAPI]
+  G --> H[Rascunho com referências explícitas]
+  H --> I{Revisão do psicólogo}
+  I -->|Aprova ou corrige| J[Memória derivada validada]
+  I -->|Rejeita| K[Registro da decisão sem promover inferências]
+  C --> L[(PostgreSQL e pgvector - alvo)]

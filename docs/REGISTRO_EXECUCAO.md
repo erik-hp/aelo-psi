@@ -514,3 +514,59 @@ O registro não é histórico de conversa: é histórico auditável de artefatos
   - `tls_smoke` (CA local descartável): `LIVE_TLS_SMOKE_OK: verified CA/hostname, HTTP redirect, HSTS, proxy spoofing, Secure/HttpOnly/SameSite cookies, origin, rotation/replay/logout, clinic scope, admin denial`.
   - `manage.py check --deploy --fail-level ERROR`: aprovado com 0 erros (avisos esperados `W005`/`W021`). Pilhas e volume de CA descartável removidos ao final.
 - **Decisão e próximo item:** código integrado e validado na `main`; assim que o upstream publicar `picomatch >= 4.0.8`, atualizar `Frontend/package-lock.json` e reexecutar `python tools/local_ci.py` para emissão do manifesto unificado com código 0. **G0 continua BLOQUEADO**.
+
+## Design system "Abrigo" — migração inicial da interface — 22/11/2026 — EM REVISÃO
+
+- Pedido do autor: redesenho completo e personalizado das telas (tom acolhedor), com autorização expressa para deixar de exigir BoardUI nas telas e para adicionar a fonte Fraunces. `Frontend/AGENTS.md` foi atualizado; invariantes de segurança e de dados sintéticos **não mudaram**.
+- **Aplicado:** tokens de cor, raio e sombra em `aelo-tokens.css` (nomes semânticos preservados, então os componentes existentes herdam o tema); fonte Atkinson Hyperlegible Next como sans (antes o código usava Instrument Sans, apesar de o guia citar Atkinson); Fraunces hospedada em `src/assets/fonts/` (licença OFL anexa); nova marca (arco) em `public/brand/aelo-app-icon.svg` e `favicon.svg`; menu, cabeçalho e Login; Dashboard reestruturado e renomeado "Hoje" (rota `/dashboard` mantida).
+- **Verificado em cópia com dependências Linux, `TZ=UTC`:** `aelo-tokens.test.ts` 57 aprovados; suíte completa **225 aprovados em 30 arquivos**; `eslint` 0 erros; `npm run build` aprovado. Testes que checavam o título "Dashboard clínico" e o link "Dashboard" foram atualizados para "Hoje" (4 arquivos). Capturas de tela do app compilado em modo demonstração, tema claro e escuro: Login e Hoje conferidos visualmente.
+- **Não feito:** demais telas ainda usam a composição antiga (só herdam cor, fonte e forma): Pacientes (mestre-detalhe), Perfil (abas), Editor, Agenda, Financeiro, Auditoria, Usuários, Configurações. Ícones `lucide-react` permanecem em cerca de 20 arquivos. O alerta de pendências ainda aparece no menu e no "Hoje". Sem teste com usuários nem com leitor de tela. Contraste dos tokens por teste automático, o que não comprova conformidade com a WCAG.
+- Protótipo de referência: `docs/design/prototipos/aelo-abrigo-prototipos.html`; guia: `docs/design/AELO_DESIGN_SYSTEM_ABRIGO.md`.
+
+### Abrigo — Pacientes e Perfil — 22/11/2026 — EM REVISÃO
+
+- `PatientCard`: iniciais em círculo, nome em Fraunces, status ao lado do nome, próxima sessão em destaque, seta de navegação; nota da IA limitada a 2 linhas.
+- `PatientProfilePage`, `SessionCard`, `AIAnalysisCard`: `lucide-react` trocado por Remix; abas com raio maior e sombra na ativa; títulos de seção em Fraunces; editor de análise por IA em caixa tracejada; descrição do cabeçalho com idade e profissional.
+- Verificado na cópia Linux: `tsc -b` ok; `eslint` 0 erros (9 avisos anteriores); `TZ=UTC vitest run` 225 testes em 30 arquivos; `npm run build` ok.
+- Não feito: Editor, Agenda, Financeiro, Auditoria, Usuários, Configurações, 404; `lucide-react` ainda em PatientVault, Vault* e outras telas; sem teste visual no navegador desta etapa.
+
+### Abrigo — Editor — 22/11/2026 — EM REVISÃO
+
+- `ClinicalEditorPage`/`NarrativeEditorPage`: superfície com raio 3xl e mais respiro, título da nota em Fraunces, progresso da IA em caixa tracejada.
+- `ClinicalSessionEditor`: aviso de nota assinada em tom de informação (antes amarelo de alerta); ação "Revisar texto para IA" separada em caixa tracejada com a explicação de que a síntese fica pendente até a revisão. Fluxo de salvar, revisar, assinar e retificar inalterado.
+- `lucide-react` removido de `NarrativeEditor`, `NarrativeEditorPage` e `LoginForm`.
+- Verificado na cópia Linux: `tsc -b` ok; `eslint` 0 erros; `TZ=UTC vitest run` 225 testes; build ok. Sem verificação visual no navegador.
+
+### Abrigo — Agenda, Auditoria e componentes base — 22/11/2026 — EM REVISÃO
+
+- Auditoria: perfis exibidos em português (Administração, Psicologia, Estágio) no filtro, na tabela e no painel de detalhe; os valores enviados à API continuam `ADMIN`/`PSYCHOLOGIST`/`INTERN`. Teste de badges de perfil em `PagesAndLayoutEmpiricalChallenge.test.tsx` ajustado para os novos rótulos.
+- `lucide-react` substituído por Remix em Agenda, Sessões, Análise IA, Configurações, tabela de Auditoria, `ThemeToggle`, `Badge`, `Dialog` e `EmptyState` (título do estado vazio em Fraunces).
+- Verificado na cópia Linux: `tsc -b` ok; `eslint` 0 erros; `TZ=UTC vitest run` 225 testes; build ok. Sem verificação visual no navegador; a composição da Agenda (faixa semanal + lista) não foi refeita, só ícones.
+
+### Abrigo — ícones e telas restantes — 22/11/2026 — EM REVISÃO
+
+- `lucide-react` não é mais importado em `src/` (cofre clínico, `ToastContext` migrados para Remix). A dependência continua em `package.json`; remoção exige atualizar `package-lock.json` com `npm` no Windows.
+- 404: botão "Voltar para Hoje". Configurações: ícone com `aria-hidden`.
+- Financeiro e Usuários herdam os tokens do Abrigo; sem recomposição própria nesta etapa.
+- Verificado na cópia Linux: `tsc -b` ok; `eslint` 0 erros; `TZ=UTC vitest run` 225 testes; build ok. Sem verificação visual no navegador.
+
+### Abrigo — Agenda recomposta — 22/11/2026 — EM REVISÃO
+
+- `AgendaPage`: faixa semanal (7 dias da semana do dia selecionado, com pontos por quantidade de sessões, dia atual destacado, `aria-current="date"`); barra de modo/navegação com raio 2xl; título do dia e horários das sessões em Fraunces; células da matriz mensal com raio xl. Lógica de agenda, status, remarcação e agendamento inalterada.
+- Rótulos da faixa em minúsculas com `capitalize` por CSS, para não duplicar o texto "Dom"/"Seg" que o teste da matriz mensal procura.
+- Verificado na cópia Linux: `tsc -b` ok; `eslint` 0 erros; `TZ=UTC vitest run` 225 testes; build ok. Sem verificação visual no navegador.
+
+## Identidade visual AELO (EM REVISÃO)
+
+- Símbolo (arco com recorte e ponto argila) levado a um sistema: 19 SVGs em `docs/design/identidade/assets/`, 7 PNGs em `docs/design/identidade/png/` (favicon 32, ícones 180/192/512, avatar, lockups horizontal e vertical com descritor).
+- Guia em `docs/design/AELO_IDENTIDADE_VISUAL.md`. Cores: oliva #35523F, argila #A4482B (só acento), papel #FAF5EC, areia #EADFCB, tinta #2A2018. Fontes: Fraunces (títulos e marca), Atkinson Hyperlegible Next (interface), Source Serif 4 (texto clínico).
+- `Frontend/public/brand/` (aelo-symbol, aelo-wordmark-light, aelo-wordmark-dark) substituiu os SVGs teal antigos.
+- Limites: sem pesquisa de marca no INPI para "AELO"; peso e espaçamento do logotipo avaliados só em tela; em 16 px o ponto some; mockups do quadro são ilustrativos; não testado com usuários.
+
+## F4 — Aba Evolução com sinais exploratórios e mapa da Memória clínica (22/11/2026)
+
+- Pedido do autor: testar os valores com um modelo mais capaz (Claude) e as telas Evolução e Memória clínica. `ai-service` executado no host com `AI_ENGINE=claude-cli` e `AELO_SYNTHETIC_DATA_ONLY=True` (dados sintéticos; recusado em HTTPS).
+- **Mudança em relação ao F4-01:** a aba "Evolução" (antes "Evolução longitudinal") deixou de exibir só aviso de indisponibilidade em modo API e passa a listar, por análise, os `sentiment_metrics` devolvidos pelo modelo, rotulados como sinais linguísticos exploratórios (escala 0–1, data, status, trechos citados). Sem curva temporal, sem conversão de ausência em zero. A validação clínica com psicólogos (`G4`) **não** foi feita; o texto de F4-01 sobre visualização desligada precisa ser atualizado pelo autor. **G0 permanece BLOQUEADO.**
+- Memória clínica: grupos de conceitos desenhados como áreas tracejadas, nomeados pelo conceito mais conectado com as palavras da nota ("Em torno de …"), rótulos maiores e legenda de tamanho/linhas.
+- Perfil do paciente: mensagem específica para ADMIN (sem acesso clínico) e orientação quando não há sessões.
+- Verificado nesta rodada (SQLite, sem PostgreSQL): backend **513 aprovados, 4 ignorados**, `ruff` limpo; frontend **226 aprovados**, `tsc`/build ok, lint sem erros. Revisão de design feita em navegador headless no desktop e mobile; não houve inspeção em tema escuro nem revisão profissional.
