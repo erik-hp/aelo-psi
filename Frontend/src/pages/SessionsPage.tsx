@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { RiAddLine } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SessionCard } from "@/components/sessions/SessionCard";
@@ -18,7 +18,7 @@ export function SessionsPage() {
       <PageHeader
         title="Sessões terapêuticas"
         description="Registro e histórico das sessões, sempre vinculadas individualmente ao paciente e ao seu prontuário."
-        action={can("sessions:write") ? <Button><Plus className="h-4 w-4" /> Registrar sessão</Button> : null}
+        action={can("sessions:write") ? <Button><RiAddLine className="h-4 w-4" /> Registrar sessão</Button> : null}
       />
       {isLoading ? <PageLoading label="Carregando sessões…" /> : isError ? <PageError description="Não foi possível consultar as sessões. Tente novamente." /> : sessions.length ? (
         <ol className="aelo-thread-list space-y-8">

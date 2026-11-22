@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { RiAlertLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +67,7 @@ export function AIAnalysisCard({ analysis }: { analysis: AIAnalysis }) {
         </section>
         <section>
           <h4 className="flex items-center gap-2 text-body-medium">
-            <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
+            <RiAlertLine aria-hidden="true" className="size-4 text-status-yellow-text" />
             Pontos de atenção
           </h4>
           <ul className="aelo-record mt-2 space-y-2 text-text-secondary">

@@ -1,21 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  ArrowRight,
-  Calendar,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardPenLine,
-  Clock,
-  Filter,
-  Play,
-  Plus,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { RiAddLine, RiAlertLine, RiArrowLeftSLine, RiArrowRightLine, RiArrowRightSLine, RiCalendarLine, RiCheckboxCircleLine, RiCloseLine, RiFileEditLine, RiFilter3Line, RiPlayLine, RiSparklingLine, RiTimeLine } from "@remixicon/react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/modal";
@@ -223,6 +209,24 @@ export function AgendaPage() {
     setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1, 12));
   }
 
+  const weekStrip = useMemo(() => {
+    const base = parseLocalDate(selectedDate);
+    base.setDate(base.getDate() - base.getDay());
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(base);
+      day.setDate(base.getDate() + index);
+      const key = dateKey(day);
+      return {
+        key,
+        weekday: weekdays[day.getDay()],
+        number: day.getDate(),
+        count: agenda.filter((item) => item.date === key || item.date.includes(key)).length,
+        isSelected: key === selectedDate,
+        isToday: key === today,
+      };
+    });
+  }, [agenda, selectedDate, today]);
+
   function changeDay(direction: number) {
     const current = parseLocalDate(selectedDate);
     current.setDate(current.getDate() + direction);
@@ -318,7 +322,7 @@ export function AgendaPage() {
         description="Agendamentos e registro do status dos atendimentos. Os horários seguem o fuso deste navegador."
         action={
           canSchedule ? <Button onClick={() => setIsNewSessionOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
+            <RiAddLine className="h-4 w-4" />
             Nova sessão
           </Button> : null
         }
@@ -346,7 +350,7 @@ export function AgendaPage() {
 
       {/* Alternância Dual Ergonômica (Linha do Tempo vs Matriz mensal - Lei de Hick) */}
       <section className="mt-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-button-default bg-background-primary-default p-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border-button-default bg-background-primary-default p-2">
           <div className="flex items-center gap-2">
             <Button
               variant={viewMode === "timeline" ? "default" : "ghost"}
@@ -354,7 +358,7 @@ export function AgendaPage() {
               onClick={() => setViewMode("timeline")}
               className="gap-2 text-body-medium"
             >
-              <Clock className="h-4 w-4" />
+              <RiTimeLine className="h-4 w-4" />
               Linha do tempo diária
             </Button>
             <Button
@@ -363,7 +367,7 @@ export function AgendaPage() {
               onClick={() => setViewMode("matrix")}
               className="gap-2 text-body-medium"
             >
-              <Calendar className="h-4 w-4" />
+              <RiCalendarLine className="h-4 w-4" />
               Matriz mensal
             </Button>
           </div>
@@ -377,7 +381,7 @@ export function AgendaPage() {
               onClick={() => changeDay(-1)}
               aria-label="Dia anterior"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <RiArrowLeftSLine className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -397,17 +401,39 @@ export function AgendaPage() {
               onClick={() => changeDay(1)}
               aria-label="Próximo dia"
             >
-              <ChevronRight className="h-4 w-4" />
+              <RiArrowRightSLine className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </section>
 
+      <nav aria-label="Dias da semana" className="mt-4 grid grid-cols-7 gap-2">
+        {weekStrip.map((day) => (
+          <button
+            key={day.key}
+            type="button"
+            aria-label={`${day.weekday} ${day.number}`}
+            aria-current={day.isSelected ? "date" : undefined}
+            onClick={() => { setSelectedDate(day.key); setVisibleMonth(parseLocalDate(day.key)); }}
+            className={cn(
+              "focus-ring flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border border-border-button-default bg-background-primary-default px-1 py-2 transition-colors hover:bg-background-primary-hover",
+              day.isSelected && "border-[var(--aelo-thread)] bg-[var(--aelo-accent-soft)]",
+            )}
+          >
+            <span aria-hidden="true" className="text-caption-1-regular capitalize text-text-secondary">{day.weekday.toLowerCase()}</span>
+            <span aria-hidden="true" className={cn("aelo-display text-xl tabular-nums", day.isToday && "text-[var(--aelo-thread)]")}>{day.number}</span>
+            <span aria-hidden="true" className="flex h-1.5 gap-0.5">
+              {Array.from({ length: Math.min(day.count, 3) }).map((_, i) => <span key={i} className="size-1.5 rounded-full bg-[var(--aelo-thread)]" />)}
+            </span>
+          </button>
+        ))}
+      </nav>
+
       {/* Sugestão acolhedora caso o dia de hoje não tenha sessões cadastradas no mock */}
       {filteredItems.length === 0 && availableDates.length > 0 && selectedDate === today ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-focus-ring bg-status-blue-background p-3.5 text-caption-1-regular text-status-blue-text">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 shrink-0" />
+            <RiSparklingLine className="h-4 w-4 shrink-0" />
             <span>
               A data de hoje não possui agendamentos no demonstrativo. Existem sessões cadastradas em outras datas.
             </span>
@@ -445,7 +471,7 @@ export function AgendaPage() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-text-secondary shrink-0 hidden sm:block" />
+              <RiFilter3Line className="h-4 w-4 text-text-secondary shrink-0 hidden sm:block" />
               <Select
                 className="w-full sm:w-56"
                 value={status}
@@ -482,7 +508,7 @@ export function AgendaPage() {
                       onClick={() => changeMonth(-1)}
                       aria-label="Mês anterior"
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <RiArrowLeftSLine className="h-4 w-4" />
                     </Button>
                     <Button
                       size="icon"
@@ -491,7 +517,7 @@ export function AgendaPage() {
                       onClick={() => changeMonth(1)}
                       aria-label="Próximo mês"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      <RiArrowRightSLine className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -512,7 +538,7 @@ export function AgendaPage() {
                       aria-label={`Selecionar dia ${day.key}`}
                       aria-pressed={day.isSelected}
                       className={cn(
-                        "focus-ring min-h-20 rounded-md border border-border-button-default bg-background-full p-2 text-left transition hover:border-border-focus-ring hover:bg-background-secondary-default",
+                        "focus-ring min-h-20 rounded-xl border border-border-button-default bg-background-full p-2 text-left transition hover:border-border-focus-ring hover:bg-background-secondary-default",
                         !day.isCurrentMonth && "opacity-35",
                         day.isSelected && "border-border-focus-ring bg-status-blue-background shadow-sm",
                         day.hasPendingReview && "border-status-yellow-text",
@@ -560,7 +586,7 @@ export function AgendaPage() {
           {/* CABEÇALHO DO DIA SELECIONADO NA LINHA DO TEMPO */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-button-default pb-3 pt-1">
             <div>
-              <h2 className="text-title-3-semibold first-letter:uppercase text-text-primary">
+              <h2 className="aelo-display text-2xl first-letter:uppercase text-text-primary">
                 {selectedDateLabel}
               </h2>
               <p className="text-caption-1-regular text-text-secondary mt-0.5">
@@ -578,14 +604,14 @@ export function AgendaPage() {
                   <li
                     key={item.id}
                     className={cn(
-                      "p-4 first:rounded-t-3xl last:rounded-b-3xl",
+                      "p-4 md:p-5 first:rounded-t-3xl last:rounded-b-3xl",
                       item.status === "in_progress" && "bg-status-blue-background",
                       item.status === "needs_review" && "bg-status-yellow-background",
                     )}
                   >
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                         {/* Bloco de Horário */}
-                        <p className="shrink-0 text-headline-semibold tabular-nums lg:w-20">{item.time}</p>
+                        <p className="aelo-display shrink-0 text-2xl tabular-nums text-[var(--aelo-thread)] lg:w-24">{item.time}</p>
 
                         {/* Conteúdo Clínico */}
                         <div className="flex-1 min-w-0">
@@ -620,7 +646,7 @@ export function AgendaPage() {
                                 className="h-8 text-caption-1-regular gap-1.5"
                                 onClick={() => handleUpdateStatus(item.id, "in_progress")}
                               >
-                                <Play className="h-3.5 w-3.5 text-status-blue-text" />
+                                <RiPlayLine className="h-3.5 w-3.5 text-status-blue-text" />
                                 Iniciar consulta
                               </Button>
                             ) : null}
@@ -632,7 +658,7 @@ export function AgendaPage() {
                                 className="h-8 text-caption-1-regular gap-1.5 border-status-yellow-text text-status-yellow-text hover:bg-status-yellow-background"
                                 onClick={() => handleUpdateStatus(item.id, "needs_review")}
                               >
-                                <ClipboardPenLine className="h-3.5 w-3.5" />
+                                <RiFileEditLine className="h-3.5 w-3.5" />
                                 Encerrar e evoluir nota
                               </Button>
                             ) : null}
@@ -644,7 +670,7 @@ export function AgendaPage() {
                                 className="h-8 text-caption-1-regular gap-1.5 border-status-lime-text text-status-lime-text hover:bg-status-lime-background"
                                 onClick={() => handleUpdateStatus(item.id, "completed")}
                               >
-                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                <RiCheckboxCircleLine className="h-3.5 w-3.5" />
                                 Assinar e finalizar
                               </Button>
                             ) : null}
@@ -676,7 +702,7 @@ export function AgendaPage() {
                               size="small"
                             >
                               <span>Acessar prontuário</span>
-                              <ArrowRight className="h-3.5 w-3.5" />
+                              <RiArrowRightLine className="h-3.5 w-3.5" />
                             </ButtonLink>
                           </div>
                         </div>
@@ -695,8 +721,8 @@ export function AgendaPage() {
 
         {/* Revisões documentais em ordem cronológica. */}
         <aside className="space-y-4">
-          <h2 className="text-headline-semibold flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
+          <h2 className="aelo-display flex items-center gap-2 text-xl">
+            <RiAlertLine className="size-4 text-status-yellow-text" />
             Revisões documentais do período
           </h2>
           {isLoading ? <PageLoading label="Carregando revisões…" /> : isError ? <PageError description="Não foi possível carregar as revisões documentais." /> : reviewItems.length > 0 ? (
@@ -771,7 +797,7 @@ export function AgendaPage() {
                 onClick={() => setIsNewSessionOpen(false)}
                 aria-label="Fechar modal de agendamento"
               >
-                <X className="h-4 w-4" />
+                <RiCloseLine className="h-4 w-4" />
               </Button>
             </div>
 

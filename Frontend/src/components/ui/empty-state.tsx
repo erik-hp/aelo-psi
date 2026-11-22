@@ -1,18 +1,17 @@
-import type { LucideIcon } from "lucide-react";
-import { FileSearch } from "lucide-react";
+import { RiFileSearchLine, type RemixiconComponentType } from "@remixicon/react";
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: RemixiconComponentType;
   title: string;
   description: string;
 }
 
-export function EmptyState({ icon: Icon = FileSearch, title, description }: EmptyStateProps) {
+export function EmptyState({ icon: Icon = RiFileSearchLine, title, description }: EmptyStateProps) {
   return (
     <div className="clinical-panel grid min-h-52 place-items-center p-8 text-center">
       <div>
-        <Icon className="mx-auto h-6 w-6 text-foreground-icon-secondary" aria-hidden />
-        <h3 className="mt-3 text-headline-semibold">{title}</h3>
+        <Icon className="mx-auto size-7 text-foreground-icon-secondary" aria-hidden />
+        <h3 className="aelo-display mt-3 text-xl">{title}</h3>
         <p className="mx-auto mt-2 max-w-md text-body-regular text-text-secondary">{description}</p>
       </div>
     </div>

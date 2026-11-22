@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Clock, FileEdit, FileText, RotateCcw, Sparkles, Trash2 } from "lucide-react";
+import { RiArrowGoBackLine, RiCheckLine, RiDeleteBinLine, RiEditLine, RiFileTextLine, RiSparklingLine, RiTimeLine } from "@remixicon/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -202,7 +202,7 @@ export function NarrativeEditor({
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-button-default bg-background-secondary-default p-2.5">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-caption-1-semibold text-text-secondary flex items-center gap-1.5 mr-1">
-            <FileEdit className="h-3.5 w-3.5 text-status-blue-text" />
+            <RiEditLine className="h-3.5 w-3.5 text-status-blue-text" />
             Estruturas de apoio à redação:
           </span>
           <Button
@@ -231,12 +231,12 @@ export function NarrativeEditor({
         <div className="flex items-center gap-3 text-caption-1-regular text-text-secondary">
           {lastSavedTime ? (
             <span className="flex items-center gap-1 text-status-lime-text text-body-medium">
-              <Check className="h-3.5 w-3.5" />
+              <RiCheckLine className="h-3.5 w-3.5" />
             Rascunho salvo no servidor às {lastSavedTime}
             </span>
           ) : (
             <span className="flex items-center gap-1">
-              <RotateCcw className="h-3.5 w-3.5" />
+              <RiArrowGoBackLine className="h-3.5 w-3.5" />
               {draftError ? "Falha no autosave; copie seu texto antes de sair" : isApiMode && patientId ? "Autosave no servidor" : "Rascunho apenas nesta página"}
             </span>
           )}
@@ -248,7 +248,7 @@ export function NarrativeEditor({
             className="h-7 px-2 text-caption-1-regular text-text-secondary hover:text-text-error-primary"
             title="Descartar rascunho clínico"
           >
-            <Trash2 className="h-3 w-3 mr-1" />
+            <RiDeleteBinLine className="h-3 w-3 mr-1" />
             Limpar rascunho
           </Button>
         </div>
@@ -292,11 +292,11 @@ export function NarrativeEditor({
         {/* Contadores e Ergonomia Cognitiva */}
         <div className="flex items-center gap-4 text-caption-1-regular text-text-secondary">
           <span className="flex items-center gap-1">
-            <FileText className="h-3.5 w-3.5" />
+            <RiFileTextLine className="h-3.5 w-3.5" />
             {charCount.toLocaleString("pt-BR")} caracteres, {wordCount} palavras
           </span>
           <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
+            <RiTimeLine className="h-3.5 w-3.5" />
             ~{readingTimeMin} min de leitura
           </span>
           <span className="hidden lg:inline text-text-secondary">
@@ -310,7 +310,7 @@ export function NarrativeEditor({
           disabled={isSubmitting || (isApiMode && !!patientId && !draftReady) || !formState.isValid}
           className="gap-2 px-6 text-body-semibold"
         >
-          <Sparkles className="h-4 w-4" />
+          <RiSparklingLine className="h-4 w-4" />
           {isSubmitting ? "Enviando análise…" : "Solicitar análise assistiva"}
         </Button>
       </div>

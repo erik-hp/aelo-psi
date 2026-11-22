@@ -116,7 +116,7 @@ describe("DashboardPage Resiliency, Hero Card and Clinical Alerts", () => {
     renderDashboardPage();
 
     // O dashboard NÃO deve quebrar nem exibir mensagem fatal
-    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
+    expect(await screen.findByText("Hoje")).toBeDefined();
     expect(await screen.findByRole("heading", { name: "Ana Clara Silva", level: 2 })).toBeDefined();
 
     // Módulo financeiro exibe degradação graciosa em vez de quebrar a página

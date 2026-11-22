@@ -154,7 +154,7 @@ describe("VaultCytoscapeCanvas", () => {
 
     // Fit Graph
     fireEvent.click(fitBtn);
-    expect(mockCy.fit).toHaveBeenCalledWith(undefined, 25);
+    expect(mockCy.fit).toHaveBeenCalledWith(undefined, 40);
 
     // Scenario 2: Mobile Screen Resize (360px width x 480px height)
     vi.spyOn(canvasDiv, "getBoundingClientRect").mockReturnValue({
@@ -202,8 +202,8 @@ describe("VaultCytoscapeCanvas", () => {
     render(<VaultCytoscapeCanvas graph={mockGraph} onSelectNode={onSelectNode} />);
 
     // Verify tap listener was attached
-    expect(mockCy.on).toHaveBeenCalledWith("tap", "node", expect.any(Function));
-    const tapHandler = mockCy.on.mock.calls.find((call) => call[0] === "tap" && call[1] === "node")![2] as (event: { target: { id: () => string } }) => void;
+    expect(mockCy.on).toHaveBeenCalledWith("tap", "node:childless", expect.any(Function));
+    const tapHandler = mockCy.on.mock.calls.find((call) => call[0] === "tap" && call[1] === "node:childless")![2] as (event: { target: { id: () => string } }) => void;
 
     // Simulating tap on a clinical node
     tapHandler({ target: { id: () => "node-1" } });

@@ -1,5 +1,4 @@
-import { Bell, LogOut, Menu, MonitorX } from "lucide-react";
-import { RiSearchLine } from "@remixicon/react";
+import { RiComputerLine, RiLogoutBoxRLine, RiMenuLine, RiNotification3Line, RiSearchLine } from "@remixicon/react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,14 +30,14 @@ export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
           aria-expanded={isSidebarOpen}
           onClick={onOpenSidebar}
         >
-          <Menu className="h-5 w-5" />
+          <RiMenuLine className="h-5 w-5" />
         </Button>
         <form role="search" className="relative hidden flex-1 md:block" onSubmit={(event) => { event.preventDefault(); navigate(`/patients?search=${encodeURIComponent(search.trim())}`); }}>
           <Input leadingIcon={RiSearchLine} className="max-w-xl" placeholder="Buscar pacientes por nome e pressionar Enter" aria-label="Buscar pacientes" autoComplete="off" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} />
         </form>
         <div className="ml-auto flex items-center gap-2">
           <Button size="icon" variant="ghost" aria-label="Notificações indisponíveis" title="Notificações ainda não implementadas" disabled>
-            <Bell className="h-4 w-4" />
+            <RiNotification3Line className="h-4 w-4" />
           </Button>
           <ThemeToggle />
           <div className="hidden px-2 sm:block">
@@ -52,10 +51,10 @@ export function Header({ onOpenSidebar, isSidebarOpen = false }: HeaderProps) {
             title="Sair de todos os dispositivos"
             onClick={() => { if (window.confirm("Encerrar a sessão em todos os dispositivos?")) void logout(true); }}
           >
-            <MonitorX className="h-4 w-4" />
+            <RiComputerLine className="h-4 w-4" />
           </Button>
           <Button size="icon" variant="ghost" aria-label="Sair" onClick={() => void logout()}>
-            <LogOut className="h-4 w-4" />
+            <RiLogoutBoxRLine className="h-4 w-4" />
           </Button>
         </div>
       </div>

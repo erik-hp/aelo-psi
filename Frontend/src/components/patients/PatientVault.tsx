@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { GitBranch, History, Network, Sparkles } from "lucide-react";
+import { RiGitBranchLine, RiHistoryLine, RiNodeTree, RiSparklingLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePatientVault } from "@/hooks/usePatientVault";
@@ -63,7 +63,7 @@ export function PatientVault({
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="flex items-center gap-2 text-title-3-regular">
-              <Network className="h-5 w-5 text-status-blue-text" />
+              <RiNodeTree className="h-5 w-5 text-status-blue-text" />
               Memória clínica
             </CardTitle>
             <p className="mt-1 text-caption-1-regular text-text-secondary">
@@ -77,7 +77,7 @@ export function PatientVault({
               onClick={() => create.mutate(latest.id)}
               className="gap-2 shrink-0"
             >
-              <Sparkles className="h-4 w-4" />
+              <RiSparklingLine className="h-4 w-4" />
               Gerar checkpoint da análise recente
             </Button>
           )}
@@ -92,19 +92,19 @@ export function PatientVault({
           aria-label="Visões da memória clínica"
         >
           <Tab id="graph" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
-            <GitBranch className="h-3.5 w-3.5" />
+            <RiGitBranchLine className="h-3.5 w-3.5" />
             Mapa de conceitos
           </Tab>
 
           <Tab id="timeline" className="justify-center rounded-xl data-[selected]:bg-background-primary-default">
-            <History className="h-3.5 w-3.5" />
+            <RiHistoryLine className="h-3.5 w-3.5" />
             Checkpoints revisados
           </Tab>
         </TabList>
 
           <TabPanel id="graph" aria-label="Mapa de conceitos" className="min-w-0 space-y-3">
             {isLoading ? <PageLoading label="Carregando memória clínica…" /> : isError ? <PageError description="Não foi possível carregar a memória clínica. Nenhum dado de demonstração foi usado." /> : nodes.length ? (
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,0.75fr)]">
                 <Suspense
                   fallback={
                     <div className="flex h-[460px] w-full flex-col justify-between rounded-md border border-border-button-default bg-background-primary-default p-6 animate-pulse">
@@ -132,7 +132,7 @@ export function PatientVault({
               </div>
             ) : (
               <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-border-button-default p-8 text-center text-body-regular text-text-secondary">
-                <Network className="mb-2 h-8 w-8 text-text-secondary" />
+                <RiNodeTree className="mb-2 h-8 w-8 text-text-secondary" />
                 <p className="text-body-medium text-text-primary">Ainda não há conceitos extraídos.</p>
                 <p className="mt-1 text-caption-1-regular">
                   Envie anotações clínicas na aba de Prontuários para gerar a análise assistiva e montar o mapa de conceitos.
@@ -142,7 +142,7 @@ export function PatientVault({
 
             {!!graph?.communities.length && (
               <p className="text-caption-1-regular text-text-secondary">
-                {graph.communities.length} grupos de conceitos. Os agrupamentos apoiam a leitura longitudinal e não configuram diagnóstico ou decisão clínica.
+                {graph.communities.filter((group) => group.length >= 2).length} grupos de conceitos, mostrados como áreas tracejadas no mapa. Os agrupamentos apoiam a leitura longitudinal e não configuram diagnóstico ou decisão clínica.
               </p>
             )}
           </TabPanel>

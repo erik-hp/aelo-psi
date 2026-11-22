@@ -38,7 +38,7 @@ export function PatientsPage() {
     <>
       <PageHeader
         title="Pacientes"
-        description="Cadastro e acesso ao histórico dos pacientes autorizados."
+        description="Pessoas em acompanhamento e acesso ao histórico de cada uma."
         action={can("patients:write") ? <Button disabled={!isApiMode} title={!isApiMode ? "O cadastro exige conexão com a API." : undefined} onClick={() => setCreating(true)}>Adicionar paciente</Button> : null}
       />
       <div className="mb-5 flex flex-col gap-3 md:flex-row">
@@ -52,7 +52,7 @@ export function PatientsPage() {
         </Select>
       </div>
       {isLoading ? <PageLoading label="Carregando pacientes…" /> : isError ? <PageError description="Não foi possível consultar os pacientes. Tente novamente." /> : filtered.length ? (
-        <ul className="clinical-panel divide-y divide-separator-border overflow-hidden">
+        <ul className="clinical-panel divide-y divide-separator-border overflow-hidden" aria-label="Lista de pacientes">
           {filtered.map((patient) => (
             <li key={patient.id}>
             <PatientCard

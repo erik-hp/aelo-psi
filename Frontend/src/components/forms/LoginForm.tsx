@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { RiLoader4Line } from "@remixicon/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export function LoginForm() {
         {form.formState.errors.password ? <p id="password-error" role="alert" className="mt-1 text-caption-1-medium text-text-error-primary">{form.formState.errors.password.message}</p> : null}
       </div>
       <Button className="w-full" disabled={isLoading} type="submit">
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        {isLoading ? <RiLoader4Line className="h-4 w-4 animate-spin" /> : null}
         Entrar
       </Button>
     </form>

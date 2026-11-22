@@ -14,7 +14,7 @@ export function NotFoundPage() {
           to="/dashboard"
           variant="primary" className="mt-6"
         >
-          Voltar ao dashboard
+          Voltar para Hoje
         </ButtonLink>
       </div>
     </main>

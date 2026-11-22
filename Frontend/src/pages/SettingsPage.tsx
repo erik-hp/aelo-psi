@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { RiSettings3Line } from "@remixicon/react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ export function SettingsPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Settings className="h-4 w-4" /> Segurança</CardTitle>
+            <CardTitle className="flex items-center gap-2"><RiSettings3Line aria-hidden="true" className="size-4" /> Segurança</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-body-regular text-text-secondary">
             <p>Refresh token automático habilitado.</p>

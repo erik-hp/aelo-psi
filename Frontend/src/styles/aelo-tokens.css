@@ -1,47 +1,59 @@
 /* ---------------------------------------------------------------------------
- * AELO design system "Continuidade"
+ * AELO design system "Abrigo"
  *
- * Layer over BoardUI: components keep their semantic tokens, and this file
- * decides what those tokens mean for the product. Guide and rationale live in
- * docs/design/AELO_DESIGN_SYSTEM.md. Contrast pairs are checked by
+ * Layer over the base theme: components keep their semantic tokens, and this
+ * file decides what those tokens mean for the product. Guide and rationale live
+ * in docs/design/AELO_DESIGN_SYSTEM_ABRIGO.md. Contrast pairs are checked by
  * src/styles/aelo-tokens.test.ts.
+ *
+ * Primary action is olive. Clay is an accent only (counters, "today" marker,
+ * pending marks) and never the primary button, so it is not mistaken for error.
  * --------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("../assets/fonts/fraunces-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   --font-serif: "Source Serif 4 Variable", Georgia, "Times New Roman", serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 
-  /* Cool neutrals: every surface and text role inherits this hue. */
-  --color-neutral-50: #f6f9f8;
-  --color-neutral-100: #edf2f1;
-  --color-neutral-200: #dce5e3;
-  --color-neutral-300: #c1cecc;
-  --color-neutral-400: #8fa3a2;
-  --color-neutral-500: #586c6d;
-  --color-neutral-600: #4a5e60;
-  --color-neutral-700: #33484d;
-  --color-neutral-800: #1c303b;
-  --color-neutral-900: #152733;
-  --color-neutral-925: #0f1d27;
-  --color-neutral-950: #0b1522;
+  /* Warm neutrals: every surface and text role inherits this hue. */
+  --color-neutral-50: #fdfaf4;
+  --color-neutral-100: #f4ecdf;
+  --color-neutral-200: #e4d9c6;
+  --color-neutral-300: #cbbca6;
+  --color-neutral-400: #a39280;
+  --color-neutral-500: #6b5a4c;
+  --color-neutral-600: #5b4c3f;
+  --color-neutral-700: #4a3d32;
+  --color-neutral-800: #382e26;
+  --color-neutral-900: #2a2018;
+  --color-neutral-925: #211a14;
+  --color-neutral-950: #1b1713;
 
-  /* Action hue, derived from the mark. */
-  --color-accent-50: #e6f7f4;
-  --color-accent-100: #c4ede6;
-  --color-accent-200: #97dfd3;
-  --color-accent-300: #65dcc7;
-  --color-accent-400: #38b5a3;
-  --color-accent-500: #148f82;
-  --color-accent-600: #0e7269;
-  --color-accent-700: #0b5c56;
-  --color-accent-800: #0a4a46;
-  --color-accent-900: #083b38;
-  --color-accent-950: #042524;
+  /* Action hue: olive. */
+  --color-accent-50: #eef3ea;
+  --color-accent-100: #e2ebdb;
+  --color-accent-200: #c5d8bb;
+  --color-accent-300: #a9cba0;
+  --color-accent-400: #7fa98a;
+  --color-accent-500: #4f7459;
+  --color-accent-600: #416649;
+  --color-accent-700: #35523f;
+  --color-accent-800: #2b4534;
+  --color-accent-900: #22372a;
+  --color-accent-950: #15231a;
 
   /* Hierarchy by shape: page regions are soft, controls are firm, status is round. */
-  --radius-3xl: 0.875rem;
-  --radius-2xl: 0.75rem;
-  --radius-xl: 0.625rem;
-  --radius-lg: 0.5rem;
+  --radius-3xl: 1.25rem;
+  --radius-2xl: 1rem;
+  --radius-xl: 0.75rem;
+  --radius-lg: 0.625rem;
 
   --shadow-xs: 0 0 0 0 transparent;
 }
@@ -52,127 +64,187 @@
 
 :root {
   color-scheme: light;
-  --color-background-full: var(--color-neutral-100);
-  --color-background-primary-default: var(--color-white);
-  --color-background-secondary-default: var(--color-neutral-100);
-  --color-text-primary: var(--color-neutral-950);
-  --color-text-secondary: var(--color-neutral-600);
-  --color-text-tertiary: var(--color-neutral-500);
-  --color-text-placeholder: var(--color-neutral-500);
-  --color-text-error-primary: #b42318;
+  --color-background-full: #faf5ec;
+  --color-background-primary-default: #fffdf8;
+  --color-background-secondary-default: #f1e9db;
+  --color-text-primary: #2a2018;
+  --color-text-secondary: #5b4c3f;
+  --color-text-tertiary: #6b5a4c;
+  --color-text-placeholder: #6b5a4c;
+  --color-text-error-primary: #a92b1f;
   --color-border-button-default: var(--color-neutral-300);
   --color-border-button-hover: var(--color-neutral-400);
   --color-separator-border: var(--color-neutral-200);
-  --color-border-focus-ring: var(--color-accent-600);
-  --gradient-button-primary-default: linear-gradient(180deg, var(--color-accent-600) 0%, var(--color-accent-700) 100%);
-  --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-800) 100%);
-  --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-800) 0%, var(--color-accent-900) 100%);
+  --color-border-focus-ring: var(--color-accent-700);
+  /* Flat on purpose: no gloss. Both stops are the same so the contrast test stays honest. */
+  --gradient-button-primary-default: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-700) 100%);
+  --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-800) 0%, var(--color-accent-800) 100%);
+  --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-900) 0%, var(--color-accent-900) 100%);
   --aelo-button-primary-surface: var(--color-accent-700);
-  --aelo-on-primary: var(--color-white);
+  --aelo-on-primary: #fffdf8;
   /* Ghost means no fill until the pointer arrives. */
   --color-button-ghost-background: transparent;
   --color-button-ghost-hover: var(--color-accent-50);
   --color-button-ghost-active: var(--color-accent-100);
   --color-button-ghost-disabled: transparent;
-  /* Status tints stay quiet for long reading; the text carries the emphasis. */
-  --color-status-lime-background: var(--color-lime-100);
-  --color-status-yellow-background: var(--color-yellow-100);
-  --color-status-rose-background: var(--color-rose-100);
-  --color-status-blue-background: var(--color-blue-100);
-  --aelo-field-border: var(--color-neutral-500);
-  --aelo-thread: var(--color-accent-600);
-  --aelo-thread-end: #2f5fa8;
+  /* Status tints stay quiet for long reading; the text carries the emphasis.
+     lime = success, yellow = attention, rose = error, blue = information.
+     cyan (default badge) follows the olive primary, orange follows the clay accent. */
+  --color-status-lime-background: #dfede2;
+  --color-status-lime-text: #2f6b45;
+  --color-status-yellow-background: #f7e9c8;
+  --color-status-yellow-text: #8a5a00;
+  --color-status-rose-background: #f8e1dc;
+  --color-status-rose-text: #a92b1f;
+  --color-status-blue-background: #dceaf1;
+  --color-status-blue-text: #2c5f7a;
+  --color-status-cyan-background: #e2ebdb;
+  --color-status-cyan-text: #35523f;
+  --color-status-orange-background: #f6e1d6;
+  --color-status-orange-text: #a4482b;
+  --aelo-field-border: #8a7a6a;
+  --aelo-thread: #35523f;
+  --aelo-thread-end: #a4482b;
+  --aelo-accent: #a4482b;
+  --aelo-accent-soft: #f6e1d6;
+  --aelo-hero-bg: #35523f;
+  --aelo-hero-text: #fffdf8;
+  --aelo-hero-mark: #e8a27c;
+  --aelo-shadow-panel: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -12px rgb(60 40 20 / 0.16);
 }
 
 .dark {
   color-scheme: dark;
   --shadow-xs: 0 0 0 0 transparent;
-  /* Dark palette from the DESIGN.md "AELO - Modo escuro": graphite surfaces, slate and brass accents. */
-  --color-background-full: #15181d;
-  --color-background-primary-default: #20252d;
-  --color-background-secondary-default: #252b34;
-  --color-background-secondary-hover: #2d3948;
-  --color-text-primary: #eceff3;
-  --color-text-secondary: #b8c2ce;
-  --color-text-tertiary: #a3aebc;
-  --color-text-placeholder: #a3aebc;
-  --color-text-error-primary: #fda29b;
-  --color-border-button-default: #3a434f;
-  --color-border-button-hover: #738397;
-  --color-separator-border: #3a434f;
-  --color-border-focus-ring: #a5bbd2;
-  --aelo-primary: #a5bbd2;
+  --color-background-full: #1b1713;
+  --color-background-primary-default: #25201b;
+  --color-background-secondary-default: #2d261f;
+  --color-background-secondary-hover: #382f26;
+  --color-text-primary: #f3ebdd;
+  --color-text-secondary: #cfc3b2;
+  --color-text-tertiary: #b5a794;
+  --color-text-placeholder: #b5a794;
+  --color-text-error-primary: #ffa89c;
+  --color-border-button-default: #3a322a;
+  --color-border-button-hover: #8f8272;
+  --color-separator-border: #3a322a;
+  --color-border-focus-ring: #a9cba0;
+  --aelo-primary: #a9cba0;
   --gradient-button-primary-default: linear-gradient(180deg, var(--aelo-primary) 0%, var(--aelo-primary) 100%);
-  --gradient-button-primary-hover: linear-gradient(180deg, #b8cbdd 0%, #b8cbdd 100%);
-  --gradient-button-primary-active: linear-gradient(180deg, #8ea8c2 0%, #8ea8c2 100%);
+  --gradient-button-primary-hover: linear-gradient(180deg, #bdd9b5 0%, #bdd9b5 100%);
+  --gradient-button-primary-active: linear-gradient(180deg, #8fb787 0%, #8fb787 100%);
   --aelo-button-primary-surface: var(--aelo-primary);
-  --aelo-on-primary: #18232e;
+  --aelo-on-primary: #16200f;
   --color-button-ghost-background: transparent;
-  --color-button-ghost-hover: #2d3948;
-  --color-button-ghost-active: #3a434f;
+  --color-button-ghost-hover: #382f26;
+  --color-button-ghost-active: #3a322a;
   --color-button-ghost-disabled: transparent;
-  --color-button-ghost-foreground: #a5bbd2;
+  --color-button-ghost-foreground: #a9cba0;
   /* Same selector weight as :root, so every light override needs its dark value here. */
-  --color-status-lime-background: color-mix(in srgb, var(--color-lime-950) 60%, transparent);
-  --color-status-yellow-background: color-mix(in srgb, var(--color-yellow-950) 60%, transparent);
-  --color-status-rose-background: color-mix(in srgb, var(--color-rose-950) 60%, transparent);
-  --color-status-blue-background: color-mix(in srgb, var(--color-blue-950) 60%, transparent);
-  --color-status-rose-text: var(--color-rose-400);
-  --aelo-field-border: #738397;
-  --aelo-thread: #86a7c4;
-  --aelo-thread-end: #c3a26a;
+  --color-status-lime-background: #213528;
+  --color-status-lime-text: #9bd4ab;
+  --color-status-yellow-background: #3f3317;
+  --color-status-yellow-text: #f0c36a;
+  --color-status-rose-background: #43221e;
+  --color-status-rose-text: #ffa89c;
+  --color-status-blue-background: #1f3340;
+  --color-status-blue-text: #9ccbe4;
+  --color-status-cyan-background: #2a3a2c;
+  --color-status-cyan-text: #a9cba0;
+  --color-status-orange-background: #3f2a20;
+  --color-status-orange-text: #e8a27c;
+  --aelo-field-border: #8f8272;
+  --aelo-thread: #a9cba0;
+  --aelo-thread-end: #e8a27c;
+  --aelo-accent: #e8a27c;
+  --aelo-accent-soft: #3f2a20;
+  --aelo-hero-bg: #26382b;
+  --aelo-hero-text: #f3ebdd;
+  --aelo-hero-mark: #e8a27c;
+  --aelo-shadow-panel: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.5);
 }
 
 @layer components {
-  /* The system speaks in sans; the record speaks in serif. */
+  /* The system speaks in sans; the record speaks in serif; titles use the display face. */
   .aelo-record {
     font-family: var(--font-serif);
     font-size: 1.0625rem;
-    line-height: 1.7;
-    max-width: 72ch;
+    line-height: 1.75;
+    max-width: 68ch;
   }
 
   .aelo-page-title {
-    font-family: var(--font-serif);
-    font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    font-weight: 540;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
     text-wrap: balance;
   }
 
-  /* Continuity thread: the line and dot of the mark, used only for "you are here"
-     and for the sequence of sessions. */
-  .aelo-nav-link,
-  .aelo-thread-item {
+  .aelo-display {
+    font-family: var(--font-display);
+    font-weight: 540;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+  }
+
+  /* Calm brand panel (login). Colors come from tokens so both themes stay in contrast. */
+  .aelo-hero {
+    background: var(--aelo-hero-bg);
+    color: var(--aelo-hero-text);
+  }
+
+  /* Navigation: the current page is a soft olive pill, not a decoration. */
+  .aelo-nav-link[aria-current="page"] {
+    background: var(--color-accent-100);
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .dark .aelo-nav-link[aria-current="page"] {
+    background: #2a3a2c;
+  }
+
+  /* Sequence of sessions: a vertical line with one dot per session. Use only for that sequence. */
+  .aelo-thread-list {
     position: relative;
   }
 
-  .aelo-nav-link[aria-current="page"]::before,
+  .aelo-thread-list::before {
+    content: "";
+    position: absolute;
+    inset-block: 0.625rem;
+    inset-inline-start: 0.6875rem;
+    width: 2px;
+    background: var(--color-separator-border);
+  }
+
+  .aelo-thread-item {
+    position: relative;
+    padding-inline-start: 2.25rem;
+  }
+
   .aelo-thread-item::before {
     content: "";
     position: absolute;
-    inset-block: 0.25rem;
-    inset-inline-start: 0;
-    width: 2px;
+    inset-block-start: 1.125rem;
+    inset-inline-start: 0.25rem;
+    width: 0.875rem;
+    height: 0.875rem;
     border-radius: 999px;
+    border: 3px solid var(--aelo-thread);
     background: var(--aelo-thread);
   }
 
-  .aelo-nav-link[aria-current="page"]::after,
-  .aelo-thread-item::after {
-    content: "";
-    position: absolute;
-    inset-block-end: 0.25rem;
-    inset-inline-start: -2.5px;
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: var(--aelo-thread-end);
+  .aelo-thread-item[data-state="today"]::before {
+    border-color: var(--aelo-accent);
+    background: var(--aelo-accent);
   }
 
-  .aelo-thread-list > .aelo-thread-item {
-    padding-inline-start: 1.25rem;
+  .aelo-thread-item[data-state="open"]::before {
+    background: var(--color-background-primary-default);
+    border-color: var(--aelo-field-border);
   }
 }
 

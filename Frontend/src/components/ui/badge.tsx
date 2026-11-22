@@ -1,4 +1,4 @@
-import { Check, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
+import { RiAlertLine, RiCheckLine, RiErrorWarningLine, type RemixiconComponentType } from "@remixicon/react";
 import { Chip, type ChipColor } from "@/components/base/badges/chip";
 import { cx } from "@/utils/cx";
 
@@ -7,7 +7,7 @@ type BadgeVariant = "default" | "success" | "warning" | "muted" | "critical";
 const colors = { default: "cyan", success: "lime", warning: "yellow", muted: "soft", critical: "rose" } as const satisfies Record<BadgeVariant, ChipColor>;
 
 /** Status must not rely on color alone; counters can turn the mark off. */
-const icons: Partial<Record<BadgeVariant, LucideIcon>> = { success: Check, warning: TriangleAlert, critical: OctagonAlert };
+const icons: Partial<Record<BadgeVariant, RemixiconComponentType>> = { success: RiCheckLine, warning: RiAlertLine, critical: RiErrorWarningLine };
 
 export function Badge({
   className,

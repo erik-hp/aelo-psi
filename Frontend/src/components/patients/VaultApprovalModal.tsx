@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, FileCheck, ShieldCheck } from "lucide-react";
+import { RiCheckboxCircleLine, RiFileCheckLine, RiShieldCheckLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,7 +64,7 @@ export function VaultApprovalModal({
             </p>
           </div>
           <Badge variant="success" className="shrink-0 gap-1 py-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-status-lime-text" />
+            <RiShieldCheckLine className="h-3.5 w-3.5 text-status-lime-text" />
             Auditável
           </Badge>
         </div>
@@ -73,7 +73,7 @@ export function VaultApprovalModal({
         <div className="rounded-md border border-border-button-default bg-background-secondary-default p-3 text-caption-1-regular space-y-1.5">
           <div className="flex items-center justify-between font-mono text-caption-1-regular text-text-secondary">
             <span className="flex items-center gap-1.5 text-body-medium text-text-primary">
-              <FileCheck className="h-3.5 w-3.5 text-status-blue-text" />
+              <RiFileCheckLine className="h-3.5 w-3.5 text-status-blue-text" />
               Selo Criptográfico de Integridade
             </span>
             <span>SHA-256</span>
@@ -149,7 +149,7 @@ export function VaultApprovalModal({
             onClick={() => onConfirm(justification.trim())}
             className="gap-2 px-5 text-body-semibold"
           >
-            <CheckCircle2 className="h-4 w-4" />
+            <RiCheckboxCircleLine className="h-4 w-4" />
             Assinar aprovação
           </Button>
         </div>

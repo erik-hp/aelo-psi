@@ -44,10 +44,19 @@ This project uses BoardUI (React + Tailwind CSS v4, source-owned components unde
 When unsure about a token, a component's API, or working example code, ask the BoardUI MCP server: `get_theme`, `get_component`, `get_usage_examples`.
 <!-- boardui:rules:end -->
 
-## AELO design system
+## AELO design system "Abrigo" (decisão do autor, 2026-11-22)
 
-The AELO layer over BoardUI lives in `src/styles/aelo-tokens.css`, with the guide in `docs/design/AELO_DESIGN_SYSTEM.md` at the repository root. Keep using semantic tokens: change meanings there, never with literals in components.
+O autor autorizou deixar de exigir BoardUI nas telas e adotar o sistema **Abrigo**. Guia: `docs/design/AELO_DESIGN_SYSTEM_ABRIGO.md` (raiz do repositório); protótipo: `docs/design/prototipos/aelo-abrigo-prototipos.html`. Onde estas regras conflitarem com o bloco BoardUI acima, **estas valem**. O que não conflita continua valendo.
 
-- `aelo-record` is for clinical narrative, and `aelo-page-title` for page titles. Everything else stays in the sans family.
-- The continuity thread (`aelo-nav-link`, `aelo-thread-list`, `aelo-thread-item`) marks only the current page and the sequence of sessions.
-- Run `npx vitest run src/styles/aelo-tokens.test.ts` after changing colors.
+- **Tokens semânticos continuam obrigatórios.** Nenhuma cor literal (hex, oklch, `text-gray-500`) em componente: mude o significado do token em `src/styles/aelo-tokens.css`.
+- **BoardUI deixa de ser obrigatório.** Componentes BoardUI já instalados continuam funcionando e herdam os tokens do Abrigo. Código novo pode usar `components/ui/*`; não instale mais componentes BoardUI só para evitar escrever o próprio.
+- **Ícones:** um único conjunto, `@remixicon/react`. Não adicione `lucide-react` em código novo; ao tocar um arquivo que o use, troque.
+- **Tipografia:** `aelo-page-title` e `aelo-display` (Fraunces) só para títulos de página e números grandes; `aelo-record` (Source Serif 4) só para texto que uma pessoa escreveu sobre o atendimento; todo o resto em sans (Atkinson). Fontes ficam hospedadas no site (CSP): Fraunces está em `src/assets/fonts/`.
+- **Forma:** painéis `rounded-3xl` com `clinical-panel` (borda + sombra suave); controles `rounded-xl`; status em pílula. Alvos de toque de pelo menos 44 px.
+- **Acento argila** (`--aelo-accent`) só para contador, marcador de "hoje" e pendência. Nunca como botão principal e nunca como único sinal de estado.
+- **Linha de sessões** (`aelo-thread-list` / `aelo-thread-item`, com `data-state="today|open"`) só para a sequência de sessões.
+- **Saída de IA** aparece sempre em caixa tracejada, rotulada como sugestão local, e nada entra no registro sem aceite da pessoa.
+- Rótulos e textos de interface em português, sem códigos internos (`PSYCHOLOGIST`) nem jargão de projeto.
+- Rode `npx vitest run src/styles/aelo-tokens.test.ts` depois de mudar cores.
+
+Os invariantes técnicos e éticos do `AGENTS.md` da raiz (dados só sintéticos, autorização no back-end, falha explícita da IA) **não mudam**.

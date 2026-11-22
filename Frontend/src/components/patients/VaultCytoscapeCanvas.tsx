@@ -11,7 +11,7 @@ import {
   type SimulationLinkDatum,
   type SimulationNodeDatum,
 } from "d3-force";
-import { Maximize2, Minus, Plus } from "lucide-react";
+import { RiAddLine, RiFullscreenLine, RiSubtractLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import type { VaultGraph } from "@/types/vault";
 
@@ -70,9 +70,30 @@ export function VaultCytoscapeCanvas({
     // A concept grows with every link it receives.
     const sizeOf = (id: string) => 12 + Math.min(30, (degree.get(id) ?? 0) * 7);
 
+    // Each group of two or more concepts becomes a translucent area, so groups are visible on the map.
+    const known = new Set(graph.nodes.map((node) => node.id));
+    const parentOf = new Map<string, string>();
+    const groups = graph.communities
+      .map((community) => community.filter((id) => known.has(id) && !parentOf.has(id)))
+      .filter((members) => members.length >= 2);
+    groups.forEach((members, index) => members.forEach((id) => parentOf.set(id, `group-${index}`)));
+
+    // A group is named after its most connected concept, using the note's own words (no interpretive label).
+    const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+    const titleOf = (members: string[]) => {
+      const central = members.reduce((best, id) =>
+        (degree.get(id) ?? 0) > (degree.get(best) ?? 0) ||
+        ((degree.get(id) ?? 0) === (degree.get(best) ?? 0) && (nodeById.get(id)?.mention_count ?? 0) > (nodeById.get(best)?.mention_count ?? 0))
+          ? id
+          : best,
+      );
+      return `Em torno de ${nodeById.get(central)?.label ?? ""}`;
+    };
+
     const elements: ElementDefinition[] = [
+      ...groups.map((members, index) => ({ data: { id: `group-${index}`, group: titleOf(members) } })),
       ...graph.nodes.map((node) => ({
-        data: { id: node.id, label: node.label, kind: node.kind, size: sizeOf(node.id) },
+        data: { id: node.id, label: node.label, kind: node.kind, size: sizeOf(node.id), ...(parentOf.has(node.id) ? { parent: parentOf.get(node.id) } : {}) },
       })),
       ...graph.edges.map((edge) => ({
         data: { id: edge.id, source: edge.source, target: edge.target },
@@ -93,7 +114,30 @@ export function VaultCytoscapeCanvas({
       maxZoom: 3,
       style: [
         {
-          selector: "node",
+          selector: "node:parent",
+          style: {
+            shape: "round-rectangle",
+            "background-color": text,
+            "background-opacity": 0.06,
+            "border-width": 1,
+            "border-style": "dashed",
+            "border-color": text,
+            "border-opacity": 0.35,
+            padding: "22px",
+            label: "data(group)",
+            color: strong,
+            "font-size": "13px",
+            "font-weight": 600,
+            "text-valign": "top",
+            "text-halign": "center",
+            "text-margin-y": -4,
+            "text-wrap": "wrap",
+            "text-max-width": "170px",
+            "min-zoomed-font-size": 9,
+          },
+        },
+        {
+          selector: "node:childless",
           style: {
             width: "data(size)",
             height: "data(size)",
@@ -101,10 +145,10 @@ export function VaultCytoscapeCanvas({
             "border-width": 0,
             label: "data(label)",
             color: text,
-            "font-size": "11px",
-            "min-zoomed-font-size": 7,
-            "text-wrap": "ellipsis",
-            "text-max-width": "120px",
+            "font-size": "13px",
+            "min-zoomed-font-size": 9,
+            "text-wrap": "wrap",
+            "text-max-width": "110px",
             "text-valign": "bottom",
             "text-margin-y": 5,
             "text-outline-color": surface,
@@ -157,10 +201,10 @@ export function VaultCytoscapeCanvas({
     );
 
     const simulation = forceSimulation(bodies)
-      .force("charge", forceManyBody<Body>().strength(-260).distanceMax(420))
-      .force("link", forceLink<Body, SimulationLinkDatum<Body>>(links).id((body) => body.id).distance(80).strength(0.7))
-      .force("ties", forceLink<Body, SimulationLinkDatum<Body>>(ties).id((body) => body.id).distance(110).strength(0.06))
-      .force("collide", forceCollide<Body>((body) => sizeOf(body.id) / 2 + 16))
+      .force("charge", forceManyBody<Body>().strength(-380).distanceMax(480))
+      .force("link", forceLink<Body, SimulationLinkDatum<Body>>(links).id((body) => body.id).distance(90).strength(0.7))
+      .force("ties", forceLink<Body, SimulationLinkDatum<Body>>(ties).id((body) => body.id).distance(80).strength(0.3))
+      .force("collide", forceCollide<Body>((body) => sizeOf(body.id) / 2 + 40))
       .force("center", forceCenter(0, 0))
       .force("gravityX", forceX(0).strength(0.06))
       .force("gravityY", forceY(0).strength(0.06))
@@ -175,7 +219,7 @@ export function VaultCytoscapeCanvas({
     };
     const sync = () =>
       cy.batch(() => {
-        cy.nodes().forEach((node, index) => {
+        cy.nodes(":childless").forEach((node, index) => {
           const body = byId.get(node.id());
           if (body && !node.grabbed()) node.position({ x: body.x ?? 0, y: body.y ?? 0 });
           node.data("size", grown(node.id(), index));
@@ -187,7 +231,7 @@ export function VaultCytoscapeCanvas({
     simulation.stop();
     simulation.tick(160);
     sync();
-    cy.fit(undefined, 60);
+    cy.fit(undefined, 40);
     simulation.alpha(0.25).restart();
 
     const pin = (id: string, x: number | null, y: number | null) => {
@@ -197,25 +241,25 @@ export function VaultCytoscapeCanvas({
         body.fy = y;
       }
     };
-    cy.on("grab", "node", (event) => {
+    cy.on("grab", "node:childless", (event) => {
       pin(event.target.id(), event.target.position("x"), event.target.position("y"));
       simulation.alphaTarget(0.3).restart();
     });
-    cy.on("drag", "node", (event) => pin(event.target.id(), event.target.position("x"), event.target.position("y")));
-    cy.on("free", "node", (event) => {
+    cy.on("drag", "node:childless", (event) => pin(event.target.id(), event.target.position("x"), event.target.position("y")));
+    cy.on("free", "node:childless", (event) => {
       pin(event.target.id(), null, null);
       simulation.alphaTarget(0);
     });
 
     // Hover: the concept and its neighbours stay lit, everything else recedes.
-    cy.on("mouseover", "node", (event) => {
+    cy.on("mouseover", "node:childless", (event) => {
       const near = event.target.closedNeighborhood();
       cy.elements().not(near).addClass("faded");
       near.addClass("hover");
     });
-    cy.on("mouseout", "node", () => cy.elements().removeClass("faded hover"));
+    cy.on("mouseout", "node:childless", () => cy.elements().removeClass("faded hover"));
 
-    cy.on("tap", "node", (event) => {
+    cy.on("tap", "node:childless", (event) => {
       onSelectNode(event.target.id());
     });
 
@@ -241,7 +285,7 @@ export function VaultCytoscapeCanvas({
 
   const handleFit = () => {
     if (!instance.current) return;
-    instance.current.fit(undefined, 25);
+    instance.current.fit(undefined, 40);
   };
 
   return (
@@ -270,7 +314,7 @@ export function VaultCytoscapeCanvas({
             aria-label="Aumentar zoom"
             className="h-8 w-8 text-text-primary hover:bg-background-secondary-default"
           >
-            <Plus className="h-4 w-4" />
+            <RiAddLine className="h-4 w-4" />
           </Button>
 
           <Button
@@ -282,7 +326,7 @@ export function VaultCytoscapeCanvas({
             aria-label="Diminuir zoom"
             className="h-8 w-8 text-text-primary hover:bg-background-secondary-default"
           >
-            <Minus className="h-4 w-4" />
+            <RiSubtractLine className="h-4 w-4" />
           </Button>
 
           <div className="my-0.5 border-t border-border-button-default" />
@@ -296,7 +340,7 @@ export function VaultCytoscapeCanvas({
             aria-label="Ajustar e centralizar grafo"
             className="h-8 w-8 text-text-primary hover:bg-background-secondary-default"
           >
-            <Maximize2 className="h-3.5 w-3.5" />
+            <RiFullscreenLine className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -322,6 +366,10 @@ export function VaultCytoscapeCanvas({
             <span>Intervenção</span>
           </span>
         </div>
+        <p className="basis-full text-text-secondary">
+          Quanto maior o círculo, mais ligações o conceito tem. Linhas ligam conceitos que aparecem relacionados nas notas. Áreas tracejadas
+          agrupam conceitos próximos e não configuram diagnóstico.
+        </p>
       </div>
     </div>
   );

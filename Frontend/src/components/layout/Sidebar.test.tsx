@@ -65,7 +65,7 @@ describe("Sidebar Navigation and Zeigarnik Counters", () => {
     expect(screen.getByText(/Atendimento Clínico/i)).toBeDefined();
     expect(screen.getByText(/Governança e gestão/i)).toBeDefined();
 
-    expect(screen.getByRole("link", { name: /Dashboard/i })).toBeDefined();
+    expect(screen.getByRole("link", { name: /Hoje/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Agenda/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Pacientes/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Editor Clínico/i })).toBeDefined();

@@ -15,7 +15,7 @@ export function AeloBrand({ subtitle, size = "compact", titleAs: Title = "p", cl
     <div className={cn("flex min-w-0 items-center gap-3", className)}>
       <img src="/brand/aelo-app-icon.svg" alt="" width={iconSize} height={iconSize} className="shrink-0 rounded-xl" />
       <div className="min-w-0">
-        <Title className={regular ? "text-title-1-semibold" : "text-title-3-semibold"} translate="no">AELO</Title>
+        <Title className={cn("aelo-display", regular ? "text-title-1-semibold" : "text-title-3-semibold")} translate="no">AELO</Title>
         {subtitle ? <p className={cn("text-text-secondary", regular ? "text-body-regular" : "text-caption-1-regular")}>{subtitle}</p> : null}
       </div>
     </div>

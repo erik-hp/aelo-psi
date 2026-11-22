@@ -49,10 +49,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Instrument Sans Variable", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Atkinson Hyperlegible Next Variable", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Fraunces", "Georgia", "serif"],
       },
       boxShadow: {
-        clinical: "0 20px 80px -45px rgba(14, 114, 105, 0.32)",
+        clinical: "0 20px 80px -45px rgba(60, 40, 20, 0.32)",
       },
     },
   },

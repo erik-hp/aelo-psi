@@ -29,7 +29,7 @@ let client: QueryClient;
 afterEach(() => { cleanup(); client?.clear(); });
 
 const pages = [
-  [DashboardPage, "Dashboard clínico"], [PatientsPage, "Pacientes"],
+  [DashboardPage, "Hoje"], [PatientsPage, "Pacientes"],
   [PatientProfilePage, patients[0].name], [AgendaPage, "Agenda clínica"],
   [NarrativeEditorPage, "Editor narrativo de prontuário"], [FinancePage, "Financeiro"],
   [AuditPage, "Trilha de Auditoria"], [UsersPage, "Usuários"],

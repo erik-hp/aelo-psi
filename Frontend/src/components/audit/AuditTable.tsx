@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, FileCode2, KeyRound, ShieldCheck, X } from "lucide-react";
+import { RiCloseLine, RiEyeLine, RiFileCodeLine, RiKey2Line, RiShieldCheckLine } from "@remixicon/react";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ export interface AuditTableProps {
   events: AuditEvent[];
   onSelectEvent?: (event: AuditEvent) => void;
 }
+
+const ROLE_LABELS: Record<string, string> = { ADMIN: "Administração", PSYCHOLOGIST: "Psicologia", INTERN: "Estágio" };
 
 export function getEventCategory(event: AuditEvent): {
   variant: "default" | "success" | "warning" | "muted" | "critical";
@@ -87,7 +89,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
                     : "muted"
                 }
               >
-                {event.role}
+                {ROLE_LABELS[event.role] ?? event.role}
               </Badge>
             ),
           },
@@ -131,7 +133,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
                 }}
                 aria-label={`Inspecionar evento ${event.id}`}
               >
-                <Eye className="h-3.5 w-3.5" />
+                <RiEyeLine className="h-3.5 w-3.5" />
                 Inspecionar
               </Button>
             ),
@@ -145,7 +147,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             <div className="flex items-start justify-between border-b border-border-button-default pb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-status-lime-text" />
+                  <RiShieldCheckLine className="h-5 w-5 text-status-lime-text" />
                   <h2 id="audit-detail-title" className="text-title-3-bold text-text-primary">
                     Inspeção técnica de auditoria
                   </h2>
@@ -160,7 +162,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
                 onClick={() => setActiveEvent(null)}
                 aria-label="Fechar detalhes técnicos"
               >
-                <X className="h-4 w-4" />
+                <RiCloseLine className="h-4 w-4" />
               </Button>
             </div>
 
@@ -178,7 +180,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
               <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 space-y-1">
                 <span className="text-text-secondary">Usuário responsável e perfil</span>
                 <p className="text-body-semibold text-text-primary">
-                  {activeEvent.actor}, <Badge variant="muted">{activeEvent.role}</Badge>
+                  {activeEvent.actor}, <Badge variant="muted">{ROLE_LABELS[activeEvent.role] ?? activeEvent.role}</Badge>
                 </p>
               </div>
 
@@ -204,7 +206,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             {/* Hash Criptográfico SHA-256 (Cadeia de Custódia) */}
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-caption-1-semibold text-text-primary">
-                <KeyRound className="h-3.5 w-3.5 text-status-lime-text" />
+                <RiKey2Line className="h-3.5 w-3.5 text-status-lime-text" />
                 Hash de integridade (SHA-256):
               </div>
               <div className="rounded-md border border-status-lime-text bg-status-lime-background p-2.5 font-mono text-caption-1-regular break-all text-status-lime-text select-all">
@@ -218,7 +220,7 @@ export function AuditTable({ events, onSelectEvent }: AuditTableProps) {
             {/* Payload Técnico JSON */}
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-caption-1-semibold text-text-primary">
-                <FileCode2 className="h-3.5 w-3.5 text-status-blue-text" />
+                <RiFileCodeLine className="h-3.5 w-3.5 text-status-blue-text" />
                 Dados de rastreabilidade:
               </div>
               <pre className="max-h-48 overflow-y-auto rounded-lg border border-border-button-default bg-background-secondary-default p-3 text-caption-1-regular font-mono text-text-primary">

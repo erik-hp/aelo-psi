@@ -3,16 +3,16 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  AlertTriangle,
-  Brain,
-  Clock,
-  FileText,
-  Network,
-  Send,
-  Sparkles,
-  TrendingUp,
-  User,
-} from "lucide-react";
+  RiAlertLine,
+  RiBrainLine,
+  RiFileTextLine,
+  RiNodeTree,
+  RiSendPlaneLine,
+  RiSparklingLine,
+  RiTimeLine,
+  RiUserLine,
+  RiLineChartLine,
+} from "@remixicon/react";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { PatientVault } from "@/components/patients/PatientVault";
 import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
@@ -136,10 +136,10 @@ function SessionAnalysisBlock({
   });
 
   return (
-    <div className="rounded-lg border border-border-button-default bg-background-secondary-default p-3 transition-colors hover:border-border-focus-ring">
+    <div className="rounded-2xl border border-dashed border-[var(--aelo-thread)] bg-background-secondary-default p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-caption-1-medium text-text-secondary">
-          <Brain className="h-4 w-4 text-status-blue-text" />
+          <RiBrainLine aria-hidden="true" className="size-4 text-[var(--aelo-thread)]" />
           <span>Análise Assistiva por IA (Sessão {session.id.slice(0, 8)})</span>
         </div>
         <Button
@@ -178,7 +178,7 @@ function SessionAnalysisBlock({
               }}
               className="gap-1.5"
             >
-              <Send className="h-3.5 w-3.5" />
+              <RiSendPlaneLine aria-hidden="true" className="size-4" />
               {mutation.isPending ? "Processando…" : !isApiMode ? "Enviar para análise" : preview !== null ? "Confirmar envio à IA" : "Revisar texto para IA"}
             </Button>
           </div>
@@ -278,7 +278,7 @@ export function PatientProfilePage() {
     <>
       <PageHeader
         title={data.patient.name}
-        description="Histórico de sessões, notas e análises assistivas deste paciente."
+        description={`${data.patient.age === null ? "Idade não informada" : `${data.patient.age} anos`}, ${data.patient.therapist}. Sessões, notas e análises assistivas.`}
         action={
           isApiMode ? (
             <div className="flex flex-wrap gap-2">
@@ -299,21 +299,21 @@ export function PatientProfilePage() {
 
       {/* Particionamento em 4 Abas Clínicas com foco e teclado acessível (WAI-ARIA) */}
       <Tabs selectedKey={activeTab} onSelectionChange={(key) => setActiveTab(String(key))} className="mt-4 min-w-0 gap-6">
-        <TabList showIndicator={false} aria-label="Seções do prontuário" className="grid w-full grid-cols-1 gap-1 rounded-xl bg-background-secondary-default p-1 sm:grid-cols-2 xl:grid-cols-4">
-          <Tab id="overview" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
-            <User className="h-4 w-4" />
+        <TabList showIndicator={false} aria-label="Seções do prontuário" className="grid w-full grid-cols-1 gap-1 rounded-2xl bg-background-secondary-default p-1.5 sm:grid-cols-2 xl:grid-cols-4">
+          <Tab id="overview" className="min-h-11 justify-center rounded-xl py-3 data-[selected]:bg-background-primary-default data-[selected]:shadow-[var(--aelo-shadow-panel)]">
+            <RiUserLine aria-hidden="true" className="size-4" />
             Resumo clínico
           </Tab>
-          <Tab id="sessions" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
-            <FileText className="h-4 w-4" />
+          <Tab id="sessions" className="min-h-11 justify-center rounded-xl py-3 data-[selected]:bg-background-primary-default data-[selected]:shadow-[var(--aelo-shadow-panel)]">
+            <RiFileTextLine aria-hidden="true" className="size-4" />
             Prontuários e sessões
           </Tab>
-          <Tab id="longitudinal" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
-            <TrendingUp className="h-4 w-4" />
+          <Tab id="longitudinal" className="min-h-11 justify-center rounded-xl py-3 data-[selected]:bg-background-primary-default data-[selected]:shadow-[var(--aelo-shadow-panel)]">
+            <RiLineChartLine aria-hidden="true" className="size-4" />
             Evolução
           </Tab>
-          <Tab id="vault" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
-            <Network className="h-4 w-4" />
+          <Tab id="vault" className="min-h-11 justify-center rounded-xl py-3 data-[selected]:bg-background-primary-default data-[selected]:shadow-[var(--aelo-shadow-panel)]">
+            <RiNodeTree aria-hidden="true" className="size-4" />
             Memória clínica
           </Tab>
         </TabList>
@@ -343,7 +343,7 @@ export function PatientProfilePage() {
                         key={item.id}
                         variant="muted"
                       >
-                        <Clock className="mr-1 h-3.5 w-3.5" />
+                        <RiTimeLine aria-hidden="true" className="mr-1 size-4" />
                         {item.date} às {item.time}
                       </Badge>
                     ))
@@ -356,10 +356,10 @@ export function PatientProfilePage() {
           </section>
 
           {/* Síntese Atual dos Prontuários */}
-           {isApiMode ? <><PatientAccessPanel patientId={patientId} />{user?.role === "ADMIN" ? <EmptyState title="Conteúdo clínico restrito" description="A administração operacional gerencia cadastro e vínculos iniciais, sem acesso a prontuários ou sínteses clínicas." /> : <section className="space-y-4"><h2 className="text-headline-semibold">Análises assistivas registradas</h2>{data.analyses.length ? data.analyses.map((item) => <AIAnalysisCard key={item.id} analysis={item} />) : <EmptyState title="Nenhuma análise registrada" description="A ausência de análise não representa ausência de risco. A avaliação clínica pertence ao profissional." />}</section>}</> : <Card className="border-border-button-default">
+           {isApiMode ? <><PatientAccessPanel patientId={patientId} />{user?.role === "ADMIN" ? <EmptyState title="Conteúdo clínico restrito" description="A administração operacional gerencia cadastro e vínculos iniciais, sem acesso a prontuários ou sínteses clínicas." /> : <section className="space-y-4"><h2 className="aelo-display text-xl">Análises assistivas registradas</h2>{data.analyses.length ? data.analyses.map((item) => <AIAnalysisCard key={item.id} analysis={item} />) : <EmptyState title="Nenhuma análise registrada" description="A ausência de análise não representa ausência de risco. A avaliação clínica pertence ao profissional." />}</section>}</> : <Card className="border-border-button-default">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-headline-regular">
-                <Sparkles className="h-4 w-4 text-status-blue-text" />
+                <RiSparklingLine aria-hidden="true" className="size-4 text-[var(--aelo-thread)]" />
                 Síntese clínica consolidada da IA consultiva
               </CardTitle>
             </CardHeader>
@@ -387,7 +387,7 @@ export function PatientProfilePage() {
 
               <section className="space-y-2">
                 <h3 className="flex items-center gap-2 text-body-medium">
-                  <AlertTriangle className="h-4 w-4 text-status-yellow-text" />
+                  <RiAlertLine aria-hidden="true" className="size-4 text-status-yellow-text" />
                   Possíveis inconsistências documentais para revisão
                 </h3>
                 <ul className="aelo-record list-inside list-disc space-y-1 text-text-secondary">
@@ -415,7 +415,7 @@ export function PatientProfilePage() {
         <TabPanel id="sessions" className="min-w-0 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-button-default pb-3">
             <div>
-              <h2 className="text-headline-semibold">Histórico de atendimentos e prontuários</h2>
+              <h2 className="aelo-display text-xl">Histórico de atendimentos e prontuários</h2>
               <p className="text-caption-1-regular text-text-secondary">
                 Evoluções documentais da psicoterapia com editor de análise colapsável sob demanda.
               </p>
@@ -448,7 +448,7 @@ export function PatientProfilePage() {
         {/* ABA 3: EVOLUÇÃO LONGITUDINAL */}
         <TabPanel id="longitudinal" className="min-w-0 space-y-6">
           <div className="border-b border-border-button-default pb-3">
-            <h2 className="text-headline-semibold">Métricas e Evolução</h2>
+            <h2 className="aelo-display text-xl">Métricas e Evolução</h2>
             <p className="text-caption-1-regular text-text-secondary">
               {isApiMode
                 ? "Sinais linguísticos exploratórios extraídos das notas, por análise."

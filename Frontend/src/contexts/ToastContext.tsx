@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { RiCheckboxCircleLine, RiCloseCircleLine } from "@remixicon/react";
 import { ToastContext, type Toast } from "@/contexts/toastContextValue";
 import { cn } from "@/lib/utils";
 
@@ -23,9 +23,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((toast) => (
           <div key={toast.id} className="clinical-panel flex gap-3 p-4">
             {toast.type === "error" ? (
-              <XCircle className="mt-0.5 h-5 w-5 text-text-error-primary" />
+              <RiCloseCircleLine className="mt-0.5 h-5 w-5 text-text-error-primary" />
             ) : (
-              <CheckCircle2 className={cn("mt-0.5 h-5 w-5", toast.type === "success" ? "text-status-lime-text" : "text-status-blue-text")} />
+              <RiCheckboxCircleLine className={cn("mt-0.5 h-5 w-5", toast.type === "success" ? "text-status-lime-text" : "text-status-blue-text")} />
             )}
             <div>
               <p className="text-body-medium">{toast.title}</p>

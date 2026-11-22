@@ -88,9 +88,9 @@ export function AuditPage() {
             className="w-full sm:w-44"
           >
             <option value="all">Todos os perfis</option>
-            <option value="ADMIN">ADMIN</option>
-            <option value="PSYCHOLOGIST">PSYCHOLOGIST</option>
-            <option value="INTERN">INTERN</option>
+            <option value="ADMIN">Administração</option>
+            <option value="PSYCHOLOGIST">Psicologia</option>
+            <option value="INTERN">Estágio</option>
           </Select>
 
           <Select

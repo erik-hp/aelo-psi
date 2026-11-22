@@ -1,4 +1,4 @@
-import { Calendar, ExternalLink, FileText, MousePointerClick, Quote } from "lucide-react";
+import { RiCalendarLine, RiCursorLine, RiDoubleQuotesL, RiExternalLinkLine, RiFileTextLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { VaultGraph, VaultNodeKind, VaultRelationType } from "@/types/vault";
@@ -30,7 +30,7 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
   if (!selected) {
     return (
       <div className="flex min-h-[380px] flex-col items-center justify-center rounded-lg border border-dashed border-border-button-default p-6 text-center text-body-regular text-text-secondary">
-        <MousePointerClick className="mb-2 h-8 w-8 text-text-secondary" />
+        <RiCursorLine className="mb-2 h-8 w-8 text-text-secondary" />
         <p className="text-body-medium text-text-primary">Nenhum conceito selecionado</p>
         <p className="mt-1 max-w-xs text-caption-1-regular">
           Clique em qualquer conceito no mapa para inspecionar as evidências literais citadas pelo paciente e sua rastreabilidade no prontuário.
@@ -54,7 +54,7 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
         <h3 className="mt-2 text-headline-semibold text-text-primary">{selected.label}</h3>
         {selected.first_seen_at && (
           <p className="mt-1 flex items-center gap-1.5 text-caption-1-regular text-text-secondary">
-            <Calendar className="h-3.5 w-3.5" />
+            <RiCalendarLine className="h-3.5 w-3.5" />
             Primeira menção em {new Date(selected.first_seen_at).toLocaleDateString("pt-BR")}
             {selected.last_seen_at && selected.last_seen_at !== selected.first_seen_at
               ? `, mais recente em ${new Date(selected.last_seen_at).toLocaleDateString("pt-BR")}`
@@ -66,7 +66,7 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
       {/* Lista de Relações e Evidências Literais (Lei da Proximidade da Gestalt) */}
       <div className="space-y-3">
         <h4 className="flex items-center gap-1.5 text-caption-1-semibold text-text-secondary">
-          <Quote className="h-3.5 w-3.5 text-status-blue-text" />
+          <RiDoubleQuotesL className="h-3.5 w-3.5 text-status-blue-text" />
           Evidências literais no prontuário ({edges.length})
         </h4>
 
@@ -114,9 +114,9 @@ export function VaultNodeInspector({ graph, nodeId, onSelectNote }: VaultNodeIns
                       className="inline-flex items-center gap-1 text-body-medium text-status-blue-text hover:underline hover:text-status-blue-text transition-colors"
                       title={`Ver contexto completo na nota nº ${edge.note_id}`}
                     >
-                      <FileText className="h-3 w-3" />
+                      <RiFileTextLine className="h-3 w-3" />
                       Nota original nº {edge.note_id}
-                      <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                      <RiExternalLinkLine className="h-2.5 w-2.5 opacity-70" />
                     </button>
                     <span>{new Date(edge.observed_at).toLocaleDateString("pt-BR")}</span>
                   </div>

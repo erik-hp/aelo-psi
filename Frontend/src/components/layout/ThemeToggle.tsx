@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+import { RiMoonLine, RiSunLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { useThemeStore } from "@/store/themeStore";
 
@@ -7,7 +7,7 @@ export function ThemeToggle() {
   const setTheme = useThemeStore((state) => state.setTheme);
   const nextTheme = theme === "dark" ? "light" : "dark";
   const label = nextTheme === "dark" ? "Usar tema escuro" : "Usar tema claro";
-  const Icon = nextTheme === "dark" ? Moon : Sun;
+  const Icon = nextTheme === "dark" ? RiMoonLine : RiSunLine;
 
   return (
     <Button size="icon" variant="ghost" aria-label={label} title={label} onClick={() => setTheme(nextTheme)}>

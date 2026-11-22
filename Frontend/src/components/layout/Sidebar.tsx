@@ -1,17 +1,17 @@
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  CalendarClock,
-  ClipboardList,
-  ClockAlert,
-  DollarSign,
-  FileEdit,
-  LayoutDashboard,
-  Settings,
-  ShieldCheck,
-  Users,
-  X,
-} from "lucide-react";
+  RiCalendarLine,
+  RiCloseLine,
+  RiEdit2Line,
+  RiGroupLine,
+  RiHome4Line,
+  RiKey2Line,
+  RiMoneyDollarCircleLine,
+  RiSettings3Line,
+  RiShieldCheckLine,
+  RiTimeLine,
+} from "@remixicon/react";
 import { AeloBrand } from "@/components/brand/AeloBrand";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -35,17 +35,17 @@ interface NavItem {
 }
 
 const clinicalItems: NavItem[] = [
-  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard, permission: "dashboard:read" },
-  { label: "Agenda", to: "/agenda", icon: CalendarClock, permission: "sessions:read", badge: "agenda" },
-  { label: "Pacientes", to: "/patients", icon: Users, permission: "patients:read" },
-  { label: "Editor Clínico", to: "/editor", icon: FileEdit, permission: "notes:write" },
+  { label: "Hoje", to: "/dashboard", icon: RiHome4Line, permission: "dashboard:read" },
+  { label: "Agenda", to: "/agenda", icon: RiCalendarLine, permission: "sessions:read", badge: "agenda" },
+  { label: "Pacientes", to: "/patients", icon: RiGroupLine, permission: "patients:read" },
+  { label: "Editor Clínico", to: "/editor", icon: RiEdit2Line, permission: "notes:write" },
 ];
 
 const managementItems: NavItem[] = [
-  { label: "Financeiro", to: "/finance", icon: DollarSign, permission: "finance:read" },
-  { label: "Auditoria", to: "/audit", icon: ClipboardList, permission: "audit:read" },
-  { label: "Usuários", to: "/users", icon: ShieldCheck, permission: "users:manage" },
-  { label: "Configurações", to: "/settings", icon: Settings, permission: "settings:manage" },
+  { label: "Financeiro", to: "/finance", icon: RiMoneyDollarCircleLine, permission: "finance:read" },
+  { label: "Auditoria", to: "/audit", icon: RiShieldCheckLine, permission: "audit:read" },
+  { label: "Usuários", to: "/users", icon: RiKey2Line, permission: "users:manage" },
+  { label: "Configurações", to: "/settings", icon: RiSettings3Line, permission: "settings:manage" },
 ];
 
 function NavSection({ label, items, pendingReviews, onNavigate, className }: {
@@ -69,7 +69,7 @@ function NavSection({ label, items, pendingReviews, onNavigate, className }: {
               onClick={() => onNavigate?.()}
               className={({ isActive }) =>
                 cn(
-                  "aelo-nav-link focus-ring relative flex items-center gap-3 rounded-md py-2.5 ps-4 pe-3 text-body-regular text-text-secondary transition-colors hover:bg-background-secondary-default hover:text-text-primary",
+                  "aelo-nav-link focus-ring relative flex items-center gap-3 rounded-xl py-2.5 ps-3 pe-3 text-body-regular text-text-secondary transition-colors hover:bg-background-secondary-default hover:text-text-primary",
                   isActive && "text-text-primary text-body-medium",
                 )
               }
@@ -140,7 +140,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             aria-label="Fechar navegação"
             onClick={onClose}
           >
-            <X className="h-5 w-5" />
+            <RiCloseLine className="h-5 w-5" />
           </Button>
         </div>
 
@@ -152,10 +152,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           {/* Widget Zeigarnik: Consciência de Pendências Clínicas */}
           {pendingReviews > 0 ? (
             <div className="mt-auto pt-6">
-              <div className="rounded-lg border border-border-button-default bg-background-primary-default p-3">
+              <div className="rounded-2xl border border-border-button-default bg-background-primary-default p-3">
                 <div className="flex items-center justify-between gap-2 text-body-medium text-text-primary">
                   <span className="flex items-center gap-2">
-                    <ClockAlert className="h-4 w-4 shrink-0 text-status-yellow-text" aria-hidden />
+                    <RiTimeLine className="h-4 w-4 shrink-0 text-status-yellow-text" aria-hidden />
                     Pendências de evolução
                   </span>
                   <Badge variant="warning" showIcon={false} className="px-1.5 py-0 text-caption-2-bold">

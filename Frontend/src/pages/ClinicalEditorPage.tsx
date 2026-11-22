@@ -37,8 +37,8 @@ export function ClinicalEditorPage() {
     if (!session) return <EmptyState title="Selecione uma sessão" description="Escolha uma sessão da lista para abrir o editor." />;
     if (notes.isLoading) return <PageLoading />;
     if (notes.isError) return <PageError description="Não foi possível consultar a nota. Confira sua permissão de acesso." />;
-    return <Card><CardContent className="p-5">
-      <h2 className="mb-4 text-headline-semibold">{selectedPatient.name}, {session.date}</h2>
+    return <Card className="rounded-3xl"><CardContent className="p-5 md:p-8">
+      <h2 className="aelo-display mb-5 text-2xl">{selectedPatient.name}, {session.date}</h2>
       <ClinicalSessionEditor key={`${patientId}:${sessionId}:${note?.id ?? "new"}`} patientId={patientId} sessionId={sessionId} note={note} onDirtyChange={setDirty} />
     </CardContent></Card>;
   }

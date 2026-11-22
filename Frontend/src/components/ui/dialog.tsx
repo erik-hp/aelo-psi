@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { RiCloseLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/modal";
 
@@ -23,7 +23,7 @@ export function ConfirmDialog({ open, title, description, confirmLabel = "Confir
             <p className="mt-2 text-body-regular text-text-secondary">{description}</p>
           </div>
           <Button aria-label="Fechar" size="icon" variant="ghost" onClick={onClose}>
-            <X className="h-4 w-4" />
+            <RiCloseLine className="size-4" />
           </Button>
         </div>
         <div className="mt-6 flex justify-end gap-2">

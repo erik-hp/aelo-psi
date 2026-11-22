@@ -1,4 +1,4 @@
-import { Clock, FileText } from "lucide-react";
+import { RiFileTextLine, RiTimeLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import type { PatientNote, SessionStatus, TherapySession } from "@/types/clinical";
 
@@ -28,7 +28,7 @@ export function SessionCard({ session, notes = [] }: { session: TherapySession; 
         <div key={note.id} id={`note-${note.id}`} className="mt-3 rounded-md py-1 transition-colors">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-body-medium">
-              <FileText className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+              <RiFileTextLine className="size-4 text-text-secondary" aria-hidden="true" />
               Prontuário da sessão
             </div>
           </div>
@@ -37,7 +37,7 @@ export function SessionCard({ session, notes = [] }: { session: TherapySession; 
         </div>
       ))}
       <p className="mt-3 flex items-center gap-2 text-caption-1-regular text-text-secondary">
-        <Clock className="h-4 w-4" aria-hidden="true" />
+        <RiTimeLine className="size-4" aria-hidden="true" />
         {session.duration === null ? "Duração não registrada" : `${session.duration} minutos`}
       </p>
     </article>

@@ -1,15 +1,14 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  AlertCircle,
-  ArrowRight,
-  CalendarCheck,
-  CheckCircle2,
-  Clock,
-  ClockAlert,
-  FileEdit,
-  Users,
-} from "lucide-react";
+  RiAlarmWarningLine,
+  RiArrowRightLine,
+  RiCalendarCheckLine,
+  RiCheckboxCircleLine,
+  RiErrorWarningLine,
+  RiGroupLine,
+  RiTimeLine,
+} from "@remixicon/react";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { MetricCard, MetricStrip } from "@/components/dashboard/MetricCard";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -93,23 +92,29 @@ export function DashboardPage() {
     time: event.date,
   })) ?? [];
 
+  const todayLabel = (() => {
+    const label = new Date(`${today}T12:00:00`).toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  })();
+  const agendaSummary = agendaQuery.isLoading
+    ? "Carregando a agenda…"
+    : agendaQuery.isError
+    ? "A agenda não pôde ser carregada."
+    : `${actualTodaySessions.length} ${actualTodaySessions.length === 1 ? "sessão hoje" : "sessões hoje"}, ${openRecords.length} com evolução pendente.`;
+
   return (
     <>
       <PageHeader
-        title="Dashboard clínico"
-        description="Acompanhe pacientes autorizados, agendamentos e registros do consultório."
+        title="Hoje"
+        description={`${todayLabel}. ${agendaSummary}`}
         action={
           <div className="flex flex-col gap-2 sm:flex-row">
-            <ButtonLink to="/editor">
-              <FileEdit className="h-4 w-4" />
-              Editor de prontuário
-            </ButtonLink>
             <ButtonLink to="/patients">
-              <Users className="h-4 w-4" />
+              <RiGroupLine className="h-4 w-4" aria-hidden />
               Pacientes
             </ButtonLink>
             <ButtonLink variant="primary" to="/agenda">
-              <CalendarCheck className="h-4 w-4" />
+              <RiCalendarCheckLine className="h-4 w-4" aria-hidden />
               Agenda do dia
             </ButtonLink>
           </div>
@@ -122,45 +127,41 @@ export function DashboardPage() {
           <LoadingSkeleton className="h-36 w-full rounded-xl" />
         ) : agendaQuery.isError ? (
           <div className="rounded-xl border border-border-error-default bg-status-rose-background p-4 text-body-regular text-text-error-primary flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 shrink-0" />
+            <RiErrorWarningLine className="h-5 w-5 shrink-0" />
             <span>Não foi possível sincronizar a agenda imediata. Tente recarregar.</span>
           </div>
         ) : nextSession ? (
-          <div className="clinical-panel p-5 md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-body-medium text-text-secondary">
-                    {isUsingUpcomingFallback ? "Próxima sessão" : "Próxima sessão do dia"}: {nextSession.time}, {shortDate(nextSession.date)}
-                  </p>
-                </div>
-
+          <div className="clinical-panel p-6 md:p-8" style={{ background: "linear-gradient(135deg, var(--color-status-cyan-background), var(--color-background-primary-default) 72%)" }}>
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div className="space-y-3">
+                <p className="text-body-medium text-text-secondary">
+                  {isUsingUpcomingFallback ? "Próxima sessão" : "Próxima sessão do dia"}, {shortDate(nextSession.date)}
+                </p>
+                <p className="aelo-display tabular-nums text-[3.25rem] leading-none" style={{ color: "var(--aelo-thread)" }}>{nextSession.time}</p>
                 <div>
-                  <h2 className="font-serif text-title-2-semibold text-text-primary">
+                  <h2 className="aelo-display text-title-2-semibold text-text-primary">
                     {nextSession.patientName}
                   </h2>
-                  <p className="text-body-regular text-text-secondary mt-0.5">
+                  <p className="mt-1 text-body-regular text-text-secondary">
                     {nextSession.complement || "Sessão de psicoterapia individual"}
                   </p>
                 </div>
               </div>
-
-              {/* Botão de ação direta com alvo ergonômico generoso (Lei de Fitts: min 44px altura) */}
-              <div className="flex items-center gap-3 pt-2 md:pt-0">
+              <div className="flex flex-wrap items-center gap-3">
                 <ButtonLink
                   to={`/patients/${nextSession.patientId}`}
                   variant="primary" className="min-h-12 px-6"
                   aria-label={`Acessar prontuário de ${nextSession.patientName}`}
                 >
                   <span>Acessar prontuário</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <RiArrowRightLine className="h-4 w-4" aria-hidden />
                 </ButtonLink>
               </div>
             </div>
           </div>
         ) : (
           <div className="rounded-xl border border-border-button-default bg-background-primary-default p-5 text-center text-body-regular text-text-secondary flex items-center justify-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-status-lime-text" />
+            <RiCheckboxCircleLine className="h-4 w-4 text-status-lime-text" />
             <span>Jornada clínica do dia sem atendimentos pendentes. Todos os horários estão livres.</span>
           </div>
         )}
@@ -238,8 +239,8 @@ export function DashboardPage() {
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-body-semibold">
-                            <Clock className="h-4 w-4 text-text-secondary" aria-hidden="true" />
-                            <span className="tabular-nums">
+                            <RiTimeLine className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+                            <span className="aelo-display tabular-nums text-headline-medium">
                               {session.time} {session.date !== today ? `(${shortDate(session.date)})` : ""}
                             </span>
                           </div>
@@ -280,26 +281,13 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Linha do Tempo de Rastreabilidade e Auditoria */}
-        <ActivityTimeline items={recentActivities} />
-      </section>
-
-      {/* Grid Inferior: Segregação de Alertas (Von Restorff), Pendências Zeigarnik e Financeiro */}
-      <section className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Indicadores indisponíveis não equivalem à ausência de risco. */}
-        <Card>
-          <CardHeader><CardTitle>Avaliação clínica</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-body-regular text-text-secondary">A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.</p>
-          </CardContent>
-        </Card>
-
+        {/* Pendências primeiro: é o que a pessoa precisa fazer antes de fechar o dia. */}
         {/* Bloco 2: Pendências Clínicas e Prontuários em Aberto (Efeito Zeigarnik) */}
         {isApiMode ? <Card><CardHeader><CardTitle>Registros das sessões</CardTitle></CardHeader><CardContent><p className="text-body-regular text-text-secondary">Consulte e salve as notas no Editor Clínico. Concluir um atendimento não assina sua nota.</p><ButtonLink to="/editor" className="mt-4">Abrir editor clínico</ButtonLink></CardContent></Card> : <Card className="border-border-button-default">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-headline-regular flex items-center gap-2 text-text-primary">
-                <ClockAlert className="h-4 w-4 text-status-yellow-text" />
+                <RiAlarmWarningLine className="h-4 w-4 text-status-yellow-text" />
                 Pendências de evolução
               </CardTitle>
               {openRecords.length > 0 ? (
@@ -341,12 +329,25 @@ export function DashboardPage() {
               </ul>
             ) : (
               <div className="flex items-center gap-2.5 rounded-md border border-status-lime-text bg-status-lime-background p-4 text-caption-1-regular text-text-secondary">
-                <CheckCircle2 className="h-4 w-4 text-status-lime-text shrink-0" />
+                <RiCheckboxCircleLine className="h-4 w-4 text-status-lime-text shrink-0" />
                 <span>Nenhuma evolução documental pendente na agenda consultada.</span>
               </div>
             )}
           </CardContent>
         </Card>}
+      </section>
+
+      {/* Grid Inferior: Segregação de Alertas (Von Restorff), Pendências Zeigarnik e Financeiro */}
+      <section className="mt-6 grid gap-6 lg:grid-cols-3">
+        {/* Indicadores indisponíveis não equivalem à ausência de risco. */}
+        <Card>
+          <CardHeader><CardTitle>Avaliação clínica</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-body-regular text-text-secondary">A plataforma não classifica risco automaticamente. A ausência de indicadores não substitui a avaliação do profissional.</p>
+          </CardContent>
+        </Card>
+
+        <ActivityTimeline items={recentActivities} />
 
         {/* Bloco 3: Financeiro (Desacoplado) */}
         <Card className="border-border-button-default">

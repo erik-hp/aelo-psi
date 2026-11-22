@@ -124,7 +124,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
     );
 
     // Screen must not crash
-    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
+    expect(await screen.findByText("Hoje")).toBeDefined();
     // Clinical sessions and Hero Card must remain visible and functional
     expect(await screen.findByRole("heading", { name: "Paciente Alpha", level: 2 })).toBeDefined();
     expect(screen.getAllByText(/10:00/).length).toBeGreaterThan(0);
@@ -145,7 +145,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
     );
 
     // Screen must not crash
-    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
+    expect(await screen.findByText("Hoje")).toBeDefined();
     // Agenda error alert is displayed gracefully in Hero slot
     expect(await screen.findByText(/Não foi possível sincronizar a agenda imediata/i)).toBeDefined();
     // Agenda section alert is displayed
@@ -168,7 +168,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
+    expect(await screen.findByText("Hoje")).toBeDefined();
     expect(await screen.findByText(/Indicadores de pacientes temporariamente indisponíveis/i)).toBeDefined();
     expect(await screen.findByText(/Não foi possível sincronizar a agenda imediata/i)).toBeDefined();
     expect(await screen.findByText(/Dados financeiros temporariamente indisponíveis/i)).toBeDefined();
@@ -204,7 +204,7 @@ describe("Adversarial Stress Test: DashboardPage Resilience & Query Failures", (
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("Dashboard clínico")).toBeDefined();
+    expect(await screen.findByText("Hoje")).toBeDefined();
     const items = await screen.findAllByText("Paciente Sem Dados");
     expect(items.length).toBeGreaterThan(0);
     expect(screen.getByText(/Sem observações adicionais para este atendimento/i)).toBeDefined();

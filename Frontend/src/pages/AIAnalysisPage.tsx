@@ -1,4 +1,4 @@
-import { Brain } from "lucide-react";
+import { RiBrainLine } from "@remixicon/react";
 import { useQuery } from "@tanstack/react-query";
 import { AIAnalysisCard } from "@/components/analysis/AIAnalysisCard";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -21,7 +21,7 @@ export function AIAnalysisPage() {
           {analyses.map((analysis) => <AIAnalysisCard key={analysis.id} analysis={analysis} />)}
         </div>
       ) : (
-        <EmptyState icon={Brain} title="Nenhuma análise pendente" description="Solicitações de análise aparecerão aqui para validação humana." />
+        <EmptyState icon={RiBrainLine} title="Nenhuma análise pendente" description="Solicitações de análise aparecerão aqui para validação humana." />
       )}
     </>
   );

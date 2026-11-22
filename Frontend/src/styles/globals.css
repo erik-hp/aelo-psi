@@ -24,45 +24,45 @@
 
 @layer base {
   :root {
-    --font-inter: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
-    --background: 168 16% 94%;
-    --foreground: 214 51% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 214 51% 9%;
-    --primary: 175 78% 25%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 167 15% 88%;
-    --secondary-foreground: 214 51% 9%;
-    --muted: 167 15% 88%;
-    --muted-foreground: 185 13% 33%;
-    --accent: 175 78% 25%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 4 76% 40%;
+    --font-inter: "Atkinson Hyperlegible Next Variable", ui-sans-serif, system-ui, sans-serif;
+    --background: 39 50% 95%;
+    --foreground: 28 27% 13%;
+    --card: 43 100% 99%;
+    --card-foreground: 28 27% 13%;
+    --primary: 139 21% 26%;
+    --primary-foreground: 43 100% 99%;
+    --secondary: 39 40% 90%;
+    --secondary-foreground: 28 27% 13%;
+    --muted: 39 40% 90%;
+    --muted-foreground: 29 20% 31%;
+    --accent: 139 21% 26%;
+    --accent-foreground: 43 100% 99%;
+    --destructive: 5 68% 39%;
     --destructive-foreground: 0 0% 100%;
-    --border: 171 12% 78%;
-    --input: 171 12% 78%;
-    --ring: 175 78% 25%;
-    --radius: 0.5rem;
+    --border: 39 33% 83%;
+    --input: 39 33% 83%;
+    --ring: 139 21% 26%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 205 44% 11%;
-    --foreground: 160 20% 97%;
-    --card: 204 42% 14%;
-    --card-foreground: 160 20% 97%;
-    --primary: 169 63% 63%;
-    --primary-foreground: 214 51% 9%;
-    --secondary: 201 36% 17%;
-    --secondary-foreground: 160 20% 97%;
-    --muted: 201 36% 17%;
-    --muted-foreground: 171 12% 78%;
-    --accent: 169 63% 63%;
-    --accent-foreground: 214 51% 9%;
-    --destructive: 4 96% 80%;
-    --destructive-foreground: 214 51% 9%;
-    --border: 192 20% 25%;
-    --input: 192 20% 25%;
-    --ring: 169 63% 63%;
+    --background: 30 17% 9%;
+    --foreground: 39 45% 90%;
+    --card: 30 17% 12%;
+    --card-foreground: 39 45% 90%;
+    --primary: 108 28% 69%;
+    --primary-foreground: 97 36% 9%;
+    --secondary: 31 19% 15%;
+    --secondary-foreground: 39 45% 90%;
+    --muted: 31 19% 15%;
+    --muted-foreground: 37 20% 74%;
+    --accent: 108 28% 69%;
+    --accent-foreground: 97 36% 9%;
+    --destructive: 6 100% 80%;
+    --destructive-foreground: 97 36% 9%;
+    --border: 33 17% 20%;
+    --input: 33 17% 20%;
+    --ring: 108 28% 69%;
   }
 
   * {
@@ -100,7 +100,8 @@
   }
 
   .clinical-panel {
-    @apply rounded-3xl border border-border-button-default bg-background-primary-default shadow-xs;
+    @apply rounded-3xl border border-border-button-default bg-background-primary-default;
+    box-shadow: var(--aelo-shadow-panel);
   }
 
   .focus-ring {

@@ -364,13 +364,13 @@ describe("Empirical Challenge: Audit Table Severity Badges & Semantic Categoriza
     expect(defaultBadge.className).toContain("bg-status-cyan-background");
 
     // Verify Role Badges
-    const adminRoleBadge = screen.getAllByText("ADMIN")[0];
+    const adminRoleBadge = screen.getAllByText("Administração").find((el) => el.className.includes("text-status"))!;
     expect(adminRoleBadge.className).toContain("text-status-cyan-text"); // default variant
 
-    const psychRoleBadge = screen.getAllByText("PSYCHOLOGIST")[0];
+    const psychRoleBadge = screen.getAllByText("Psicologia").find((el) => el.className.includes("text-status"))!;
     expect(psychRoleBadge.className).toContain("text-status-lime-text"); // success variant
 
-    const internRoleBadge = screen.getByText("INTERN");
+    const internRoleBadge = screen.getAllByText("Estágio").find((el) => el.className.includes("text-text-secondary"))!;
     expect(internRoleBadge.className).toContain("text-text-secondary"); // muted variant
   });
 
@@ -472,7 +472,7 @@ describe("Empirical Challenge: Zeigarnik Counters & Edge Cases in Sidebar", () =
 
     // Sidebar should still render navigation items
     expect(screen.getByText(/Atendimento Clínico/i)).toBeDefined();
-    expect(screen.getByRole("link", { name: /Dashboard/i })).toBeDefined();
+    expect(screen.getByRole("link", { name: /Hoje/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Agenda/i })).toBeDefined();
     expect(screen.getByRole("link", { name: /Editor Clínico/i })).toBeDefined();
     expect(screen.queryByText(/Pendências de evolução/i)).toBeNull();

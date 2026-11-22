@@ -112,7 +112,7 @@ export function ClinicalSessionEditor({ patientId, sessionId, note, onDirtyChang
       <p className="text-body-regular text-text-secondary">Salve explicitamente antes de sair. A nota é registrada no servidor; não depende da IA e não é assinada por este botão.</p>
       {noteId && <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge>}
     </div>
-    {locked && <p role="status" className="text-body-medium text-status-yellow-text">Nota assinada e bloqueada contra alteração direta. Para corrigir ou complementar preservando o histórico íntegro, utilize a retificação formal.</p>}
+    {locked && <p role="status" className="rounded-xl border border-[var(--aelo-thread)] bg-[var(--aelo-accent-soft)] p-3 text-body-medium text-text-primary">Nota assinada e bloqueada contra alteração direta. Para corrigir ou complementar preservando o histórico íntegro, utilize a retificação formal.</p>}
     <label htmlFor="clinical-session-note" className="block text-body-medium">Nota da sessão</label>
     <Textarea id="clinical-session-note" record rows={14} maxLength={50000} value={content} onChange={(event) => setContent(event.target.value)} readOnly={locked || save.isPending} required placeholder="Escreva o registro desta sessão. Nenhum texto clínico é preenchido automaticamente." />
     <p role="status" className="text-caption-1-regular text-text-secondary">{dirty ? "Alterações ainda não salvas." : noteId ? `Nota salva no servidor, versão ${version}.` : "Nenhuma nota salva nesta sessão."}</p>
@@ -133,6 +133,9 @@ export function ClinicalSessionEditor({ patientId, sessionId, note, onDirtyChang
       {noteId && (version ?? 1) > 1 && (
         <Button variant="ghost" onClick={() => setShowHistory((prev) => !prev)}>{showHistory ? "Ocultar histórico" : "Ver histórico de versões"}</Button>
       )}
+    </div>
+    <div className="space-y-2 rounded-2xl border border-dashed border-[var(--aelo-thread)] p-4">
+      <p className="text-body-regular text-text-secondary">Análise assistiva por IA: só começa depois que você salva a nota e confere o texto que será enviado. A síntese fica pendente até a sua revisão.</p>
       <Button variant="outline" disabled={!noteId || dirty || content.trim().length < 30 || preview.isPending || request.isPending || (Boolean(jobId) && !["COMPLETED", "FAILED"].includes(job.data?.status ?? ""))} onClick={() => preview.mutate()}>Revisar texto para IA</Button>
     </div>
     {showHistory && noteId && (
