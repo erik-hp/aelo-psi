@@ -450,7 +450,9 @@ export function PatientProfilePage() {
           <div className="border-b border-border-button-default pb-3">
             <h2 className="text-headline-semibold">Métricas e Evolução</h2>
             <p className="text-caption-1-regular text-text-secondary">
-              Variação dos indicadores clínicos estimada ao longo do acompanhamento psicoterapêutico.
+              {isApiMode
+                ? "Sinais linguísticos exploratórios extraídos das notas, por análise."
+                : "Variação dos indicadores clínicos estimada ao longo do acompanhamento psicoterapêutico."}
             </p>
           </div>
 
