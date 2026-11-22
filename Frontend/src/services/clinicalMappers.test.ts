@@ -24,3 +24,15 @@ describe("Missing operational metrics", () => {
     expect(mapped).not.toHaveProperty("riskLevel");
   });
 });
+
+describe("mapAnalysis sinais exploratórios", () => {
+  it("mantém valores numéricos e descarta valores inválidos, sem converter ausência em zero", () => {
+    const mapped = mapAnalysis({
+      id: "a1", patient: "p1", status: "PENDING_REVIEW", patterns: [], longitudinal_evolution: "", attention_points: [],
+      longitudinal_coherence: "", relevance_score: null, sources: [], created_at: "2026-11-22T10:00:00Z",
+      sentiment_metrics: [{ label: "culpa_mencionada", value: "0.3" }, { label: "quebrado", value: "abc" }],
+    });
+    expect(mapped.signals).toEqual([{ label: "culpa_mencionada", value: 0.3 }]);
+    expect(mapped.createdAt).toBe("2026-11-22T10:00:00Z");
+  });
+});

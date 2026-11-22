@@ -36,6 +36,7 @@ export interface ApiAnalysis {
   behavioral_changes?: string[];
   possible_inconsistencies?: string[];
   sentiment_metrics?: Array<{ label: string; value: number | string }>;
+  created_at?: string;
   sources: Array<{ excerpt: string }>;
 }
 
@@ -110,5 +111,10 @@ export function mapAnalysis(analysis: ApiAnalysis): AIAnalysis {
     attentionPoints: analysis.attention_points ?? [],
     narrativeCoherence: null,
     sources: analysis.sources?.map((source) => source.excerpt) ?? [],
+    ...(analysis.created_at ? { createdAt: analysis.created_at } : {}),
+    signals: (analysis.sentiment_metrics ?? []).flatMap((item) => {
+      const value = Number(item.value);
+      return Number.isFinite(value) ? [{ label: item.label, value }] : [];
+    }),
   };
 }

@@ -31,6 +31,7 @@ import type { TherapySession } from "@/types/clinical";
 import { PageLoading } from "@/components/ui/page-state";
 import { ButtonLink } from "@/components/ui/button-link";
 import { useAuth } from "@/hooks/useAuth";
+import { ExploratorySignals } from "@/components/analysis/ExploratorySignals";
 import { AIAnalysisCard } from "@/components/analysis/AIAnalysisCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmDialog } from "@/components/ui/dialog";
@@ -256,7 +257,9 @@ export function PatientProfilePage() {
   if (!data) {
     return (
       <p role="alert" className="text-body-regular text-text-error-primary">
-        Não foi possível carregar o perfil do paciente.
+        {isApiMode && user?.role === "ADMIN"
+          ? "Administradores não têm acesso ao conteúdo clínico. Entre com um psicólogo vinculado a este paciente."
+          : "Não foi possível carregar o perfil do paciente."}
       </p>
     );
   }
@@ -307,7 +310,7 @@ export function PatientProfilePage() {
           </Tab>
           <Tab id="longitudinal" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <TrendingUp className="h-4 w-4" />
-            Evolução longitudinal
+            Evolução
           </Tab>
           <Tab id="vault" className="justify-center rounded-lg py-3 data-[selected]:bg-background-primary-default">
             <Network className="h-4 w-4" />
@@ -420,6 +423,15 @@ export function PatientProfilePage() {
             <Badge variant="muted">{data.sessions.length} atendimentos</Badge>
           </div>
 
+          {isApiMode && data.sessions.length === 0 && (
+            <div className="space-y-3">
+              <p className="text-body-regular text-text-secondary">
+                O prontuário é escrito dentro de uma sessão. Agende uma sessão para este paciente na Agenda para liberar o editor.
+              </p>
+              <ButtonLink to="/agenda">Ir para a Agenda</ButtonLink>
+            </div>
+          )}
+
           <ol className="aelo-thread-list space-y-8">
             {data.sessions.map((session) => (
               <li key={session.id} className="aelo-thread-item space-y-3 pb-4">
@@ -436,13 +448,13 @@ export function PatientProfilePage() {
         {/* ABA 3: EVOLUÇÃO LONGITUDINAL */}
         <TabPanel id="longitudinal" className="min-w-0 space-y-6">
           <div className="border-b border-border-button-default pb-3">
-            <h2 className="text-headline-semibold">Métricas e Evolução longitudinal</h2>
+            <h2 className="text-headline-semibold">Métricas e Evolução</h2>
             <p className="text-caption-1-regular text-text-secondary">
               Variação dos indicadores clínicos estimada ao longo do acompanhamento psicoterapêutico.
             </p>
           </div>
 
-          {isApiMode ? <EmptyState title="Indicadores longitudinais indisponíveis" description="Esta visualização ainda não possui um pipeline validado conectado à API. Nenhum escore clínico foi estimado." /> : <div className="space-y-5">
+          {isApiMode ? (user?.role === "ADMIN" ? <EmptyState title="Conteúdo clínico restrito" description="A evolução clínica é acessível apenas a profissionais com vínculo clínico autorizado." /> : data.analyses.some((item) => item.signals?.length) ? <ExploratorySignals analyses={data.analyses} /> : <EmptyState title="Sem sinais exploratórios" description="Solicite uma análise assistiva para este paciente. Nenhum escore clínico é estimado sem análise registrada." />) : <div className="space-y-5">
             <ChartCard
               title="Indicador de humor"
               description="Indicador estimado a partir dos prontuários analisados nas sessões."

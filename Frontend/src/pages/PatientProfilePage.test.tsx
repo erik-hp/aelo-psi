@@ -115,7 +115,7 @@ describe("PatientProfilePage Clinical Tabs", () => {
     // 4 Abas Clínicas presentes no DOM (Leis de Miller e Jakob)
     const tabOverview = screen.getByRole("tab", { name: /Resumo clínico/i });
     const tabSessions = screen.getByRole("tab", { name: /Prontuários e sessões/i });
-    const tabLongitudinal = screen.getByRole("tab", { name: /Evolução longitudinal/i });
+    const tabLongitudinal = screen.getByRole("tab", { name: /^Evolução$/i });
     const tabVault = screen.getByRole("tab", { name: /Memória clínica/i });
 
     expect(tabOverview).toBeDefined();
@@ -143,10 +143,10 @@ describe("PatientProfilePage Clinical Tabs", () => {
     fireEvent.click(toggleBtn);
     expect(screen.getByText(/Ocultar editor de análise/i)).toBeDefined();
 
-    // Navega para aba "Evolução longitudinal"
+    // Navega para aba "Evolução"
     fireEvent.click(tabLongitudinal);
     await waitFor(() => {
-      expect(screen.getByText("Métricas e Evolução longitudinal")).toBeDefined();
+      expect(screen.getByText("Métricas e Evolução")).toBeDefined();
       expect(screen.getByText("Indicador de humor")).toBeDefined();
       expect(screen.getByText("Estado emocional")).toBeDefined();
     });

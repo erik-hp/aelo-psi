@@ -44,6 +44,8 @@ export interface AIAnalysis {
   attentionPoints: string[];
   narrativeCoherence: number | null;
   sources: string[];
+  createdAt?: string;
+  signals?: Array<{ label: string; value: number }>;
 }
 
 export interface AuditEvent {
